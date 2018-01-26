@@ -1,0 +1,45 @@
+html, body {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-grow: 1;
+}
+
+.fade-in {
+  opacity: 1;
+  animation: fadeIn 0.1s linear;
+}
+
+.fade-out {
+  opacity: 0;
+  animation: fadeOut 0.1s linear;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

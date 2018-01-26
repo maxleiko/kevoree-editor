@@ -1,0 +1,25 @@
+.SidebarItem {
+  color: #ccc;
+  padding: 8px 0 8px 10px;
+}
+
+.SidebarItem:hover {
+  cursor: grab;
+  background-color: #333;
+}
+
+.SidebarItem-component {
+
+}
+
+.SidebarItem-node {
+
+}
+
+.SidebarItem-channel {
+
+}
+
+.SidebarItem-group {
+
+}

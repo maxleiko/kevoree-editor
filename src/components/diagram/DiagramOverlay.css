@@ -1,0 +1,17 @@
+.DiagramOverlay {
+  padding: 10px;
+}
+
+.DiagramOverlay i {
+  padding: 6px 8px;
+  background-color: #000;
+  color: #ccc;
+  margin-left: 10px;
+  border-radius: 100px;
+}
+
+.DiagramOverlay i:hover,
+.DiagramOverlay i:active {
+  background-color: #222;
+  cursor: pointer;
+}

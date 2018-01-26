@@ -1,0 +1,11 @@
+.App {
+  display: flex;
+  flex-grow: 1;
+  background: black;
+}
+
+.App-diagram-container {
+  display: flex;
+  flex-grow: 1;
+  padding: 10px;
+}
