@@ -1,0 +1,1 @@
+export const DND_ITEM = 'sidebar-dnd-item';

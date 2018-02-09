@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { TypeDefinition } from '../../types/kevoree.d';
+import { DND_ITEM } from '../../utils/constants';
 
 import './SidebarItem.css';
 
@@ -15,7 +16,7 @@ export const SidebarItem = ({ tdef, onDblClick = () => {/*noop*/} }: SideBarItem
   <div
     className={['SidebarItem', `SidebarItem-${tdef.type}`].join(' ')}
     draggable={true}
-    onDragStart={(event) => event.dataTransfer.setData(SIDEBAR_ITEM_DT, JSON.stringify(tdef))}
+    onDragStart={(event) => event.dataTransfer.setData(DND_ITEM, JSON.stringify(tdef))}
     onDoubleClick={() => onDblClick()}
   >
     {tdef.name}
