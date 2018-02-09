@@ -21,4 +21,19 @@ export class KevoreeNodeModel extends NodeModel {
   addComponent(comp: KevoreeComponentModel) {
     this.components.push(comp);
   }
+
+  serialize() {
+    return {
+      ...super.serialize(),
+      name: this.name,
+      color: this.color,
+      components: this.components.map((comp) => comp.serialize())
+    };
+  }
+
+  deSerialize(obj: { name: string, color: string }) {
+    super.deSerialize(obj);
+    this.name = obj.name;
+    this.color = obj.color;
+  }
 }

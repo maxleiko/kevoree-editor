@@ -7,7 +7,8 @@ import { TypeDefinition } from './types/kevoree.d';
 import { KevoreeEngine } from './KevoreeEngine';
 
 import './App.css';
-import { KevoreeNodeFactory } from './widgets/node';
+import { KevoreeNodeFactory, KevoreeNodeModel } from './widgets/node';
+import { KevoreeComponentFactory, KevoreeComponentModel } from './widgets/component';
 
 interface AppProps {}
 interface AppState {
@@ -25,6 +26,7 @@ class App extends React.Component<AppProps, AppState> {
     };
 
     this.state.kevoreeEngine.addTypes([
+      { type: 'node', name: 'JavaNode' },
       { type: 'node', name: 'JavascriptNode' },
       { type: 'component', name: 'Ticker', outputs: ['out'] },
       { type: 'component', name: 'ConsolePrinter', inputs: ['input'] },
@@ -34,7 +36,8 @@ class App extends React.Component<AppProps, AppState> {
 
   componentWillMount() {
     const model = new DiagramModel();
-    this.state.diagramEngine.installDefaultFactories();
+    // this.state.diagramEngine.installDefaultFactories();
+    this.state.diagramEngine.registerNodeFactory(new KevoreeComponentFactory());
     this.state.diagramEngine.registerNodeFactory(new KevoreeNodeFactory(this.state.kevoreeEngine));
     this.state.diagramEngine.setDiagramModel(model);
   }
@@ -44,7 +47,7 @@ class App extends React.Component<AppProps, AppState> {
       <div className="App">
         <Sidebar>
           {this.state.kevoreeEngine.getTypes().map((tdef, i) => (
-            <SidebarItem key={i} tdef={tdef} onDblClick={() => this.createNode(tdef)}/>
+            <SidebarItem key={i} tdef={tdef} onDblClick={() => this.createInstance(tdef)}/>
           ))}
         </Sidebar>
         <Diagram
@@ -55,13 +58,26 @@ class App extends React.Component<AppProps, AppState> {
     );
   }
 
-  private createNode(tdef: TypeDefinition) {
+  createInstance(tdef: TypeDefinition) {
     const model = this.state.diagramEngine.getDiagramModel();
-    const node = this.state.kevoreeEngine.createInstance(tdef);
-    node.x = 100;
-    node.y = 100;
-    model.addNode(node);
-    this.state.diagramEngine.repaintCanvas();
+
+    if (tdef.type !== 'component') {
+      const node = this.state.kevoreeEngine.createInstance(tdef);
+      node.x = 100;
+      node.y = 100;
+      model.addNode(node);
+      this.state.diagramEngine.repaintCanvas();
+    } else {
+      model.getSelectedItems().forEach((item) => {
+        if (item instanceof KevoreeNodeModel) {
+          const comp = this.state.kevoreeEngine.createInstance(tdef);
+          if (comp instanceof KevoreeComponentModel) {
+            (item as KevoreeNodeModel).addComponent(comp);
+            this.state.diagramEngine.repaintCanvas();
+          }
+        }
+      });
+    }
   }
 }
 

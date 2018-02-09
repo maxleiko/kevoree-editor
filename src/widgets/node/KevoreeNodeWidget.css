@@ -1,6 +1,17 @@
 .kevoree-node .components {
-  margin: 3px;
+  margin: 2px;
+  padding: 1px;
   min-height: 10px;
-  border: 1px solid rgba(0,0,0,0.2);
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1));
+}
+
+.kevoree-node .components .kevoree-component {
+  margin-top: 2px;
+}
+
+.kevoree-node .components .kevoree-component:first-child {
+  margin-top: 0;
+}
+
+.kevoree-node .components.droppable {
+  background-color: rgba(124,252,0,0.7) !important;
 }

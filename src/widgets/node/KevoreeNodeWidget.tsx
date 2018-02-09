@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { DiagramEngine } from 'storm-react-diagrams';
+import * as cx from 'classnames';
+
 import { KevoreeNodeModel } from './KevoreeNodeModel';
 import { KevoreeComponentWidget, KevoreeComponentModel } from '../component';
 import { KevoreeEngine } from '../../KevoreeEngine';
@@ -37,38 +39,34 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
     }
   }
 
-  onDragOver(event: React.DragEvent<HTMLDivElement>) {
-    try {
-      const tdef: TypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-      // tslint:disable-next-line
-      console.log(tdef);
-      if (tdef.type === 'component') {
-        // TODO: check if component is compatible with node
-        this.setState({ canDrop: true });
-      } else {
-        this.setState({ canDrop: false });
-      }
-    } catch (ignore) {/* noop */}
-    event.preventDefault();
+  onDragEnter(event: React.DragEvent<HTMLDivElement>) {
+    this.setState({ canDrop: true });
+    // tslint:disable-next-line
+    console.log('onDrag enter');
   }
 
-  generateComponent(comp: KevoreeComponentModel) {
-    return <KevoreeComponentWidget node={comp} diagramEngine={this.props.diagramEngine} />;
+  onDragLeave(event: React.DragEvent<HTMLDivElement>) {
+    this.setState({ canDrop: false });
+    // tslint:disable-next-line
+    console.log('onDrag false');
   }
 
   render() {
     return (
-      <div className="basic-node kevoree-node" style={{ background: this.props.node.color }}>
+      <div
+        className="basic-node kevoree-node"
+        style={{ background: this.props.node.color }}
+        onDrop={(event) => this.onDrop(event)}
+        onDragEnter={(event) => this.onDragEnter(event)}
+        onDragLeave={(event) => this.onDragLeave(event)}
+      >
         <div className="title">
           <div className="name">{this.props.node.name}</div>
         </div>
-        <div
-          className="components"
-          style={this.state.canDrop ? { borderColor: 'green' } : { borderColor: 'inherit' }}
-          onDrop={(event) => this.onDrop(event)}
-          onDragOver={(event) => this.onDragOver(event)}
-        >
-          {this.props.node.components.map((comp) => this.generateComponent.bind(this))}
+        <div className={cx('components', { droppable: this.state.canDrop })}>
+          {this.props.node.components.map((comp, i) => (
+            <KevoreeComponentWidget key={i} node={comp} diagramEngine={this.props.diagramEngine} />
+          ))}
         </div>
       </div>
     );

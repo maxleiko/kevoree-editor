@@ -41,7 +41,7 @@ export class Diagram extends React.Component<DiagramProps, DiagramState> {
       // move instance action started
       action.selectionModels.forEach((model) => {
         // tslint:disable-next-line
-        console.log(model);
+        console.log('MoveItemsAction', model);
       });
     }
     return true;

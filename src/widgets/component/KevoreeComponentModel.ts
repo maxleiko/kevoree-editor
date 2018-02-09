@@ -5,8 +5,11 @@ import { TypeDefinition } from '../../types/kevoree';
 
 export class KevoreeComponentModel extends DefaultNodeModel {
 
-  constructor(tdef: TypeDefinition, count: number) {
-    const color = new ColorHash();
-    super(`comp${count}: ${tdef.name}`, color.hex(tdef.name));
+  constructor(tdef: TypeDefinition | undefined = undefined, count: number = 0) {
+    super('kevoree-component');
+    if (tdef) {
+      this.name = `comp${count}: ${tdef.name}`;
+      this.color = new ColorHash().hex(tdef.name);
+    }
   }
 }
