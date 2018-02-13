@@ -1,3 +1,7 @@
 .Sidebar {
-  width: 200px;
+  width: 220px;
+}
+
+.Sidebar:hover {
+  overflow-y: auto;
 }

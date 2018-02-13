@@ -1,0 +1,6 @@
+.DiagramOverlay {
+  padding: 10px;
+  display: flex;
+  flex-flow: column;
+  align-items: flex-end;
+}

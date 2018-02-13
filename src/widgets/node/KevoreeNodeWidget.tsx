@@ -3,10 +3,7 @@ import { DiagramEngine } from 'storm-react-diagrams';
 import * as cx from 'classnames';
 
 import { KevoreeNodeModel } from './KevoreeNodeModel';
-import { KevoreeComponentWidget, KevoreeComponentModel } from '../component';
 import { KevoreeEngine } from '../../KevoreeEngine';
-import { TypeDefinition } from '../../types/kevoree';
-import { DND_ITEM } from '../../utils/constants';
 
 import './KevoreeNodeWidget.css';
 
@@ -22,52 +19,65 @@ interface KevoreeNodeWidgetState {
 
 export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, KevoreeNodeWidgetState> {
 
+  private elem: HTMLDivElement;
+
   constructor(props: KevoreeNodeWidgetProps) {
     super(props);
     this.state = { canDrop: false };
   }
 
-  onDrop(event: React.DragEvent<HTMLDivElement>) {
-    const tdef: TypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-    if (tdef.type === 'component') {
-      const comp = this.props.kevoreeEngine.createInstance(tdef);
-      if (comp instanceof KevoreeComponentModel) {
-        this.props.node.addComponent(comp);
-        event.preventDefault();
-        this.props.diagramEngine.repaintCanvas();
-      }
-    }
-  }
+  // onDrop(event: React.DragEvent<HTMLDivElement>) {
+  //   const tdef: TypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
+  //   if (tdef.type === 'component') {
+  //     const comp = this.props.kevoreeEngine.createInstance(tdef);
+  //     if (comp instanceof KevoreeComponentModel) {
+  //       this.props.node.addChild(comp);
+  //       event.preventDefault();
+  //       this.props.diagramEngine.repaintCanvas();
+  //     }
+  //   }
+  // }
 
-  onDragEnter(event: React.DragEvent<HTMLDivElement>) {
-    this.setState({ canDrop: true });
-    // tslint:disable-next-line
-    console.log('onDrag enter');
-  }
+  // onDragOver(event: React.DragEvent<HTMLDivElement>) {
+  //   this.setState({ canDrop: true });
+  //   // tslint:disable-next-line
+  //   console.log('onDrag over', JSON.parse(event.dataTransfer.getData(DND_ITEM)));
+  // }
 
-  onDragLeave(event: React.DragEvent<HTMLDivElement>) {
-    this.setState({ canDrop: false });
-    // tslint:disable-next-line
-    console.log('onDrag false');
+  // onDragLeave(event: React.DragEvent<HTMLDivElement>) {
+  //   this.setState({ canDrop: false });
+  //   // tslint:disable-next-line
+  //   console.log('onDrag leave');
+  // }
+
+  componentDidMount() {
+    this.props.node.setWidth(this.elem.getBoundingClientRect().width);
+    this.props.node.setHeight(this.elem.getBoundingClientRect().height);
   }
 
   render() {
     return (
       <div
-        className="basic-node kevoree-node"
+        ref={(elem) => this.elem = elem!}
+        className={cx('basic-node', 'kevoree-node', { droppable: this.state.canDrop })}
         style={{ background: this.props.node.color }}
-        onDrop={(event) => this.onDrop(event)}
-        onDragEnter={(event) => this.onDragEnter(event)}
-        onDragLeave={(event) => this.onDragLeave(event)}
       >
         <div className="title">
-          <div className="name">{this.props.node.name}</div>
+          <div className="name">{this.props.node.name}: {this.props.node.typeName}</div>
         </div>
-        <div className={cx('components', { droppable: this.state.canDrop })}>
-          {this.props.node.components.map((comp, i) => (
-            <KevoreeComponentWidget key={i} node={comp} diagramEngine={this.props.diagramEngine} />
-          ))}
-        </div>
+        {/* <div className="children">
+          {_.map(this.props.node.children, (node) => {
+            return React.createElement(
+              NodeWidget,
+              {
+                diagramEngine: this.props.diagramEngine,
+                key: node.id,
+                node: node
+              },
+              this.props.diagramEngine.generateWidgetForNode(node)
+            );
+          })}
+        </div> */}
       </div>
     );
   }

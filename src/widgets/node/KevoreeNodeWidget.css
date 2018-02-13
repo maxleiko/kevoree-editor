@@ -1,17 +1,25 @@
-.kevoree-node .components {
+.kevoree-node.droppable {
+  border-color: lightgreen !important;
+}
+
+.kevoree-node .title .name {
+  text-align: center;
+}
+
+.kevoree-node .children {
   margin: 2px;
   padding: 1px;
   min-height: 10px;
 }
 
-.kevoree-node .components .kevoree-component {
+.kevoree-node .children .node {
+  position: relative;
+}
+
+.kevoree-node .children .node {
   margin-top: 2px;
 }
 
-.kevoree-node .components .kevoree-component:first-child {
+.kevoree-node .children .node:first-child {
   margin-top: 0;
-}
-
-.kevoree-node .components.droppable {
-  background-color: rgba(124,252,0,0.7) !important;
 }

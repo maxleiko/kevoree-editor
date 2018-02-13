@@ -1,51 +1,75 @@
-import { DefaultPortModel } from 'storm-react-diagrams';
-import { ComponentType, NodeType, TypeDefinition } from './types/kevoree';
+import * as kevoree from 'kevoree-library';
+
 import { KevoreeComponentModel } from './widgets/component';
 import { KevoreeNodeModel } from './widgets/node';
 
+const registryModel: Array<k.RTypeDefinition> = require('./assets/model.json');
+
 export class KevoreeEngine {
 
-  private nodeInstances = 0;
-  private compInstances = 0;
-  private types: TypeDefinition[] = [];
+  private count: number;
+  private model: k.Model;
+  private factory: k.KevoreeFactory;
 
-  public createInstance(tdef: TypeDefinition) {
-    switch (tdef.type) {
-      case 'component':
-        return this.createComponent(tdef);
+  constructor() {
+    this.count = 0;
+    this.factory = new kevoree.factory.DefaultKevoreeFactory();
+    const loader = this.factory.createJSONLoader();
+    const kModel = this.factory.createContainerRoot().withGenerated_KMF_ID(0);
+    this.factory.root(kModel);
 
-      case 'node':
-        return this.createNode(tdef);
+    registryModel
+      .forEach((tdef) => {
+        const pkg = this.factory.createPackage();
+        pkg.name = tdef.namespace;
 
-      default:
-        throw new Error('Unable to create instance of unknown type.');
+        // TODO
+
+        this.model.addPackages(pkg);
+      });
+
+    this.model = loader.loadModelFromString().get(0);
+    // this.types = registryModel.map((rtdef: k.RTypeDefinition) => {
+    //   return JSON.parse(rtdef.model);
+    // });
+  }
+
+  public createInstance(tdef: k.TypeDefinition) {
+    if (tdef.class.startsWith('org.kevoree.ComponentType')) {
+      return this.createComponent(<k.ComponentType> tdef);
+    } else if (tdef.class.startsWith('org.kevoree.ChannelType')) {
+      return this.createChannel(<k.ChannelType> tdef);
+    } else if (tdef.class.startsWith('org.kevoree.GroupType')) {
+      return this.createGroup(<k.GroupType> tdef);
+    } else if (tdef.class.startsWith('org.kevoree.NodeType')) {
+      return this.createNode(<k.NodeType> tdef);
     }
+    throw new Error(`Unable to create instance of unknown type "${tdef.class}"`);
   }
 
-  public createComponent(tdef: ComponentType) {
-    const comp = new KevoreeComponentModel(tdef, this.compInstances++);
-    if (tdef.inputs) {
-      tdef.inputs.forEach((name) => comp.addPort(new DefaultPortModel(true, name, name)));
-    }
-    if (tdef.outputs) {
-      tdef.outputs.forEach((name) => comp.addPort(new DefaultPortModel(false, name, name)));
-    }
-    return comp;
+  public createComponent(tdef: k.ComponentType) {
+    const instance: k.Component = this.factory.createComponentInstance();
+    instance.name = 'comp' + this.count++;
+    instance.typeDefinition = tdef;
+    return new KevoreeComponentModel(instance);
   }
 
-  public createNode(tdef: NodeType) {
-    return new KevoreeNodeModel(tdef, this.nodeInstances++);
+  public createNode(tdef: k.NodeType) {
+    const instance: k.Node = this.factory.createContainerNode();
+    instance.name = 'node' + this.count++;
+    instance.typeDefinition = tdef;
+    return new KevoreeNodeModel(instance);
   }
 
-  addTypes(types: TypeDefinition[]) {
-    types.forEach((type) => this.addType(type));
+  public createChannel(tdef: k.ChannelType) {
+    return null;
   }
 
-  addType(type: TypeDefinition) {
-    this.types.push(type);
+  public createGroup(tdef: k.GroupType) {
+    return null;
   }
 
-  getTypes() {
-    return this.types;
+  public getModel() {
+    return this.model;
   }
 }

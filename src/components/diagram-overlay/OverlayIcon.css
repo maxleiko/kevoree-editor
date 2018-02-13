@@ -1,0 +1,36 @@
+.OverlayIcon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background-color: #000;
+  color: #ccc;
+  margin-bottom: 10px;
+  border: none;
+}
+
+.OverlayIcon:last-child {
+  margin-bottom: 0;
+}
+
+.OverlayIcon:hover {
+  cursor: pointer;
+}
+
+.OverlayIcon:hover,
+.OverlayIcon:active {
+  background-color: #333;
+}
+
+.OverlayIcon-tooltip {
+  margin-right: 25px;
+  display: none;
+}
+
+.OverlayIcon-tooltip.hovered {
+  display: block;
+}
+
+.OverlayIcon i {
+  
+}

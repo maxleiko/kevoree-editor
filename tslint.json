@@ -28,7 +28,7 @@
             "static-before-instance",
             "variables-before-functions"
         ],
-        "no-any": true,
+        "no-implicit-any": true,
         "no-arg": true,
         "no-bitwise": true,
         "no-console": [

@@ -24,7 +24,7 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
     return (
       <div className="basic-node kevoree-component" style={{ background: this.props.node.color }}>
         <div className="title">
-          <div className="name">{this.props.node.name}</div>
+          <div className="name">{this.props.node.instance.name}: {this.props.node.instance.typeDefinition.name}</div>
         </div>
         <div className="ports">
           <div className="in">{this.props.node.getInPorts().map(this.generatePort.bind(this))}</div>

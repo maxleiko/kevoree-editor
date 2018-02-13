@@ -1,39 +1,48 @@
 import { NodeModel } from 'storm-react-diagrams';
 import * as ColorHash from 'color-hash';
 
-import { TypeDefinition } from '../../types/kevoree';
-import { KevoreeComponentModel } from '../component/index';
-
 export class KevoreeNodeModel extends NodeModel {
 
   name: string;
+  typeName: string;
   color: string;
-  components: KevoreeComponentModel[] = [];
+  width: number;
+  height: number;
 
-  constructor(tdef: TypeDefinition | undefined = undefined, count: number = 0) {
+  constructor(instance?: k.Node, count: number = 0) {
     super('kevoree-node');
-    if (tdef) {
-      this.name = `node${count}: ${tdef.name}`;
-      this.color = new ColorHash().hex(tdef.name);
+    if (instance) {
+      this.name = `node${count}`;
+      this.typeName = instance.typeDefinition.name;
+      this.color = new ColorHash().hex(instance.typeDefinition.name);
     }
   }
 
-  addComponent(comp: KevoreeComponentModel) {
-    this.components.push(comp);
+  setWidth(width: number) {
+    this.width = width;
+  }
+
+  setHeight(height: number) {
+    this.height = height;
   }
 
   serialize() {
     return {
       ...super.serialize(),
       name: this.name,
+      typeName: this.typeName,
+      width: this.width,
+      height: this.height,
       color: this.color,
-      components: this.components.map((comp) => comp.serialize())
     };
   }
 
-  deSerialize(obj: { name: string, color: string }) {
+  deSerialize(obj: any) {
     super.deSerialize(obj);
     this.name = obj.name;
+    this.typeName = obj.typeName;
     this.color = obj.color;
+    this.width = obj.width;
+    this.height = obj.height;
   }
 }

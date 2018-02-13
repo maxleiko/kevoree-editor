@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as cx from 'classnames';
 
 import './Hoverlay.css';
 
@@ -23,7 +24,7 @@ export class Hoverlay extends React.Component<HoverlayProps & React.HTMLAttribut
         onMouseEnter={() => this.setState({ hover: true })}
         onMouseLeave={() => this.setState({ hover: false })}
       >
-        <div className={['Hoverlay-overlay', this.state.hover ? 'fade-in' : 'fade-out'].join(' ')}>
+        <div className={cx('Hoverlay-overlay', { 'fade-in': this.state.hover }, { 'fade-out': !this.state.hover })}>
           {this.props.overlay}
         </div>
         {this.props.children}

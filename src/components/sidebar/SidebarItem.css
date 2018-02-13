@@ -1,29 +1,12 @@
 .SidebarItem {
-  color: #bbb;
+  color: #fff;
   padding: 8px 0 8px 10px;
   margin: 1px;
 }
 
 .SidebarItem:hover {
   cursor: grab;
-}
-
-.SidebarItem-component {
-  background-image: linear-gradient(to bottom, rgb(0, 0, 0));
-  background-size: 5px 100%;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5));
+  background-size: 4px 100%;
   background-repeat: no-repeat;
-}
-
-.SidebarItem-component:hover {
-  background-color: rgba(0, 0, 0, 0.342);
-}
-
-.SidebarItem-node {
-  background-image: linear-gradient(to bottom, rgba(0, 0, 139));
-  background-size: 5px 100%;
-  background-repeat: no-repeat;
-}
-
-.SidebarItem-node:hover {
-  background-color: rgba(0, 0, 139, 0.342);
 }
