@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
 import * as ColorHash from 'color-hash';
 
@@ -7,7 +8,7 @@ import { DND_ITEM } from '../../utils/constants';
 import './SidebarItem.css';
 
 export interface SidebarItemProps {
-  tdef: k.TypeDefinition;
+  tdef: kevoree.TypeDefinition;
   onDblClick: () => void;
 }
 
@@ -17,7 +18,7 @@ export const SidebarItem = ({ tdef, onDblClick = () => {/*noop*/}}: SidebarItemP
   <div
     className={cx('SidebarItem', `SidebarItem-${tdef.type}`)}
     draggable={true}
-    onDragStart={(event) => event.dataTransfer.setData(DND_ITEM, JSON.stringify(tdef))}
+    onDragStart={(event) => event.dataTransfer.setData(DND_ITEM, tdef.path())}
     onDoubleClick={() => onDblClick()}
     style={{ backgroundColor: color.hex(tdef.name) }}
   >

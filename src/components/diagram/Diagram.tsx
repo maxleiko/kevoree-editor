@@ -15,7 +15,7 @@ import './Diagram.css';
 interface DiagramProps {
   diagramEngine: DiagramEngine;
   kevoreeEngine: KevoreeEngine;
-  onDrop: (tdef: k.TypeDefinition, point: { x: number, y: number }) => void;
+  onDrop: (tdefPath: string, point: { x: number, y: number }) => void;
 }
 interface DiagramState {}
 
@@ -24,8 +24,10 @@ export class Diagram extends React.Component<DiagramProps, DiagramState> {
   onDrop(event: React.DragEvent<HTMLElement>) {
     try {
       const point = this.props.diagramEngine.getRelativeMousePoint(event);
-      const tdef: k.TypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-      this.props.onDrop(tdef, point);
+      const tdefPath = event.dataTransfer.getData(DND_ITEM);
+      // tslint:disable-next-line
+      console.log('drop', tdefPath);
+      this.props.onDrop(tdefPath, point);
     } catch (ignore) {/* noop */}
   }
 
@@ -73,6 +75,10 @@ export class Diagram extends React.Component<DiagramProps, DiagramState> {
     this.props.diagramEngine.repaintCanvas();
   }
 
+  zoomToFit() {
+    this.props.diagramEngine.zoomToFit();
+  }
+
   componentDidMount() {
     this.props.diagramEngine.getDiagramModel().setZoomLevel(150);
   }
@@ -80,9 +86,10 @@ export class Diagram extends React.Component<DiagramProps, DiagramState> {
   generateOverlay() {
     return (
       <DiagramOverlay>
-        <OverlayIcon name="Auto layout" onClick={() => this.autoLayout()} icon="fa fa-2x fa-th" />
         <OverlayIcon name="Zoom in" onClick={() => this.zoomIn()} icon="fa fa-2x fa-search-plus" />
         <OverlayIcon name="Zoom out" onClick={() => this.zoomOut()} icon="fa fa-2x fa-search-minus" />
+        <OverlayIcon name="Zoom to fit" onClick={() => this.zoomToFit()} icon="fa fa-2x fa-search" />
+        <OverlayIcon name="Auto layout" onClick={() => this.autoLayout()} icon="fa fa-2x fa-th" />
       </DiagramOverlay>
     );
   }

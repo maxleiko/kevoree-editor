@@ -18,8 +18,9 @@
 }
 
 .OverlayIcon:hover,
-.OverlayIcon:active {
-  background-color: #333;
+.OverlayIcon:active,
+.OverlayIcon:focus {
+  background-color: #292929;
 }
 
 .OverlayIcon-tooltip {
@@ -29,8 +30,4 @@
 
 .OverlayIcon-tooltip.hovered {
   display: block;
-}
-
-.OverlayIcon i {
-  
 }

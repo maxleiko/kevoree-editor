@@ -1,7 +1,10 @@
 .Sidebar {
-  width: 220px;
+  background-color: #555;
+  width: 240px;
+  box-shadow: 0 0 20px #000;
+  z-index: 1;
 }
 
-.Sidebar:hover {
-  overflow-y: auto;
+.Sidebar-inner {
+  padding: 12px;
 }

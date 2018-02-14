@@ -53,6 +53,9 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   componentDidMount() {
     this.props.node.setWidth(this.elem.getBoundingClientRect().width);
     this.props.node.setHeight(this.elem.getBoundingClientRect().height);
+    // tslint:disable-next-line
+    console.log(this.props.node.instance.name, this.props.node.width, this.props.node.height);
+    
   }
 
   render() {
@@ -63,7 +66,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
         style={{ background: this.props.node.color }}
       >
         <div className="title">
-          <div className="name">{this.props.node.name}: {this.props.node.typeName}</div>
+          <div className="name">{this.props.node.instance.name}: {this.props.node.instance.typeDefinition.name}</div>
         </div>
         {/* <div className="children">
           {_.map(this.props.node.children, (node) => {

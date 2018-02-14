@@ -2,12 +2,12 @@ import * as kevoree from 'kevoree-library';
 
 import { AbstractModel } from '../AbstractModel';
 
-export class KevoreeNodeModel extends AbstractModel {
+export class KevoreeGroupModel extends AbstractModel {
 
-  instance: kevoree.Node;
+  instance: kevoree.Group;
 
-  constructor(instance?: kevoree.Node) {
-    super('kevoree-node', instance ? instance.typeDefinition.name : undefined);
+  constructor(instance?: kevoree.Group) {
+    super('kevoree-group', instance ? instance.typeDefinition.name : undefined);
     if (instance) {
       this.instance = instance;
     }

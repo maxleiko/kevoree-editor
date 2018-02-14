@@ -1,72 +1,92 @@
 import * as kevoree from 'kevoree-library';
 
-import { KevoreeComponentModel } from './widgets/component';
+import { isComponentType, isNodeType, isChannelType, isGroupType } from './utils/kevoree';
 import { KevoreeNodeModel } from './widgets/node';
+import { KevoreeComponentModel } from './widgets/component';
+import { KevoreeChannelModel } from './widgets/channel';
+import { KevoreeGroupModel } from './widgets/group';
 
-const registryModel: Array<k.RTypeDefinition> = require('./assets/model.json');
+const registryModel: Array<kevoree.RTypeDefinition> = require('./assets/model.json');
 
 export class KevoreeEngine {
 
-  private count: number;
-  private model: k.Model;
-  private factory: k.KevoreeFactory;
+  private model: kevoree.Model;
+  private factory: kevoree.KevoreeFactory;
 
   constructor() {
-    this.count = 0;
     this.factory = new kevoree.factory.DefaultKevoreeFactory();
+    this.model = this.factory.createContainerRoot().withGenerated_KMF_ID(0);
+    this.factory.root(this.model);
+
     const loader = this.factory.createJSONLoader();
-    const kModel = this.factory.createContainerRoot().withGenerated_KMF_ID(0);
-    this.factory.root(kModel);
 
     registryModel
-      .forEach((tdef) => {
-        const pkg = this.factory.createPackage();
-        pkg.name = tdef.namespace;
-
-        // TODO
-
-        this.model.addPackages(pkg);
+      .forEach((rTdef) => {
+        // looking for this tdef's namespace in model
+        let namespace = this.model.findPackagesByID(rTdef.namespace);
+        if (!namespace) {
+          // namespace is not in model: create it
+          namespace = this.factory.createPackage().withName(rTdef.namespace);
+          // add it to model
+          this.model.addPackages(namespace);
+        }
+        // load the tdef's model
+        const tdef = loader.loadModelFromString<kevoree.TypeDefinition>(rTdef.model).get(0);
+        // add it to the model
+        namespace.addTypeDefinitions(tdef);
+        // TODO merge it's DU
       });
 
-    this.model = loader.loadModelFromString().get(0);
-    // this.types = registryModel.map((rtdef: k.RTypeDefinition) => {
-    //   return JSON.parse(rtdef.model);
-    // });
+    // tslint:disable-next-line
+    console.log(this.model);
   }
 
-  public createInstance(tdef: k.TypeDefinition) {
-    if (tdef.class.startsWith('org.kevoree.ComponentType')) {
-      return this.createComponent(<k.ComponentType> tdef);
-    } else if (tdef.class.startsWith('org.kevoree.ChannelType')) {
-      return this.createChannel(<k.ChannelType> tdef);
-    } else if (tdef.class.startsWith('org.kevoree.GroupType')) {
-      return this.createGroup(<k.GroupType> tdef);
-    } else if (tdef.class.startsWith('org.kevoree.NodeType')) {
-      return this.createNode(<k.NodeType> tdef);
+  public createInstance(tdef: kevoree.TypeDefinition, container: kevoree.Model | kevoree.Node = this.model) {
+    if (isComponentType(tdef)) {
+      return this.createComponent(<kevoree.ComponentType> tdef, <kevoree.Node> container);
+      
+    } else if (isChannelType(tdef)) {
+      return this.createChannel(<kevoree.ChannelType> tdef, <kevoree.Model> container);
+
+    } else if (isGroupType(tdef)) {
+      return this.createGroup(<kevoree.GroupType> tdef, <kevoree.Model> container);
+
+    } else if (isNodeType(tdef)) {
+      return this.createNode(<kevoree.NodeType> tdef, <kevoree.Model> container);
     }
-    throw new Error(`Unable to create instance of unknown type "${tdef.class}"`);
+    throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
   }
 
-  public createComponent(tdef: k.ComponentType) {
-    const instance: k.Component = this.factory.createComponentInstance();
-    instance.name = 'comp' + this.count++;
+  public createComponent(tdef: kevoree.ComponentType, container: kevoree.Node) {
+    const instance: kevoree.Component = this.factory.createComponentInstance();
+    instance.name = `comp${container.nodes.size()}`;
     instance.typeDefinition = tdef;
+    container.addComponents(instance);
     return new KevoreeComponentModel(instance);
   }
 
-  public createNode(tdef: k.NodeType) {
-    const instance: k.Node = this.factory.createContainerNode();
-    instance.name = 'node' + this.count++;
+  public createNode(tdef: kevoree.NodeType, container: kevoree.Model) {
+    const instance: kevoree.Node = this.factory.createContainerNode();
+    instance.name = `node${container.nodes.size()}`;
     instance.typeDefinition = tdef;
+    container.addNodes(instance);
     return new KevoreeNodeModel(instance);
   }
 
-  public createChannel(tdef: k.ChannelType) {
-    return null;
+  public createChannel(tdef: kevoree.ChannelType, container: kevoree.Model) {
+    const instance: kevoree.Channel = this.factory.createChannel();
+    instance.name = `chan${container.nodes.size()}`;
+    instance.typeDefinition = tdef;
+    container.addHubs(instance);
+    return new KevoreeChannelModel(instance);
   }
 
-  public createGroup(tdef: k.GroupType) {
-    return null;
+  public createGroup(tdef: kevoree.GroupType, container: kevoree.Model) {
+    const instance: kevoree.Group = this.factory.createGroup();
+    instance.name = `group${container.nodes.size()}`;
+    instance.typeDefinition = tdef;
+    container.addGroups(instance);
+    return new KevoreeGroupModel(instance);
   }
 
   public getModel() {

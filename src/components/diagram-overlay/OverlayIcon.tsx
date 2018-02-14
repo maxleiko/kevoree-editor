@@ -26,6 +26,8 @@ export class OverlayIcon extends React.Component<OverlayIconProps, OverlayIconSt
         className="OverlayIcon"
         onClick={(event) => this.props.onClick(event)}
         onMouseEnter={() => this.setState({ showTooltip: true })}
+        onFocus={() => this.setState({ showTooltip: true })}
+        onBlur={() => this.setState({ showTooltip: false })}
         onMouseLeave={() => this.setState({ showTooltip: false })}
       >
         <span className={cx('OverlayIcon-tooltip', { 'hovered': this.state.showTooltip })}>{this.props.name}</span>
