@@ -3,14 +3,12 @@ import { DiagramEngine } from 'storm-react-diagrams';
 import * as cx from 'classnames';
 
 import { KevoreeChannelModel } from './KevoreeChannelModel';
-import { KevoreeEngine } from '../../KevoreeEngine';
 
 import './KevoreeChannelWidget.css';
 
 export interface KevoreeChannelWidgetProps {
   node: KevoreeChannelModel;
   diagramEngine: DiagramEngine;
-  kevoreeEngine: KevoreeEngine;
 }
 
 interface KevoreeChannelWidgetState {}

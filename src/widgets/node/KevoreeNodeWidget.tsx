@@ -3,14 +3,12 @@ import { DiagramEngine } from 'storm-react-diagrams';
 import * as cx from 'classnames';
 
 import { KevoreeNodeModel } from './KevoreeNodeModel';
-import { KevoreeEngine } from '../../KevoreeEngine';
 
 import './KevoreeNodeWidget.css';
 
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
   diagramEngine: DiagramEngine;
-  kevoreeEngine: KevoreeEngine;
 }
 
 interface KevoreeNodeWidgetState {
@@ -29,7 +27,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   // onDrop(event: React.DragEvent<HTMLDivElement>) {
   //   const tdef: TypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
   //   if (tdef.type === 'component') {
-  //     const comp = this.props.kevoreeEngine.createInstance(tdef);
+  //     const comp = this.props.KevoreeState.createInstance(tdef);
   //     if (comp instanceof KevoreeComponentModel) {
   //       this.props.node.addChild(comp);
   //       event.preventDefault();

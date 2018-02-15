@@ -6,7 +6,7 @@ export abstract class AbstractModel extends NodeModel {
   height: number;
   color: string;
 
-  constructor(name: string, color: string = '#000') {
+  protected constructor(name: string, color: string = '#000') {
     super(name);
     this.color = new ColorHash().hex(color);
   }
@@ -17,6 +17,11 @@ export abstract class AbstractModel extends NodeModel {
 
   setHeight(height: number) {
     this.height = height;
+  }
+
+  setLocation(point: kwe.Point) {
+    this.x = point.x;
+    this.y = point.y;
   }
 
   serialize() {

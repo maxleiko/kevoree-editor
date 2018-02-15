@@ -21,7 +21,6 @@ declare module 'kevoree-library' {
       createPackage(): Namespace;
   
       root(model: Model): void;
-      [s: string]: any; // don't bother with the structure right now
     }
   }
 
@@ -39,7 +38,6 @@ declare module 'kevoree-library' {
     createPackage(): Namespace;
 
     root(model: Model): void;
-    [s: string]: any; // don't bother with the structure right now
   }
 
   export interface KevoreeLoader {
@@ -55,20 +53,17 @@ declare module 'kevoree-library' {
     withGenerated_KMF_ID(s: string | number): Model;
     findPackagesByID(id: string): Namespace;
     findByPath<T>(path: string): T;
-    [s: string]: any; // don't bother with the structure right now
+    addNodes(node: Node): void;
+    addGroups(grp: Group): void;
+    addHubs(channel: Channel): void;
+    addPackages(pkg: Namespace): void;
   }
 
-  export interface KevoreeSerializer {
-    [s: string]: any; // don't bother with the structure right now
-  }
+  export interface KevoreeSerializer {}
 
-  export interface KevoreeModelCompare {
-    [s: string]: any; // don't bother with the structure right now
-  }
+  export interface KevoreeModelCompare {}
 
-  export interface KevoreeModelCloner {
-    [s: string]: any; // don't bother with the structure right now
-  }
+  export interface KevoreeModelCloner {}
 
   interface KList<T> {
     array: T[];
@@ -78,10 +73,10 @@ declare module 'kevoree-library' {
   }
 
   export interface Klass<T, P = null> {
+    path(): string;
     metaClassName(): string;
     select<T>(query: string): KList<T>;
     eContainer(): P;
-    [s: string]: any; // don't bother with the structure right now
   }
   
   export interface Named<T, P> extends Klass<T, P> {
@@ -122,6 +117,9 @@ declare module 'kevoree-library' {
     host: Node;
     groups: KList<Group>;
     networkInformation: KList<NetworkInfo>;
+
+    addComponents(comp: Component): void;
+    addGroups(comp: Group): void;
   }
   
   export interface Group extends Instance<Group, Model> {
@@ -194,6 +192,9 @@ declare module 'kevoree-library' {
     packages: KList<Namespace>;
     typeDefinitions: KList<TypeDefinition>;
     deployUnits: KList<DeployUnit>;
+
+    addTypeDefinitions(tdef: TypeDefinition): void;
+    addDeployUnits(du: DeployUnit): void;
   }
   
   export enum DataType {

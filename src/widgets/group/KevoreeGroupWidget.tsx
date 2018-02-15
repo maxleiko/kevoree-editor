@@ -3,14 +3,12 @@ import { DiagramEngine } from 'storm-react-diagrams';
 import * as cx from 'classnames';
 
 import { KevoreeGroupModel } from './KevoreeGroupModel';
-import { KevoreeEngine } from '../../KevoreeEngine';
 
 import './KevoreeGroupWidget.css';
 
 export interface KevoreeGroupWidgetProps {
   node: KevoreeGroupModel;
   diagramEngine: DiagramEngine;
-  kevoreeEngine: KevoreeEngine;
 }
 
 interface KevoreeGroupWidgetState {}
