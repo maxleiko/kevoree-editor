@@ -1,58 +1,75 @@
-import { observable, computed, action } from 'mobx';
+import * as kevoree from 'kevoree-library';
+import { observable, computed, action, createTransformer, ITransformer } from 'mobx';
 
-import { KevoreeStore } from './KevoreeStore';
 import { isComponentType, isChannelType, isNodeType, isGroupType } from '../utils/kevoree';
+import { KevoreeService } from '../services/KevoreeService';
 
 export class SidebarStore {
 
-  private kevoreeStore: KevoreeStore;
+  @observable private _nameFilter = '';
+  @observable private _nodeFilter = true;
+  @observable private _compFilter = true;
+  @observable private _chanFilter = true;
+  @observable private _groupFilter = true;
 
-  @observable nameFilter = '';
-  @observable nodeFilter = true;
-  @observable compFilter = true;
-  @observable chanFilter = true;
-  @observable groupFilter = true;
+  filteredTdefs: ITransformer<kevoree.TypeDefinition[], kevoree.TypeDefinition[]>; 
 
-  constructor(kevoreeStore: KevoreeStore) {
-    this.kevoreeStore = kevoreeStore;
-  }
-
-  @computed get filtered() {
-    return this.kevoreeStore.typeDefinitions
-      .filter((tdef) => {
-        if (isNodeType(tdef)) {
-          return this.nodeFilter;
-        } else if (isComponentType(tdef)) {
-          return this.compFilter;
-        } else if (isChannelType(tdef)) {
-          return this.chanFilter;
-        } else if (isGroupType(tdef)) {
-          return this.groupFilter;
-        }
-        return true;
-      })
-      .filter((tdef) => {
-        return tdef.name.toLowerCase().indexOf(this.nameFilter) > -1;
-      });
+  constructor(kevoreeService: KevoreeService) {
+    this.filteredTdefs = createTransformer((tdefs: kevoree.TypeDefinition[]) => {
+      return tdefs
+        .filter((tdef) => {
+          if (isNodeType(tdef)) {
+            return this._nodeFilter;
+          } else if (isComponentType(tdef)) {
+            return this._compFilter;
+          } else if (isChannelType(tdef)) {
+            return this._chanFilter;
+          } else if (isGroupType(tdef)) {
+            return this._groupFilter;
+          }
+          return true;
+        })
+        .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1);
+    });
   }
 
   @action onChangeNameFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this.nameFilter = event.target.value.toLowerCase();
+    this._nameFilter = event.target.value.toLowerCase();
   }
 
   @action onChangeNodeFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this.nodeFilter = event.target.checked;
+    this._nodeFilter = event.target.checked;
   }
 
   @action onChangeGroupFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this.groupFilter = event.target.checked;
+    this._groupFilter = event.target.checked;
   }
 
   @action onChangeChanFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this.chanFilter = event.target.checked;
+    this._chanFilter = event.target.checked;
   }
 
   @action onChangeCompFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this.compFilter = event.target.checked;
+    this._compFilter = event.target.checked;
+  }
+
+  @computed get nameFilter() {
+    return this._nameFilter;
+  }
+
+  @computed get nodeFilter() {
+    return this._nodeFilter;
+  }
+
+  @computed get compFilter() {
+    return this._compFilter;
+  }
+
+  @computed get chanFilter() {
+    return this._chanFilter;
+  }
+
+  @computed get groupFilter() {
+    return this._groupFilter;
   }
 }

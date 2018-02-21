@@ -9,9 +9,11 @@
     "dagre": "^0.8.2",
     "jquery": "^3.3.1",
     "kevoree-library": "^5.0.13",
+    "kevoree-registry-client": "^3.0.1",
     "lodash": "^4.17.5",
     "mobx": "^3.5.1",
     "mobx-react": "^4.4.1",
+    "mousetrap": "^1.6.1",
     "popper.js": "^1.12.9",
     "react": "^16.2.0",
     "react-custom-scrollbars": "^4.2.1",
@@ -19,6 +21,9 @@
     "react-dnd-html5-backend": "^2.5.4",
     "react-dom": "^16.2.0",
     "react-scripts-ts": "2.13.0",
+    "react-toastify": "^3.3.3",
+    "reactstrap": "^5.0.0-beta",
+    "riek": "^1.1.0",
     "storm-react-diagrams": "4.0.0"
   },
   "scripts": {
@@ -32,11 +37,14 @@
     "@types/dagre": "^0.7.39",
     "@types/jest": "^22.1.0",
     "@types/lodash": "^4.14.102",
+    "@types/mousetrap": "^1.6.0",
     "@types/node": "^9.3.0",
     "@types/react": "^16.0.34",
     "@types/react-dnd": "^2.0.34",
     "@types/react-dnd-html5-backend": "^2.1.8",
     "@types/react-dom": "^16.0.3",
+    "@types/react-transition-group": "^2.0.7",
+    "@types/reactstrap": "^5.0.17",
     "typescript": "^2.6.2"
   }
 }

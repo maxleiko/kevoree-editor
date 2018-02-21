@@ -1,10 +1,12 @@
-import { NodeModel } from 'storm-react-diagrams';
+import * as _ from 'lodash';
+import { NodeModel, DefaultPortModel } from 'storm-react-diagrams';
 import * as ColorHash from 'color-hash';
 
 export abstract class AbstractModel extends NodeModel {
   width: number;
   height: number;
   color: string;
+  ports: { [s: string]: DefaultPortModel };
 
   protected constructor(name: string, color: string = '#000') {
     super(name);
@@ -38,5 +40,17 @@ export abstract class AbstractModel extends NodeModel {
     this.width = obj.width;
     this.height = obj.height;
     this.color = obj.color;
+  }
+
+  getInPorts() {
+    return _.filter(this.ports, (portModel) => {
+      return portModel.in;
+    });
+  }
+
+  getOutPorts() {
+    return _.filter(this.ports, (portModel) => {
+      return !portModel.in;
+    });
   }
 }

@@ -8,6 +8,8 @@
 declare module 'kevoree-library' {
   export namespace factory {
     export class DefaultKevoreeFactory implements KevoreeFactory {
+      root(model: Model): void;
+
       createJSONLoader(): KevoreeLoader;
       createJSONSerializer(): KevoreeSerializer;
       createModelCompare(): KevoreeModelCompare;
@@ -20,11 +22,45 @@ declare module 'kevoree-library' {
       createChannel(): Channel;
       createPackage(): Namespace;
   
-      root(model: Model): void;
+      getVersion(): String
+  
+      createComponentInstance(): Component;
+      createInstance<T, P>(): Instance<T, P>;
+      createPort(): Port;
+      createComponentType(): ComponentType;
+      createTypeDefinition(): TypeDefinition;
+      createChannelType(): ChannelType;
+      createGroupType(): GroupType;
+      createNodeType(): NodeType;
+      createPortTypeRef(): PortTypeRef;
+      createContainerNode(): Node;
+      createGroup(): Group;
+      createNetworkInfo(): NetworkInfo;
+      createContainerRoot(): Model;
+      createRepository(): Repository;
+      createChannel(): Channel;
+      createMBinding(): Binding;
+      createPackage(): Namespace;
+      createNamedElement<T, P>(): Named<T, P>;
+      createDeployUnit(): DeployUnit;
+      createPortType(): PortType;
+      createDictionary(): Dictionary;
+      createValue<P>(): Value<P>;
+      createFragmentDictionary(): FragmentDictionary;
+      createDictionaryType(): DictionaryType;
+      createDictionaryAttribute(): DictionaryAttribute;
+      createTypedElement(): any; // this is no longer used (so any for now)
+      createPortTypeMapping(): any; // this is no longer used (so any for now)
+      createServicePortType(): any; // this is no longer used (so any for now)
+      createOperation(): any; // this is no longer used (so any for now)
+      createParameter(): any; // this is no longer used (so any for now)
+      createMessagePortType(): any; // this is no longer used (so any for now)
     }
   }
 
   export interface KevoreeFactory {
+    root(model: Model): void;
+
     createJSONLoader(): KevoreeLoader;
     createJSONSerializer(): KevoreeSerializer;
     createModelCompare(): KevoreeModelCompare;
@@ -37,12 +73,46 @@ declare module 'kevoree-library' {
     createChannel(): Channel;
     createPackage(): Namespace;
 
-    root(model: Model): void;
+    getVersion(): String
+
+    createComponentInstance(): Component;
+    createInstance<T, P>(): Instance<T, P>;
+    createPort(): Port;
+    createComponentType(): ComponentType;
+    createTypeDefinition(): TypeDefinition;
+    createChannelType(): ChannelType;
+    createGroupType(): GroupType;
+    createNodeType(): NodeType;
+    createPortTypeRef(): PortTypeRef;
+    createContainerNode(): Node;
+    createGroup(): Group;
+    createNetworkInfo(): NetworkInfo;
+    createContainerRoot(): Model;
+    createRepository(): Repository;
+    createChannel(): Channel;
+    createMBinding(): Binding;
+    createPackage(): Namespace;
+    createNamedElement<T, P>(): Named<T, P>;
+    createDeployUnit(): DeployUnit;
+    createPortType(): PortType;
+    createDictionary(): Dictionary;
+    createValue<P>(): Value<P>;
+    createFragmentDictionary(): FragmentDictionary;
+    createDictionaryType(): DictionaryType;
+    createDictionaryAttribute(): DictionaryAttribute;
+    createTypedElement(): any; // this is no longer used (so any for now)
+    createPortTypeMapping(): any; // this is no longer used (so any for now)
+    createServicePortType(): any; // this is no longer used (so any for now)
+    createOperation(): any; // this is no longer used (so any for now)
+    createParameter(): any; // this is no longer used (so any for now)
+    createMessagePortType(): any; // this is no longer used (so any for now)
   }
 
   export interface KevoreeLoader {
     loadModelFromString<T>(str: string): KList<T>;
   }
+
+  const m: Model;
 
   export interface Model extends Klass<Model> {
     nodes: KList<Node>;
@@ -57,39 +127,76 @@ declare module 'kevoree-library' {
     addGroups(grp: Group): void;
     addHubs(channel: Channel): void;
     addPackages(pkg: Namespace): void;
+    addAllPackages(pkgs: any): void;
   }
 
-  export interface KevoreeSerializer {}
+  export interface KevoreeSerializer {
+    serialize(elem: Klass<any, any>): string;
+  }
 
-  export interface KevoreeModelCompare {}
+  export interface KevoreeModelCompare {
+    // TODO
+  }
 
-  export interface KevoreeModelCloner {}
+  export interface KevoreeModelCloner {
+    // TODO
+  }
+
+  export interface KevoreeModelListener {
+    elementChanged: (event: ModelEvent) => void;
+  }
+
+  export interface ModelEvent {
+    etype: ActionType
+    elementAttributeType: ElementAttributeType
+    elementAttributeName: string
+    value?: any
+    previous_value?: any
+    source?: Klass<any>
+    previousPath?: string
+  }
+
+  export interface ActionType {
+    code: string;
+    name$: string;
+  }
+
+  export interface ElementAttributeType {
+    name$: string;
+  }
 
   interface KList<T> {
-    array: T[];
+    readonly array: T[];
     get(i: number): T;
     size(): number;
-    // there is more here, but who cares, just use the .array
   }
 
-  export interface Klass<T, P = null> {
+  export interface Klass<T, P = Klass<any, any>> {
     path(): string;
     metaClassName(): string;
     select<T>(query: string): KList<T>;
     eContainer(): P;
+    addModelElementListener(listener: KevoreeModelListener): void;
+    removeModelElementListener(listener: KevoreeModelListener): void;
+    removeAllModelElementListeners(): void;
+    addModelTreeListener(listener: KevoreeModelListener): void;
+    removeModelTreeListener(listener: KevoreeModelListener): void;
+    removeAllModelTreeListeners(): void;
   }
   
   export interface Named<T, P> extends Klass<T, P> {
     name: string;
     withName(name: string): T;
   }
-  
-  export interface Instance<T, P> extends Named<T, P> {
+
+  export interface Instance<T = Node | Component | Channel | Group, P = Model | Node> extends Named<T, P> {
     started: boolean;
     typeDefinition: TypeDefinition;
     dictionary: Dictionary;
-    fragmentDictionary: KList<FragmentDictionary<T, P>>;
-    metaData: KList<Value<Instance<T, P>>>;
+    fragmentDictionary: KList<FragmentDictionary>;
+    metaData: KList<Value<T>>;
+    findFragmentDictionaryByID(name: string): FragmentDictionary;
+    addFragmentDictionary(dic: FragmentDictionary): void;
   }
   
   export interface Component extends Instance<Component, Node> {
@@ -130,11 +237,14 @@ declare module 'kevoree-library' {
     values: KList<Value<NetworkInfo>>;
   }
   
-  export interface Dictionary {
+  export interface Dictionary extends Klass<Dictionary, Instance> {
     values: KList<Value<Dictionary>>;
+    withGenerated_KMF_ID(id: string): Dictionary;
+    findValuesByID(name: string): Value<Dictionary>;
+    addValues(val: Value<Dictionary>): void;
   }
   
-  export interface FragmentDictionary<T, P> extends Dictionary, Named<T, Instance<T, P>> {}
+  export interface FragmentDictionary extends Dictionary, Named<FragmentDictionary, Instance> {}
   
   export interface TypeDefinition<T = PortType | NodeType | ChannelType | GroupType | ComponentType, P = Namespace> extends Named<T, P> {
     version: number;
@@ -175,6 +285,10 @@ declare module 'kevoree-library' {
   export interface DictionaryType {
     attributes: KList<DictionaryAttribute>;
   }
+
+  export interface Repository extends Klass<Repository, Model> {
+    url: string;
+  }
   
   export interface DictionaryAttribute extends Named<DictionaryAttribute, DictionaryType> {
     optional: boolean;
@@ -194,7 +308,9 @@ declare module 'kevoree-library' {
     deployUnits: KList<DeployUnit>;
 
     addTypeDefinitions(tdef: TypeDefinition): void;
+    addAllTypeDefinitions(tdefs: any): void;
     addDeployUnits(du: DeployUnit): void;
+    addAllDeployUnits(dus: any): void;
   }
   
   export enum DataType {

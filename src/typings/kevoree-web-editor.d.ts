@@ -5,6 +5,16 @@
  * consistent types.
  */
 declare namespace kwe {
+  export type Mode = 'model' | 'node';
+  export type ToastType = 'info' | 'success' | 'warning' | 'error' | 'default';
+
+  export interface Toast {
+    type: ToastType;
+    title: string;
+    message: string;
+    delay: number;
+  }
+
   export interface Point {
     x: number;
     y: number;

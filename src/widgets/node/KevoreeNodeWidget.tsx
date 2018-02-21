@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { DiagramEngine } from 'storm-react-diagrams';
+import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
 
 import { KevoreeNodeModel } from './KevoreeNodeModel';
+import { Editable } from '../../components/editable';
 
 import './KevoreeNodeWidget.css';
 
@@ -17,68 +19,51 @@ interface KevoreeNodeWidgetState {
 
 export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, KevoreeNodeWidgetState> {
 
-  private elem: HTMLDivElement;
+  private _elem: HTMLDivElement;
+  private _listener: kevoree.KevoreeModelListener = {
+    elementChanged: (event) => {
+      this.forceUpdate();
+    }
+  };
 
   constructor(props: KevoreeNodeWidgetProps) {
     super(props);
     this.state = { canDrop: false };
   }
 
-  // onDrop(event: React.DragEvent<HTMLDivElement>) {
-  //   const tdef: TypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-  //   if (tdef.type === 'component') {
-  //     const comp = this.props.KevoreeState.createInstance(tdef);
-  //     if (comp instanceof KevoreeComponentModel) {
-  //       this.props.node.addChild(comp);
-  //       event.preventDefault();
-  //       this.props.diagramEngine.repaintCanvas();
-  //     }
-  //   }
-  // }
-
-  // onDragOver(event: React.DragEvent<HTMLDivElement>) {
-  //   this.setState({ canDrop: true });
-  //   // tslint:disable-next-line
-  //   console.log('onDrag over', JSON.parse(event.dataTransfer.getData(DND_ITEM)));
-  // }
-
-  // onDragLeave(event: React.DragEvent<HTMLDivElement>) {
-  //   this.setState({ canDrop: false });
-  //   // tslint:disable-next-line
-  //   console.log('onDrag leave');
-  // }
-
   componentDidMount() {
-    this.props.node.setWidth(this.elem.getBoundingClientRect().width);
-    this.props.node.setHeight(this.elem.getBoundingClientRect().height);
-    // tslint:disable-next-line
-    console.log(this.props.node.instance.name, this.props.node.width, this.props.node.height);
-    
+    this.props.node.setWidth(this._elem.getBoundingClientRect().width);
+    this.props.node.setHeight(this._elem.getBoundingClientRect().height);
+
+    this.props.node.instance.addModelTreeListener(this._listener);
+  }
+
+  componentWillUnmount() {
+    this.props.node.instance.removeModelTreeListener(this._listener);
   }
 
   render() {
     return (
       <div
-        ref={(elem) => this.elem = elem!}
+        ref={(elem) => this._elem = elem!}
         className={cx('basic-node', 'kevoree-node', { droppable: this.state.canDrop })}
-        style={{ background: this.props.node.color }}
+        style={{ backgroundColor: this.props.node.color }}
       >
-        <div className="title">
-          <div className="name">{this.props.node.instance.name}: {this.props.node.instance.typeDefinition.name}</div>
+        <div className="header">
+          <Editable
+            value={this.props.node.instance.name}
+            onCommit={(name) => this.props.node.instance.name = name}
+            className="inline-input"
+          />
+          <span>{this.props.node.instance.typeDefinition.name}</span>
         </div>
-        {/* <div className="children">
-          {_.map(this.props.node.children, (node) => {
-            return React.createElement(
-              NodeWidget,
-              {
-                diagramEngine: this.props.diagramEngine,
-                key: node.id,
-                node: node
-              },
-              this.props.diagramEngine.generateWidgetForNode(node)
-            );
-          })}
-        </div> */}
+        <div className="body">
+          <ul className="components">
+            {this.props.node.components.map((comp) => (
+              <li key={comp.instance.name}>{comp.instance.name}: {comp.instance.typeDefinition.name}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     );
   }

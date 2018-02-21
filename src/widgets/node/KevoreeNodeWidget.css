@@ -1,25 +1,26 @@
-.kevoree-node.droppable {
-  border-color: lightgreen !important;
+.kevoree-node {
+  display: flex;
+  flex-flow: column;
+  min-width: 180px;
+  min-height: 100px;
 }
 
-.kevoree-node .title .name {
-  text-align: center;
+.kevoree-node .header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
 
-.kevoree-node .children {
+.kevoree-node .header input.inline-input {
+  display: inline-block;
+  border: none;
+  border-color: transparent;
+}
+
+.kevoree-node .content {
+  flex-grow: 1;
   margin: 2px;
-  padding: 1px;
-  min-height: 10px;
-}
-
-.kevoree-node .children .node {
-  position: relative;
-}
-
-.kevoree-node .children .node {
-  margin-top: 2px;
-}
-
-.kevoree-node .children .node:first-child {
-  margin-top: 0;
+  color: #eee;
 }

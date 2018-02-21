@@ -4,8 +4,12 @@
   background: #222;
 }
 
-.App-diagram-container {
+.App-content {
   display: flex;
   flex-grow: 1;
-  padding: 10px;
+  flex-flow: column;
+}
+
+.Toastify {
+  top: 60px;
 }

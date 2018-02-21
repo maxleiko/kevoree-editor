@@ -1,5 +1,5 @@
 .Sidebar {
-  background-color: #555;
+  background-color: #222;
   width: 240px;
   box-shadow: 0 0 20px #000;
   z-index: 1;
@@ -12,6 +12,15 @@
   height: 100%;
 }
 
+.Sidebar-scrollbar {
+  color: #666;
+}
+
 .Sidebar-innerscroll {
-  padding: 12px;
+  padding: 4px 8px;
+}
+
+.Sidebar-content-empty {
+  font-style: italic;
+  color: #ccc;
 }

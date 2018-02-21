@@ -28,9 +28,6 @@ export class SidebarHeader extends React.Component<SidebarHeaderProps> {
             value={sidebarStore.nameFilter}
             onChange={(e) => sidebarStore.onChangeNameFilter(e)}
           />
-          <div className="input-group-append">
-            <button className="btn btn-outline-secondary" type="button"><i className="fa fa-" /></button>
-          </div>
         </div>
         <div className="Sidebar-checkbox-filters">
           <div className="form-check form-check-inline">

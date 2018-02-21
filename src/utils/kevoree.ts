@@ -24,3 +24,15 @@ export function getType(tdef: kevoree.TypeDefinition) {
   if (isNodeType(tdef)) { return KEVOREE_NODE; }
   throw new Error(`Unknown Kevoree type "${tdef.metaClassName()}"`);
 }
+
+export function isTruish(val: any): boolean {
+  if (typeof val === 'string') {
+    return val.toLowerCase() === 'true';
+  }
+
+  if (typeof val === 'boolean') {
+    return val;
+  }
+
+  return false;
+}

@@ -1,49 +1,52 @@
 import * as React from 'react';
+import * as _ from 'lodash';
+import * as Mousetrap from 'mousetrap';
+import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
 import { AppStore } from './stores/AppStore';
-import { KevoreeStore } from './stores/KevoreeStore';
+import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
 
 import './App.css';
-import { KevoreeNodeFactory } from './widgets/node';
-import { KevoreeComponentFactory } from './widgets/component';
-import { KevoreeChannelFactory } from './widgets/channel';
-import { KevoreeGroupFactory } from './widgets/group';
 
 interface AppProps {
   appStore?: AppStore;
-  kevoreeStore?: KevoreeStore;
 }
 
-@inject('appStore', 'kevoreeStore')
+@inject('appStore')
 @observer
-export default class App extends React.Component<AppProps, {}> {
+export default class App extends React.Component<AppProps> {
 
-  componentWillMount() {
-    this.props.kevoreeStore!.diagram.registerNodeFactory(new KevoreeComponentFactory());
-    this.props.kevoreeStore!.diagram.registerNodeFactory(new KevoreeNodeFactory());
-    this.props.kevoreeStore!.diagram.registerNodeFactory(new KevoreeChannelFactory());
-    this.props.kevoreeStore!.diagram.registerNodeFactory(new KevoreeGroupFactory());
-    this.props.kevoreeStore!.diagram.installDefaultFactories();
+  private hkMap = {
+    undo: ['ctrl+z', 'command+z'],
+    redo: ['ctrl+y', 'command+y']
+  };
+
+  private hkActions = {
+    undo: () => this.props.appStore!.undo(),
+    redo: () => this.props.appStore!.redo(),
+  };
+
+  componentDidMount() {
+    _.forEach(this.hkMap, (value, key) => Mousetrap.bind(value, this.hkActions[key]));
+  }
+
+  componentWillUnmount() {
+    _.forEach(this.hkMap, (value) => Mousetrap.unbind(value));
   }
 
   render() {
-    // tslint:disable-next-line
-    console.log('render App');
-    const { appStore, kevoreeStore } = this.props;
-
     return (
       <div className="App">
-        <div style={{ position: 'absolute', top: 5, right: 5, zIndex: 1, color: '#fff' }}>
-          <div>Mode: {appStore!.mode}</div>
-          <button onClick={() => appStore!.changeMode()}>Switch mode</button>
-          <div>Nodes: {kevoreeStore!.nodes.length}</div>
-        </div>
         <Sidebar />
-        <Diagram />
-    </div>
+        <div className="App-content">
+          <Topbar />
+          <Diagram />
+        </div>
+        <ToastContainer position={toast.POSITION.TOP_RIGHT} className="Toastify" />
+      </div>
     );
   }
 }

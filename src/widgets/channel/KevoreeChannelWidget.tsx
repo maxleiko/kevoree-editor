@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DiagramEngine } from 'storm-react-diagrams';
+import { DiagramEngine, DefaultPortLabel, DefaultPortModel } from 'storm-react-diagrams';
 import * as cx from 'classnames';
 
 import { KevoreeChannelModel } from './KevoreeChannelModel';
@@ -27,6 +27,10 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
     this.props.node.setHeight(this.elem.getBoundingClientRect().height);
   }
 
+  generatePort(port: DefaultPortModel) {
+    return <DefaultPortLabel key={port.id} model={port} />;
+  }
+
   render() {
     return (
       <div
@@ -36,6 +40,10 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
       >
         <div className="title">
           <div className="name">{this.props.node.instance.name}: {this.props.node.instance.typeDefinition.name}</div>
+        </div>
+        <div className="ports">
+          <div className="in">{this.props.node.getInPorts().map((port) => this.generatePort(port))}</div>
+          <div className="out">{this.props.node.getOutPorts().map((port) => this.generatePort(port))}</div>
         </div>
       </div>
     );
