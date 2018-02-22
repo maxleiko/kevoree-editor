@@ -1,7 +1,7 @@
 .Sidebar {
   background-color: #222;
   width: 240px;
-  box-shadow: 0 0 20px #000;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
   z-index: 1;
   display: flex;
   flex-flow: column;

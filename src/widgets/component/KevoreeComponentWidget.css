@@ -1,8 +1,28 @@
 .kevoree-component {
-  border: 1px solid #222 !important;
-  border-radius: 2px !important;
+  min-width: 120px;
+  outline-width: 0;
 }
 
-.kevoree-component .title .name {
-  text-align: left !important;
+.kevoree-component .header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.kevoree-component .header .name {
+  margin-right: 10px;
+  color: #eee;
+  font-weight: bold;
+}
+
+.ports .in-port:last-child .port {
+  border-bottom-left-radius: 3px;
+}
+
+.ports .out-port:last-child .port {
+  border-bottom-right-radius: 3px;
 }

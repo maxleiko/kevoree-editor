@@ -2,7 +2,9 @@ import * as React from 'react';
 import { DiagramEngine } from 'storm-react-diagrams';
 import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
+import { inject, observer } from 'mobx-react';
 
+import { KevoreeService } from '../../services/KevoreeService';
 import { KevoreeNodeModel } from './KevoreeNodeModel';
 import { Editable } from '../../components/editable';
 
@@ -11,12 +13,15 @@ import './KevoreeNodeWidget.css';
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
   diagramEngine: DiagramEngine;
+  kevoreeService?: KevoreeService;
 }
 
 interface KevoreeNodeWidgetState {
   canDrop: boolean;
 }
 
+@inject('kevoreeService')
+@observer
 export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, KevoreeNodeWidgetState> {
 
   private _elem: HTMLDivElement;
@@ -29,6 +34,18 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   constructor(props: KevoreeNodeWidgetProps) {
     super(props);
     this.state = { canDrop: false };
+  }
+
+  openNodeView() {
+    this.props.kevoreeService!.openNodeView(this.props.node);
+  }
+
+  onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    // tslint:disable-next-line
+    console.log('keyDown', event.keyCode);
+    if (event.keyCode === 13) {
+      this.openNodeView();
+    }
   }
 
   componentDidMount() {
@@ -45,17 +62,19 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   render() {
     return (
       <div
+        tabIndex={0}
         ref={(elem) => this._elem = elem!}
         className={cx('basic-node', 'kevoree-node', { droppable: this.state.canDrop })}
-        style={{ backgroundColor: this.props.node.color }}
+        onDoubleClick={() => this.openNodeView()}
+        onKeyDown={(event) => this.onKeyDown(event)}
       >
-        <div className="header">
+        <div className="header" style={{ backgroundColor: this.props.node.color }}>
           <Editable
             value={this.props.node.instance.name}
             onCommit={(name) => this.props.node.instance.name = name}
-            className="inline-input"
+            className="name"
           />
-          <span>{this.props.node.instance.typeDefinition.name}</span>
+          <span className="type">{this.props.node.instance.typeDefinition.name}</span>
         </div>
         <div className="body">
           <ul className="components">

@@ -5,6 +5,8 @@
 }
 
 .SidebarGroup-header {
+  display: flex;
+  justify-content: space-between;
   padding: 5px 8px;
 }
 
@@ -25,4 +27,9 @@
 .SidebarGroup-body {
   border-top: 1px solid #666;
   padding: 5px;
+}
+
+.SidebarGroup-empty {
+  color: #999;
+  font-style: italic;
 }

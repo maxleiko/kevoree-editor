@@ -1,7 +1,5 @@
 import * as React from 'react';
-import {
-  DiagramWidget, BaseAction, MoveItemsAction, DiagramModel
-} from 'storm-react-diagrams';
+import { DiagramWidget, BaseAction, DiagramModel } from 'storm-react-diagrams';
 import { observer, inject } from 'mobx-react';
 import * as kevoree from 'kevoree-library';
 
@@ -49,10 +47,8 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   onActionStopped(action: BaseAction) {
-    if (action instanceof MoveItemsAction) {
-      // move instance action stopped
-      // TODO: check if component should be moved to another node
-    }
+    // tslint:disable-next-line
+    console.log('Diagram.onActionStopped', action);
     return true;
   }
 
@@ -118,6 +114,7 @@ export class Diagram extends React.Component<DiagramProps> {
             diagramEngine={this.props.kevoreeService!.diagram}
             inverseZoom={true}
             allowLooseLinks={false}
+            deleteKeys={[46]}
             actionStartedFiring={(action) => this.onActionStarted(action)}
             actionStoppedFiring={(action) => this.onActionStopped(action)}
           />

@@ -1,25 +1,25 @@
 import * as React from 'react';
+import * as cx from 'classnames';
+
+import './Editable.css';
 
 export interface EditableProps {
   value: string;
+  className?: string;
   onCommit: (val: string) => void;
 }
 
 interface EditableState {
   editing: boolean;
-  value: string;
 }
 
-export class Editable extends React.Component<EditableProps & React.HTMLAttributes<HTMLSpanElement>, EditableState> {
+export class Editable extends React.Component<EditableProps, EditableState> {
 
   private _elem: HTMLInputElement;
 
   constructor(props: EditableProps) {
     super(props);
-    this.state = {
-      editing: false,
-      value: this.props.value
-    };
+    this.state = { editing: false };
   }
 
   startEditing() {
@@ -28,7 +28,7 @@ export class Editable extends React.Component<EditableProps & React.HTMLAttribut
 
   finishEditing() {
     if (this.props.onCommit) {
-      this.props.onCommit(this.state.value);
+      this.props.onCommit(this._elem.value);
     }
     this.setState({ editing: false });
   }
@@ -37,23 +37,23 @@ export class Editable extends React.Component<EditableProps & React.HTMLAttribut
     this.setState({ editing: false });
   }
 
-  updateValue(event: React.ChangeEvent<HTMLInputElement>) {
-    event.stopPropagation();
-    this.setState({ value: event.target.value });
-  }
-
-  onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    event.stopPropagation();
+  onKeyUp(event: React.KeyboardEvent<HTMLInputElement>) {
     event.preventDefault();
+    event.stopPropagation();
+
     if (event.keyCode === 13) {
+      // "enter"
       this.finishEditing();
+    } else if (event.keyCode === 27) {
+      // "esc"
+      this.cancelEditing();
     }
   }
 
   renderStatic() {
     return (
       <span
-        {...this.props}
+        className={cx('Editable-span', this.props.className)}
         onDoubleClick={() => this.startEditing()}
       >
         {this.props.value}
@@ -66,7 +66,7 @@ export class Editable extends React.Component<EditableProps & React.HTMLAttribut
       if (this._elem) {
         this._elem.focus();
         if (this._elem.setSelectionRange) {
-          this._elem.setSelectionRange(0, this._elem.value.length);
+          this._elem.setSelectionRange(0, this._elem.value.length, 'forward');
         }
       }
     }
@@ -75,12 +75,11 @@ export class Editable extends React.Component<EditableProps & React.HTMLAttribut
   renderEditable() {
     return (
       <input
-        {...this.props}
+        className={cx('Editable-input', this.props.className)}
         ref={(elem) => this._elem = elem!}
         type="text"
-        value={this.state.value}
-        onChange={(event) => this.updateValue(event)}
-        onKeyDown={(event) => this.onKeyDown(event)}
+        defaultValue={this.props.value}
+        onKeyUp={(event) => this.onKeyUp(event)}
         onBlur={() => this.cancelEditing()}
       />
     );

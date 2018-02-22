@@ -1,4 +1,7 @@
 .Topbar {
-  background-color: #222 !important;
   color: #eee;
+}
+
+.Topbar-link i {
+  padding-right: 8px;
 }

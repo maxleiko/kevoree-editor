@@ -202,6 +202,9 @@ declare module 'kevoree-library' {
   export interface Component extends Instance<Component, Node> {
     provided: KList<Port>;
     required: KList<Port>;
+
+    addProvided(port: Port): void;
+    addRequired(port: Port): void;
   }
   
   export interface Port extends Named<Port, Component> {

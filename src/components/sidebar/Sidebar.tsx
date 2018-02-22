@@ -15,8 +15,12 @@ interface SidebarProps {
   registryService?: RegistryService;
 }
 
+interface SidebarState {
+  loadAll: boolean;
+}
+
 @inject('kevoreeService', 'registryService')
-export class Sidebar extends React.Component<SidebarProps> {
+export class Sidebar extends React.Component<SidebarProps, SidebarState> {
 
   private _listener: kevoree.KevoreeModelListener = {
     elementChanged: (event) => {
@@ -25,6 +29,18 @@ export class Sidebar extends React.Component<SidebarProps> {
       }
     }
   };
+
+  constructor(props: SidebarProps) {
+    super(props);
+    this.state = { loadAll: false };
+  }
+
+  loadAllNamespaces() {
+    this.props.registryService!.namespaces()
+      .then(() => {
+        this.setState({ loadAll: true });
+      });
+  }
 
   componentDidMount() {
     const { kevoreeService, registryService } = this.props;
@@ -42,10 +58,29 @@ export class Sidebar extends React.Component<SidebarProps> {
     if (namespaces.length === 0) {
       return <span className="Sidebar-content-empty">No result</span>;
     } else {
-      return this.props.kevoreeService!.namespaces.map((ns) => (
-        <SidebarGroup key={ns.name} namespace={ns} />
-      ));
+      return this.props.kevoreeService!.namespaces
+        .sort((ns0, ns1) => {
+          if (ns0.name === 'kevoree') { return -1; }
+          if (ns0.name > ns1.name) { return 1; }
+          if (ns1.name > ns0.name) { return -1; }
+          return 0;
+        })
+        .map((ns) => (
+          <SidebarGroup key={ns.name} namespace={ns} />
+        ));
     }
+  }
+
+  renderLoadAll() {
+    // TODO change that with a "reload from registry" feature
+    if (!this.state.loadAll) {
+      return (
+        <div>
+          <a href="#" onClick={() => this.loadAllNamespaces()}>Load all namespaces</a>
+        </div>
+      );
+    }
+    return null;
   }
 
   render() {
@@ -55,6 +90,7 @@ export class Sidebar extends React.Component<SidebarProps> {
         <div className="Sidebar-content">
           <Scrollbars>
             {this.renderContent()}
+            {this.renderLoadAll()}
           </Scrollbars>
         </div>
       </div>

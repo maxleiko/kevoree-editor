@@ -1,3 +1,5 @@
+const CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
 class RGBColor {
 
   readonly red = randomInt(0, 256);
@@ -25,4 +27,12 @@ export function randomInt(min: number, max: number) {
  */
 export function randomColor() {
   return new RGBColor();
+}
+
+export function uid(length: number = 5) {
+  let _uid = '';
+  for (let i = 0; i < length; i++) {
+    _uid += CHARS.charAt(randomInt(0, CHARS.length));
+  }
+  return _uid;
 }

@@ -21,11 +21,6 @@ export abstract class AbstractModel extends NodeModel {
     this.height = height;
   }
 
-  setLocation(point: kwe.Point) {
-    this.x = point.x;
-    this.y = point.y;
-  }
-
   serialize() {
     return {
       ...super.serialize(),

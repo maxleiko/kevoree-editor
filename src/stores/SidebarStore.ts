@@ -2,7 +2,6 @@ import * as kevoree from 'kevoree-library';
 import { observable, computed, action, createTransformer, ITransformer } from 'mobx';
 
 import { isComponentType, isChannelType, isNodeType, isGroupType } from '../utils/kevoree';
-import { KevoreeService } from '../services/KevoreeService';
 
 export class SidebarStore {
 
@@ -14,7 +13,7 @@ export class SidebarStore {
 
   filteredTdefs: ITransformer<kevoree.TypeDefinition[], kevoree.TypeDefinition[]>; 
 
-  constructor(kevoreeService: KevoreeService) {
+  constructor() {
     this.filteredTdefs = createTransformer((tdefs: kevoree.TypeDefinition[]) => {
       return tdefs
         .filter((tdef) => {
@@ -29,7 +28,12 @@ export class SidebarStore {
           }
           return true;
         })
-        .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1);
+        .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1)
+        .sort((t0, t1) => {
+          if (t0.name > t1.name) { return 1; }
+          if (t1.name > t0.name) { return -1; }
+          return 0;
+        });
     });
   }
 

@@ -2,6 +2,8 @@ import * as React from 'react';
 import { DiagramEngine, DefaultPortModel, DefaultPortLabel } from 'storm-react-diagrams';
 import { KevoreeComponentModel } from './KevoreeComponentModel';
 
+import { Editable } from '../../components/editable';
+
 import './KevoreeComponentWidget.css';
 
 export interface KevoreeComponentWidgetProps {
@@ -23,8 +25,13 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
   render() {
     return (
       <div className="basic-node kevoree-component" style={{ background: this.props.node.color }}>
-        <div className="title">
-          <div className="name">{this.props.node.instance.name}: {this.props.node.instance.typeDefinition.name}</div>
+        <div className="header" style={{ backgroundColor: this.props.node.color }}>
+          <Editable
+            value={this.props.node.instance.name}
+            onCommit={(name) => this.props.node.instance.name = name}
+            className="name"
+          />
+          <span className="type">{this.props.node.instance.typeDefinition.name}</span>
         </div>
         <div className="ports">
           <div className="in">{this.props.node.getInPorts().map(this.generatePort.bind(this))}</div>

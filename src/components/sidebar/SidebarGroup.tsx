@@ -55,6 +55,10 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
   renderBody() {
     const tdefs = this.props.namespace.typeDefinitions.array;
     const filteredTdefs = this.props.sidebarStore!.filteredTdefs(tdefs);
+
+    if (tdefs.length === 0) {
+      return <span className="SidebarGroup-empty">Empty namespace</span>;
+    }
     
     if (filteredTdefs.length === 0) {
       return <span className="SidebarGroup-empty">No result</span>;
@@ -71,12 +75,17 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
 
   render() {
     const ns = this.props.namespace;
+    const tdefs = ns.typeDefinitions.array;
+    const filteredTdefs = this.props.sidebarStore!.filteredTdefs(tdefs);
 
     return (
       <div className="SidebarGroup">
         <div className="SidebarGroup-header" onClick={() => this.onToggle()}>
-          <i className="SidebarGroup-header-icon fa fa-th-list" />
-          <span className="SidebarGroup-header-title">{ns.name}</span>
+          <div>
+            <i className="SidebarGroup-header-icon fa fa-th-list" />
+            <span className="SidebarGroup-header-title">{ns.name}</span>
+          </div>
+          <span className="SidebarGroup-header-details">{filteredTdefs.length}/{tdefs.length}</span>
         </div>
         <Collapse className="SidebarGroup-body" isOpen={this.state.isOpen}>
           {this.renderBody()}
