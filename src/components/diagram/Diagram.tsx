@@ -2,12 +2,12 @@ import * as React from 'react';
 import { DiagramWidget, BaseAction, DiagramModel } from 'storm-react-diagrams';
 import { observer, inject } from 'mobx-react';
 import * as kevoree from 'kevoree-library';
+import { ITypeDefinition } from 'kevoree-registry-client';
 
 import { KevoreeService } from '../../services/KevoreeService';
 import { Hoverlay } from '../hoverlay';
-import { DND_ITEM } from '../../utils/constants';
+import { DND_ITEM, DIAGRAM_DEFAULT_ZOOM } from '../../utils/constants';
 import { distributeElements } from '../../utils/dagreify';
-
 import { DiagramOverlay, OverlayIcon } from '../diagram-overlay';
 
 import './Diagram.css';
@@ -35,8 +35,8 @@ export class Diagram extends React.Component<DiagramProps> {
   onDrop(event: React.DragEvent<HTMLElement>) {
     try {
       const point = this.props.kevoreeService!.diagram.getRelativeMousePoint(event);
-      const tdefPath = event.dataTransfer.getData(DND_ITEM);
-      this.props.kevoreeService!.createInstance(tdefPath, point);
+      const tdef: ITypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
+      this.props.kevoreeService!.createInstance(tdef, point);
     } catch (ignore) {/* noop */}
   }
 
@@ -50,19 +50,6 @@ export class Diagram extends React.Component<DiagramProps> {
     // tslint:disable-next-line
     console.log('Diagram.onActionStopped', action);
     return true;
-  }
-
-  autoLayout() {
-    const model = this.props.kevoreeService!.diagram.getDiagramModel();
-    const serialized = model.serializeDiagram();
-    // tslint:disable-next-line
-    console.log(serialized);
-    const distributedSerializedDiagram = distributeElements(serialized);
-    // deserialize the model
-    let deSerializedModel = new DiagramModel();
-    deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, this.props.kevoreeService!.diagram);
-    this.props.kevoreeService!.diagram.setDiagramModel(deSerializedModel);
-    this.props.kevoreeService!.diagram.repaintCanvas();
   }
 
   zoomIn() {
@@ -81,9 +68,22 @@ export class Diagram extends React.Component<DiagramProps> {
     this.props.kevoreeService!.diagram.zoomToFit();
   }
 
+  autoLayout() {
+    const model = this.props.kevoreeService!.diagram.getDiagramModel();
+    const serialized = model.serializeDiagram();
+    // tslint:disable-next-line
+    console.log(serialized);
+    const distributedSerializedDiagram = distributeElements(serialized);
+    // deserialize the model
+    let deSerializedModel = new DiagramModel();
+    deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, this.props.kevoreeService!.diagram);
+    this.props.kevoreeService!.diagram.setDiagramModel(deSerializedModel);
+    this.props.kevoreeService!.diagram.repaintCanvas();
+  }
+
   componentDidMount() {
     const kevoreeService = this.props.kevoreeService!;
-    kevoreeService.diagram.getDiagramModel().setZoomLevel(150);
+    kevoreeService.diagram.getDiagramModel().setZoomLevel(DIAGRAM_DEFAULT_ZOOM);
     kevoreeService.model.addModelElementListener(this._listener);
   }
 
@@ -115,6 +115,7 @@ export class Diagram extends React.Component<DiagramProps> {
             inverseZoom={true}
             allowLooseLinks={false}
             deleteKeys={[46]}
+            smartRouting={true}
             actionStartedFiring={(action) => this.onActionStarted(action)}
             actionStoppedFiring={(action) => this.onActionStopped(action)}
           />

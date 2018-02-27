@@ -1,10 +1,10 @@
 import * as kevoree from 'kevoree-library';
 import * as Kotlin from 'kevoree-kotlin';
-import * as kRegistry from 'kevoree-registry-client';
 import * as _ from 'lodash';
 import { DiagramEngine, DiagramModel } from 'storm-react-diagrams';
 import { toast } from 'react-toastify';
 import { observable, computed, action } from 'mobx';
+import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
 import { isComponentType, isNodeType, isChannelType, isGroupType, isTruish } from '../utils/kevoree';
 import { KevoreeNodeFactory } from '../widgets/node';
@@ -15,6 +15,7 @@ import { KevoreeNodeModel } from '../widgets/node';
 import { KevoreeComponentModel } from '../widgets/component';
 import { KevoreeChannelModel } from '../widgets/channel';
 import { KevoreeGroupModel } from '../widgets/group';
+import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
 
 export class KevoreeService {
   
@@ -41,19 +42,16 @@ export class KevoreeService {
   }
 
   createInstance(
-    tdef: kevoree.TypeDefinition | string,
+    rTdef: ITypeDefinition,
     point: kwe.Point = { x: 100, y: 100 },
     container: kevoree.Model | kevoree.Node = this.model
   ) {
-    if (typeof tdef === 'string') {
-      tdef = this._model.findByPath<kevoree.TypeDefinition>(tdef as string);
-    }
-
+    const tdef: kevoree.TypeDefinition = this.findOrCreateTypeDefinition(rTdef);
     const diagramModel = this._diagram.getDiagramModel();
 
     if (this._nodeView) {
       if (isComponentType(tdef)) {
-        const uiComp = this.createComponent(<kevoree.ComponentType> tdef, this._nodeView.instance);
+        const uiComp = this.createComponent(<kevoree.ComponentType> tdef, this._nodeView.instance!);
         uiComp.setPosition(point.x, point.y);
         diagramModel.addNode(uiComp);
         this._nodeView.addComponent(uiComp);
@@ -73,8 +71,9 @@ export class KevoreeService {
           .filter((model) => model instanceof KevoreeNodeModel);
         if (nodes.length > 0) {
           nodes.map((node: KevoreeNodeModel) => {
-            const comp = this.createComponent(<kevoree.ComponentType> tdef, node.instance);
-            node.addComponent(comp);
+            const uiComp = this.createComponent(<kevoree.ComponentType> tdef, node.instance!);
+            uiComp.setPosition(100, 100);
+            node.addComponent(uiComp);
           });
         } else {
           toast.error('Components must be added in Nodes');
@@ -97,7 +96,7 @@ export class KevoreeService {
     }
   }
 
-  updateNamespaces(nss: kRegistry.INamespace[]) {
+  updateNamespaces(nss: INamespace[]) {
     const newNamespaces = new Kotlin.ArrayList<kevoree.Namespace>();
     nss
       .filter((ns) => this._model.findPackagesByID(ns.name) === null)
@@ -109,7 +108,7 @@ export class KevoreeService {
     }
   }
 
-  updateTypeDefinitions(namespace: string, rTdefs: kRegistry.ITypeDefinition[]) {
+  updateTypeDefinitions(namespace: string, rTdefs: ITypeDefinition[]) {
     const newTdefs = new Kotlin.ArrayList<kevoree.TypeDefinition>();
 
     // create namespace if necessary
@@ -147,11 +146,9 @@ export class KevoreeService {
     this._nodeView = node;
     this._previousModel = this._diagram.getDiagramModel();
     const newModel = new DiagramModel();
-    newModel.setZoomLevel(150);
-    node.instance.components.array.forEach((comp) => {
-      const uiComp = new KevoreeComponentModel(comp);
-      newModel.addNode(uiComp);
-    });
+    newModel.setZoomLevel(DIAGRAM_DEFAULT_ZOOM);
+    node.instance!.components.array
+      .forEach((comp) => newModel.addNode(new KevoreeComponentModel(comp)));
     this._diagram.setDiagramModel(newModel);
     this._diagram.repaintCanvas();
   }
@@ -167,6 +164,16 @@ export class KevoreeService {
 
   @computed get nodeView() {
     return this._nodeView;
+  }
+
+  private findOrCreateTypeDefinition(rTdef: ITypeDefinition) {
+    const path = `/packages[${rTdef.namespace!}]/typeDefinitions[name=${rTdef.name},version=${rTdef.version}]`;
+    let tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
+    if (!tdef) {
+      this.updateTypeDefinitions(rTdef.namespace!, [rTdef]);
+      tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
+    }
+    return tdef;
   }
 
   private createComponent(tdef: kevoree.ComponentType, container: kevoree.Node) {
@@ -288,6 +295,8 @@ export class KevoreeService {
         uiNode.addComponent(uiComp);
       });
     });
+
+    this._diagram.repaintCanvas();
   }
 
   get model() {

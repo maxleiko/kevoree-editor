@@ -1,34 +1,26 @@
 import * as React from 'react';
-import { inject } from 'mobx-react';
-import * as kevoree from 'kevoree-library';
+import { observer, inject } from 'mobx-react';
 import { Scrollbars } from 'react-custom-scrollbars';
 
+import { SidebarStore } from '../../stores/SidebarStore';
 import { KevoreeService } from '../../services/KevoreeService';
-import { RegistryService } from '../../services/RegistryService';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarGroup } from './SidebarGroup';
 
 import './Sidebar.css';
 
 interface SidebarProps {
+  sidebarStore?: SidebarStore;
   kevoreeService?: KevoreeService;
-  registryService?: RegistryService;
 }
 
 interface SidebarState {
   loadAll: boolean;
 }
 
-@inject('kevoreeService', 'registryService')
+@inject('sidebarStore', 'kevoreeService')
+@observer
 export class Sidebar extends React.Component<SidebarProps, SidebarState> {
-
-  private _listener: kevoree.KevoreeModelListener = {
-    elementChanged: (event) => {
-      if (event.elementAttributeName === 'packages') {
-        this.forceUpdate();
-      }
-    }
-  };
 
   constructor(props: SidebarProps) {
     super(props);
@@ -36,37 +28,25 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
   }
 
   loadAllNamespaces() {
-    this.props.registryService!.namespaces()
+    this.props.sidebarStore!.fetchNamespaces()
       .then(() => {
         this.setState({ loadAll: true });
       });
   }
 
   componentDidMount() {
-    const { kevoreeService, registryService } = this.props;
-    kevoreeService!.model.addModelElementListener(this._listener);
-    registryService!.namespace('kevoree');
-  }
-
-  componentWillUnmount() {
-    this.props.kevoreeService!.model.removeModelElementListener(this._listener);
+    this.props.sidebarStore!.fetchNamespace('kevoree');
   }
 
   renderContent() {
-    const namespaces = this.props.kevoreeService!.namespaces;
+    const { namespaces, namespacesMap } = this.props.sidebarStore!;
 
     if (namespaces.length === 0) {
       return <span className="Sidebar-content-empty">No result</span>;
     } else {
-      return this.props.kevoreeService!.namespaces
-        .sort((ns0, ns1) => {
-          if (ns0.name === 'kevoree') { return -1; }
-          if (ns0.name > ns1.name) { return 1; }
-          if (ns1.name > ns0.name) { return -1; }
-          return 0;
-        })
+      return namespaces
         .map((ns) => (
-          <SidebarGroup key={ns.name} namespace={ns} />
+          <SidebarGroup key={ns.name} store={namespacesMap.get(ns.name)!} />
         ));
     }
   }

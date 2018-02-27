@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { DiagramEngine, DefaultPortLabel, DefaultPortModel } from 'storm-react-diagrams';
-import * as cx from 'classnames';
 
 import { KevoreeChannelModel } from './KevoreeChannelModel';
 
@@ -35,11 +34,11 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
     return (
       <div
         ref={(elem) => this.elem = elem!}
-        className={cx('basic-node', 'kevoree-channel')}
+        className="kevoree-channel"
         style={{ background: this.props.node.color }}
       >
         <div className="title">
-          <div className="name">{this.props.node.instance.name}: {this.props.node.instance.typeDefinition.name}</div>
+          <div className="name">{this.props.node.instance!.name}: {this.props.node.instance!.typeDefinition.name}</div>
         </div>
         <div className="ports">
           <div className="in">{this.props.node.getInPorts().map((port) => this.generatePort(port))}</div>

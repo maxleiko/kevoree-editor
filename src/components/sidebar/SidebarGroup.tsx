@@ -1,37 +1,25 @@
 import * as React from 'react';
-import * as kevoree from 'kevoree-library';
 import { inject, observer } from 'mobx-react';
 import { Collapse } from 'reactstrap';
 
-import { SidebarStore } from '../../stores/SidebarStore';
+import { SidebarGroupStore } from '../../stores/SidebarGroupStore';
 import { KevoreeService } from '../../services/KevoreeService';
-import { RegistryService } from '../../services/RegistryService';
 import { SidebarItem } from './SidebarItem';
 
 import './SidebarGroup.css';
 
 export interface SidebarGroupProps {
-  namespace: kevoree.Namespace;
-  sidebarStore?: SidebarStore;
+  store: SidebarGroupStore;
   kevoreeService?: KevoreeService;
-  registryService?: RegistryService;
 }
 
 interface SidebarGroupState {
   isOpen: boolean;
 }
 
-@inject('sidebarStore', 'kevoreeService', 'registryService')
+@inject('kevoreeService')
 @observer
 export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGroupState> {
-
-  private _listener: kevoree.KevoreeModelListener = {
-    elementChanged: (event) => {
-      if (event.elementAttributeName === 'typeDefinitions') {
-        this.forceUpdate();
-      }
-    }
-  };
 
   constructor(props: SidebarGroupProps) {
     super(props);
@@ -43,18 +31,11 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
   }
 
   componentDidMount() {
-    const { registryService } = this.props;
-    this.props.namespace.addModelElementListener(this._listener);
-    registryService!.tdefs(this.props.namespace.name);
-  }
-
-  componentWillUnmount() {
-    this.props.namespace.removeModelElementListener(this._listener);
+    this.props.store!.fetchTdefs();
   }
 
   renderBody() {
-    const tdefs = this.props.namespace.typeDefinitions.array;
-    const filteredTdefs = this.props.sidebarStore!.filteredTdefs(tdefs);
+    const { tdefs, filteredTdefs } = this.props.store!;
 
     if (tdefs.length === 0) {
       return <span className="SidebarGroup-empty">Empty namespace</span>;
@@ -66,7 +47,7 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
 
     return filteredTdefs.map((tdef) => (
       <SidebarItem
-        key={tdef.path()}
+        key={`${tdef.namespace!}.${tdef.name}`}
         tdef={tdef}
         onDblClick={() => this.props.kevoreeService!.createInstance(tdef)}
       />
@@ -74,16 +55,14 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
   }
 
   render() {
-    const ns = this.props.namespace;
-    const tdefs = ns.typeDefinitions.array;
-    const filteredTdefs = this.props.sidebarStore!.filteredTdefs(tdefs);
+    const { namespace, tdefs, filteredTdefs } = this.props.store!;
 
     return (
       <div className="SidebarGroup">
         <div className="SidebarGroup-header" onClick={() => this.onToggle()}>
           <div>
             <i className="SidebarGroup-header-icon fa fa-th-list" />
-            <span className="SidebarGroup-header-title">{ns.name}</span>
+            <span className="SidebarGroup-header-title">{namespace.name}</span>
           </div>
           <span className="SidebarGroup-header-details">{filteredTdefs.length}/{tdefs.length}</span>
         </div>

@@ -1,7 +1,8 @@
-import * as kevoree from 'kevoree-library';
-import { observable, computed, action, createTransformer, ITransformer } from 'mobx';
+import { INamespace } from 'kevoree-registry-client';
+import { observable, computed, action } from 'mobx';
 
-import { isComponentType, isChannelType, isNodeType, isGroupType } from '../utils/kevoree';
+import { SidebarGroupStore } from './SidebarGroupStore';
+import { RegistryService } from '../services/RegistryService';
 
 export class SidebarStore {
 
@@ -10,31 +11,31 @@ export class SidebarStore {
   @observable private _compFilter = true;
   @observable private _chanFilter = true;
   @observable private _groupFilter = true;
+  @observable private _namespaces: Map<string, SidebarGroupStore> = new Map();
+  @observable private _error: any = null;
 
-  filteredTdefs: ITransformer<kevoree.TypeDefinition[], kevoree.TypeDefinition[]>; 
+  constructor(private registryService: RegistryService) {}
 
-  constructor() {
-    this.filteredTdefs = createTransformer((tdefs: kevoree.TypeDefinition[]) => {
-      return tdefs
-        .filter((tdef) => {
-          if (isNodeType(tdef)) {
-            return this._nodeFilter;
-          } else if (isComponentType(tdef)) {
-            return this._compFilter;
-          } else if (isChannelType(tdef)) {
-            return this._chanFilter;
-          } else if (isGroupType(tdef)) {
-            return this._groupFilter;
-          }
-          return true;
-        })
-        .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1)
-        .sort((t0, t1) => {
-          if (t0.name > t1.name) { return 1; }
-          if (t1.name > t0.name) { return -1; }
-          return 0;
-        });
-    });
+  @action fetchNamespaces() {
+    return this.registryService.namespaces()
+      .then(this.fetchNamespacesSuccess, this.fetchError);
+  }
+
+  @action.bound fetchNamespacesSuccess(namespaces: INamespace[]) {
+    namespaces.forEach((ns) => this.fetchNamespaceSuccess(ns));
+  }
+
+  @action fetchNamespace(name: string) {
+    return this.registryService.namespace(name)
+      .then(this.fetchNamespaceSuccess, this.fetchError);
+  }
+
+  @action.bound fetchNamespaceSuccess(namespace: INamespace) {
+    this._namespaces.set(namespace.name, new SidebarGroupStore(this, namespace, this.registryService));
+  }
+
+  @action.bound fetchError(err: any) {
+    this._error = err;
   }
 
   @action onChangeNameFilter(event: React.ChangeEvent<HTMLInputElement>) {
@@ -57,6 +58,21 @@ export class SidebarStore {
     this._compFilter = event.target.checked;
   }
 
+  @computed get namespaces() {
+    return Array.from(this._namespaces.values())
+      .map((store) => store.namespace)
+      .sort((ns0, ns1) => {
+        if (ns0.name === 'kevoree') { return -1; }
+        if (ns0.name > ns1.name) { return 1; }
+        if (ns1.name > ns0.name) { return -1; }
+        return 0;
+      });
+  }
+
+  @computed get namespacesMap() {
+    return this._namespaces;
+  }
+
   @computed get nameFilter() {
     return this._nameFilter;
   }
@@ -75,5 +91,9 @@ export class SidebarStore {
 
   @computed get groupFilter() {
     return this._groupFilter;
+  }
+
+  @computed get error() {
+    return this._error;
   }
 }

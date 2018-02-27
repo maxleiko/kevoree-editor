@@ -1,27 +1,16 @@
 import * as kRegistry from 'kevoree-registry-client';
 
-import { KevoreeService } from './KevoreeService';
-
 export class RegistryService {
 
-  private _kevoreeService: KevoreeService;
-
-  constructor(kevoreeService: KevoreeService) {
-    this._kevoreeService = kevoreeService;
-  }
-
   namespace(name: string) {
-    return kRegistry.namespace.get(name)
-      .then((namespace) => this._kevoreeService.updateNamespaces([namespace]));
+    return kRegistry.namespace.get(name);
   }
 
   namespaces() {
-    return kRegistry.namespace.all()
-      .then((namespaces) => this._kevoreeService.updateNamespaces(namespaces));
+    return kRegistry.namespace.all();
   }
 
   tdefs(namespace: string) {
-    return kRegistry.tdef.getLatestsByNamespace(namespace)
-      .then((tdefs) => this._kevoreeService.updateTypeDefinitions(namespace, tdefs));
+    return kRegistry.tdef.getLatestsByNamespace(namespace);
   }
 }

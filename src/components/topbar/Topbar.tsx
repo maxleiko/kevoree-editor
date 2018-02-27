@@ -48,7 +48,7 @@ export class Topbar extends React.Component<TopbarProps, TopbarState> {
 
     return (
       <Navbar className="Topbar" color="faded" dark={true} expand="md">
-        <NavbarBrand>{node ? `Node View: ${node.instance.name}` : 'Model View'}</NavbarBrand>
+        <NavbarBrand>{node ? `Node View: ${node.instance!.name}` : 'Model View'}</NavbarBrand>
         <NavbarToggler onClick={() => this.toggle()} />
         <Collapse isOpen={this.state.isOpen} navbar={true}>
           <Nav className="ml-auto" navbar={true}>

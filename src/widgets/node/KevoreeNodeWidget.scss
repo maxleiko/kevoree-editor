@@ -1,0 +1,45 @@
+.srd-node--selected {
+  .kevoree-node {
+    border: 1px solid rgba(0, 0, 0, 0.8);
+  }
+}
+
+.kevoree-node {
+  border: 1px solid black;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.2);
+  outline-width: 0;
+  display: flex;
+  flex-flow: column;
+  min-width: 180px;
+  min-height: 100px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+
+    .name {
+      margin-right: 10px;
+      color: #eee;
+      font-weight: bold;
+    }
+  }
+
+  .body {
+    flex-grow: 1;
+    margin: 2px;
+    color: #eee;
+    background-color: transparent;
+
+    .components {
+      list-style-type: none;
+      padding-left: 5px;
+      margin: 0;
+    }
+  }
+}

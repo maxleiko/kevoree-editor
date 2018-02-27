@@ -194,9 +194,11 @@ declare module 'kevoree-library' {
     typeDefinition: TypeDefinition;
     dictionary: Dictionary;
     fragmentDictionary: KList<FragmentDictionary>;
-    metaData: KList<Value<T>>;
+    metaData: KList<Value<Instance<T, P>>>;
     findFragmentDictionaryByID(name: string): FragmentDictionary;
     addFragmentDictionary(dic: FragmentDictionary): void;
+    findMetaDataByID(id: string): Value<Instance<T, P>> | null;
+    addMetaData(metaData: Value<Instance<T, P>>): void;
   }
   
   export interface Component extends Instance<Component, Node> {

@@ -1,14 +1,12 @@
 import * as kevoree from 'kevoree-library';
-import { DefaultPortModel } from 'storm-react-diagrams';
+import { DefaultPortModel, DiagramEngine } from 'storm-react-diagrams';
 
 import { AbstractModel } from '../AbstractModel';
 
-export class KevoreeChannelModel extends AbstractModel {
-
-  instance: kevoree.Channel;
+export class KevoreeChannelModel extends AbstractModel<kevoree.Channel> {
 
   constructor(instance?: kevoree.Channel) {
-    super('kevoree-channel', instance ? instance.typeDefinition.name : undefined);
+    super('kevoree-channel', instance, instance ? instance.typeDefinition.name : undefined);
     if (instance) {
       this.instance = instance;
       this.addPort(new DefaultPortModel(true, 'inputs'));
@@ -23,8 +21,8 @@ export class KevoreeChannelModel extends AbstractModel {
     };
   }
 
-  deSerialize(obj: any) {
-    super.deSerialize(obj);
+  deSerialize(obj: any, engine: DiagramEngine) {
+    super.deSerialize(obj, engine);
     this.instance = obj.instance;
   }
 }

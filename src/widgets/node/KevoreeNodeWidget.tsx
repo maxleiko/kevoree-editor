@@ -8,7 +8,7 @@ import { KevoreeService } from '../../services/KevoreeService';
 import { KevoreeNodeModel } from './KevoreeNodeModel';
 import { Editable } from '../../components/editable';
 
-import './KevoreeNodeWidget.css';
+import './KevoreeNodeWidget.scss';
 
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
@@ -41,8 +41,6 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   }
 
   onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    // tslint:disable-next-line
-    console.log('keyDown', event.keyCode);
     if (event.keyCode === 13) {
       this.openNodeView();
     }
@@ -52,11 +50,11 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
     this.props.node.setWidth(this._elem.getBoundingClientRect().width);
     this.props.node.setHeight(this._elem.getBoundingClientRect().height);
 
-    this.props.node.instance.addModelTreeListener(this._listener);
+    this.props.node.instance!.addModelTreeListener(this._listener);
   }
 
   componentWillUnmount() {
-    this.props.node.instance.removeModelTreeListener(this._listener);
+    this.props.node.instance!.removeModelTreeListener(this._listener);
   }
 
   render() {
@@ -64,22 +62,22 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
       <div
         tabIndex={0}
         ref={(elem) => this._elem = elem!}
-        className={cx('basic-node', 'kevoree-node', { droppable: this.state.canDrop })}
+        className={cx('kevoree-node', { droppable: this.state.canDrop })}
         onDoubleClick={() => this.openNodeView()}
         onKeyDown={(event) => this.onKeyDown(event)}
       >
         <div className="header" style={{ backgroundColor: this.props.node.color }}>
           <Editable
-            value={this.props.node.instance.name}
-            onCommit={(name) => this.props.node.instance.name = name}
+            value={this.props.node.instance!.name}
+            onCommit={(name) => this.props.node.instance!.name = name}
             className="name"
           />
-          <span className="type">{this.props.node.instance.typeDefinition.name}</span>
+          <span className="type">{this.props.node.instance!.typeDefinition.name}</span>
         </div>
         <div className="body">
           <ul className="components">
             {this.props.node.components.map((comp) => (
-              <li key={comp.instance.name}>{comp.instance.name}: {comp.instance.typeDefinition.name}</li>
+              <li key={comp.instance!.name}>{comp.instance!.name}: {comp.instance!.typeDefinition.name}</li>
             ))}
           </ul>
         </div>
