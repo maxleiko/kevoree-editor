@@ -16,6 +16,10 @@ body {
   flex-grow: 1;
 }
 
+.hide {
+  display: none;
+}
+
 .fade-in {
   opacity: 1;
   animation: fadeIn 0.2s linear;

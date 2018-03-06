@@ -1,31 +1,47 @@
 import * as dagre from 'dagre';
 import * as _ from 'lodash';
 
-function distributeGraph(model: any) {
-  let nodes = mapElements(model);
-  let edges = mapEdges(model);
-  let graph = new dagre.graphlib.Graph();
+import { DiagramModel } from 'storm-react-diagrams';
+
+export function distributeElements(model: DiagramModel) {
+  const graph = new dagre.graphlib.Graph();
   graph.setGraph({});
-  graph.setDefaultEdgeLabel(function() {
-    return {};
-  });
+  graph.setDefaultEdgeLabel(() => ({}));
+
+  // convert model elements to degre format
+  const nodes = mapElements(model);
+  const edges = mapEdges(model);
+
   // add elements to dagre graph
-  nodes.forEach((node: any) => {
+  nodes.forEach((node) => {
     graph.setNode(node.id, node.metadata);
   });
-  edges.forEach((edge: any) => {
+  edges.forEach((edge) => {
     if (edge.from && edge.to) {
       graph.setEdge(edge.from, edge.to);
     }
   });
+
   // auto-distribute
   dagre.layout(graph);
-  return graph.nodes().map((node) => graph.node(node));
+
+  // update model
+  graph.nodes()
+    .forEach((id) => {
+      const { x, y } = graph.node(id);
+      let mNode;
+      mNode = model.getNode(id);
+      if (mNode) {
+        // mNode is an AbstractModel
+        mNode.setPosition(x, y);
+        return;
+      }
+    });
 }
 
-function mapElements(model: any) {
+function mapElements(model: DiagramModel) {
   // dagre compatible format
-  return model.nodes.map((node: any) => ({
+  return _.map(model.nodes, (node) => ({
     id: node.id,
     metadata: {
       id: node.id,
@@ -35,29 +51,19 @@ function mapElements(model: any) {
   }));
 }
 
-function mapEdges(model: any) {
+function mapEdges(model: DiagramModel) {
   // returns links which connects nodes
   // we check that they are both "from" and "to" nodes in the model because sometimes links can be detached
-  return model.links
-    .map((link: any) => ({
-      from: link.source,
-      to: link.target
-    }))
-    .filter((item: any) => {
+  return _.map(model.links, (link) => {
+    return ({
+      from: link.getSourcePort().getParent().getID(),
+      to: link.getTargetPort().getParent().getID(),
+    });
+  })
+    .filter((item) => {
       return (
-        model.nodes.find((node: any) => node.id === item.from) &&
-        model.nodes.find((node: any) => node.id === item.to)
+        _.find(model.nodes, (node) => node.id === item.from) &&
+        _.find(model.nodes, (node) => node.id === item.to)
       );
     });
-}
-
-export function distributeElements(model: any) {
-  let clonedModel = _.cloneDeep(model);
-  let nodes = distributeGraph(clonedModel);
-  nodes.forEach((node) => {
-    let modelNode = clonedModel.nodes.find((item: any) => item.id === node.id);
-    modelNode.x = node.x;
-    modelNode.y = node.y;
-  });
-  return clonedModel;
 }

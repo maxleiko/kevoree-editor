@@ -1,7 +1,7 @@
-import { AppStore } from './AppStore';
 import { SidebarStore } from './SidebarStore';
+import { SelectionPanelStore } from './SelectionPanelStore';
 
 export default (services: any) => ({
-  appStore: new AppStore(),
   sidebarStore: new SidebarStore(services.registryService),
+  selectionPanelStore: new SelectionPanelStore(),
 });

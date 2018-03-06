@@ -1,0 +1,43 @@
+.kevoree-component {
+  color: #eee;
+  border: 2px solid black;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.2);
+  outline-width: 0;
+  display: flex;
+  flex-flow: column;
+  min-width: 160px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+
+    .name {
+      margin-right: 10px;
+      
+      font-weight: bold;
+    }
+  }
+
+  .ports {
+    display: flex;
+    justify-content: space-between;
+
+    .in .name { padding-left: 5px; }
+    .out .name { padding-right: 5px; }
+    .in, .out {
+      .port {
+        background-color: rgba(255, 255, 255, 0.4);
+      }
+
+      .port.srd-port--selected {
+        background-color: rgba(155, 245, 52, 0.4) !important;
+      }
+    }
+  }
+}

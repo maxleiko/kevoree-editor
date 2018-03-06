@@ -4,7 +4,6 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { AppStore } from './stores/AppStore';
 import { KevoreeService } from './services/KevoreeService';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
@@ -13,11 +12,10 @@ import { Diagram } from './components/diagram';
 import './App.css';
 
 interface AppProps {
-  appStore?: AppStore;
   kevoreeService?: KevoreeService;
 }
 
-@inject('appStore', 'kevoreeService')
+@inject('kevoreeService')
 @observer
 export default class App extends React.Component<AppProps> {
 
@@ -28,8 +26,8 @@ export default class App extends React.Component<AppProps> {
   };
 
   private hkActions = {
-    undo: () => this.props.appStore!.undo(),
-    redo: () => this.props.appStore!.redo(),
+    undo: () => toast.warn(<span><strong>undo:</strong> not implemented yet</span>),
+    redo: () => toast.warn(<span><strong>redo:</strong> not implemented yet</span>),
     modelView: () => this.props.kevoreeService!.openModelView(),
   };
 
@@ -49,7 +47,10 @@ export default class App extends React.Component<AppProps> {
           <Topbar />
           <Diagram />
         </div>
-        <ToastContainer position={toast.POSITION.TOP_RIGHT} className="Toastify" />
+        <ToastContainer
+          className="Toastify"
+          position={toast.POSITION.TOP_RIGHT}
+        />
       </div>
     );
   }

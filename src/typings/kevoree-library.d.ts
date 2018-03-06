@@ -114,7 +114,7 @@ declare module 'kevoree-library' {
 
   const m: Model;
 
-  export interface Model extends Klass<Model> {
+  export interface Model extends Klass {
     nodes: KList<Node>;
     groups: KList<Group>;
     hubs: KList<Channel>;
@@ -131,7 +131,7 @@ declare module 'kevoree-library' {
   }
 
   export interface KevoreeSerializer {
-    serialize(elem: Klass<any, any>): string;
+    serialize(elem: Klass<any>): string;
   }
 
   export interface KevoreeModelCompare {
@@ -171,10 +171,10 @@ declare module 'kevoree-library' {
     size(): number;
   }
 
-  export interface Klass<T, P = Klass<any, any>> {
+  export interface Klass<P = null> {
     path(): string;
     metaClassName(): string;
-    select<T>(query: string): KList<T>;
+    select<T = Klass<any>>(query: string): KList<T>;
     eContainer(): P;
     addModelElementListener(listener: KevoreeModelListener): void;
     removeModelElementListener(listener: KevoreeModelListener): void;
@@ -184,7 +184,7 @@ declare module 'kevoree-library' {
     removeAllModelTreeListeners(): void;
   }
   
-  export interface Named<T, P> extends Klass<T, P> {
+  export interface Named<T, P> extends Klass<P> {
     name: string;
     withName(name: string): T;
   }
@@ -242,7 +242,7 @@ declare module 'kevoree-library' {
     values: KList<Value<NetworkInfo>>;
   }
   
-  export interface Dictionary extends Klass<Dictionary, Instance> {
+  export interface Dictionary extends Klass<Instance> {
     values: KList<Value<Dictionary>>;
     withGenerated_KMF_ID(id: string): Dictionary;
     findValuesByID(name: string): Value<Dictionary>;
@@ -291,7 +291,7 @@ declare module 'kevoree-library' {
     attributes: KList<DictionaryAttribute>;
   }
 
-  export interface Repository extends Klass<Repository, Model> {
+  export interface Repository extends Klass<Model> {
     url: string;
   }
   

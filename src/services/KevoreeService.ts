@@ -7,14 +7,12 @@ import { observable, computed, action } from 'mobx';
 import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
 import { isComponentType, isNodeType, isChannelType, isGroupType, isTruish } from '../utils/kevoree';
-import { KevoreeNodeFactory } from '../widgets/node';
-import { KevoreeComponentFactory } from '../widgets/component';
-import { KevoreeChannelFactory } from '../widgets/channel';
-import { KevoreeGroupFactory } from '../widgets/group';
-import { KevoreeNodeModel } from '../widgets/node';
-import { KevoreeComponentModel } from '../widgets/component';
-import { KevoreeChannelModel } from '../widgets/channel';
-import { KevoreeGroupModel } from '../widgets/group';
+import {
+  KevoreeNodeFactory, KevoreeComponentFactory, KevoreeChannelFactory, KevoreeGroupFactory
+} from '../components/diagram/factories';
+import {
+  KevoreeNodeModel, KevoreeComponentModel, KevoreeChannelModel, KevoreeGroupModel
+} from '../components/diagram/models';
 import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
 
 export class KevoreeService {
@@ -37,8 +35,10 @@ export class KevoreeService {
     this._diagram.setDiagramModel(new DiagramModel());
     this._factory.root(this._model);
 
-    // tslint:disable-next-line
-    window['model'] = this._model;
+    if (process.env.ENV !== 'production') {
+      // tslint:disable-next-line
+      window['model'] = this._model;
+    }
   }
 
   createInstance(
@@ -155,6 +155,7 @@ export class KevoreeService {
 
   @action openModelView() {
     if (this._previousModel) {
+      this._previousModel.clearSelection();
       this._diagram.setDiagramModel(this._previousModel);
       this._diagram.repaintCanvas();
       this._nodeView = null;

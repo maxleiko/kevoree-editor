@@ -1,24 +1,32 @@
 import * as React from 'react';
-import { DiagramWidget, BaseAction, DiagramModel } from 'storm-react-diagrams';
+import { DiagramWidget, BaseAction, MoveItemsAction, MoveCanvasAction } from 'storm-react-diagrams';
 import { observer, inject } from 'mobx-react';
 import * as kevoree from 'kevoree-library';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
+import { AbstractModel } from './models/AbstractModel';
 import { KevoreeService } from '../../services/KevoreeService';
 import { Hoverlay } from '../hoverlay';
 import { DND_ITEM, DIAGRAM_DEFAULT_ZOOM } from '../../utils/constants';
 import { distributeElements } from '../../utils/dagreify';
 import { DiagramOverlay, OverlayIcon } from '../diagram-overlay';
+import { SelectionPanel } from '../selection-panel';
+import { SelectionPanelStore } from '../../stores/SelectionPanelStore';
 
 import './Diagram.css';
 
-interface DiagramProps {
+export interface DiagramProps {
+  selectionPanelStore?: SelectionPanelStore;
   kevoreeService?: KevoreeService;
 }
 
-@inject('kevoreeService')
+interface DiagramState {
+  smartRouting: boolean; // TODO: move it to AppStore
+}
+
+@inject('selectionPanelStore', 'kevoreeService')
 @observer
-export class Diagram extends React.Component<DiagramProps> {
+export class Diagram extends React.Component<DiagramProps, DiagramState> {
 
   private _listener: kevoree.KevoreeModelListener = {
     elementChanged: (event) => {
@@ -32,6 +40,13 @@ export class Diagram extends React.Component<DiagramProps> {
     }
   };
 
+  constructor(props: DiagramProps) {
+    super(props);
+    this.state = {
+      smartRouting: true,
+    };
+  }
+
   onDrop(event: React.DragEvent<HTMLElement>) {
     try {
       const point = this.props.kevoreeService!.diagram.getRelativeMousePoint(event);
@@ -43,6 +58,14 @@ export class Diagram extends React.Component<DiagramProps> {
   onActionStarted(action: BaseAction) {
     // tslint:disable-next-line
     console.log('Diagram.onActionStarted', action);
+    if (action instanceof MoveItemsAction) {
+      const selection: AbstractModel<kevoree.Instance>[] = action.selectionModels
+        .filter((item) => item.model.hasOwnProperty('instance'))
+        .map((selModel) => selModel.model as AbstractModel<kevoree.Instance>);
+      this.props.selectionPanelStore!.setSelection(selection);
+    } else if (action instanceof MoveCanvasAction) {
+      this.props.selectionPanelStore!.clear();
+    }
     return true;
   }
 
@@ -69,16 +92,12 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   autoLayout() {
-    const model = this.props.kevoreeService!.diagram.getDiagramModel();
-    const serialized = model.serializeDiagram();
-    // tslint:disable-next-line
-    console.log(serialized);
-    const distributedSerializedDiagram = distributeElements(serialized);
-    // deserialize the model
-    let deSerializedModel = new DiagramModel();
-    deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, this.props.kevoreeService!.diagram);
-    this.props.kevoreeService!.diagram.setDiagramModel(deSerializedModel);
+    distributeElements(this.props.kevoreeService!.diagram.getDiagramModel());
     this.props.kevoreeService!.diagram.repaintCanvas();
+  }
+
+  smartRoutingToggle() {
+    this.setState({ smartRouting: !this.state.smartRouting });
   }
 
   componentDidMount() {
@@ -92,12 +111,15 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   generateOverlay() {
+    const smartRouting = `Smart routing: ${this.state.smartRouting ? 'on' : 'off'}`;
+
     return (
       <DiagramOverlay>
         <OverlayIcon name="Zoom in" onClick={() => this.zoomIn()} icon="fa fa-2x fa-search-plus" />
         <OverlayIcon name="Zoom out" onClick={() => this.zoomOut()} icon="fa fa-2x fa-search-minus" />
         <OverlayIcon name="Zoom to fit" onClick={() => this.zoomToFit()} icon="fa fa-2x fa-search" />
         <OverlayIcon name="Auto layout" onClick={() => this.autoLayout()} icon="fa fa-2x fa-th" />
+        <OverlayIcon name={smartRouting} onClick={() => this.smartRoutingToggle()} icon="fa fa-2x fa-sitemap" />
       </DiagramOverlay>
     );
   }
@@ -115,11 +137,12 @@ export class Diagram extends React.Component<DiagramProps> {
             inverseZoom={true}
             allowLooseLinks={false}
             deleteKeys={[46]}
-            smartRouting={true}
+            smartRouting={this.state.smartRouting}
             actionStartedFiring={(action) => this.onActionStarted(action)}
             actionStoppedFiring={(action) => this.onActionStopped(action)}
           />
         </Hoverlay>
+        <SelectionPanel />
       </div>
     );
   }

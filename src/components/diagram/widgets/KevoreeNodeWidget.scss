@@ -1,0 +1,39 @@
+.kevoree-node {
+  color: #eee;
+  border: 2px solid black;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.2);
+  outline-width: 0;
+  display: flex;
+  flex-flow: column;
+  min-width: 280px;
+  min-height: 150px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+
+    .name {
+      margin-right: 10px;
+      
+      font-weight: bold;
+    }
+  }
+
+  .body {
+    flex-grow: 1;
+    margin: 2px;
+    background-color: transparent;
+
+    .components {
+      list-style-type: none;
+      padding-left: 5px;
+      margin: 0;
+    }
+  }
+}
