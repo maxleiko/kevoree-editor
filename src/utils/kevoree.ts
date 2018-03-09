@@ -1,5 +1,5 @@
 import * as kevoree from 'kevoree-library';
-import { KEVOREE_CHANNEL, KEVOREE_COMPONENT, KEVOREE_GROUP, KEVOREE_NODE } from './constants';
+import { KEVOREE_CHANNEL, KEVOREE_COMPONENT, KEVOREE_GROUP, KEVOREE_NODE, KWE_SELECTED } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
 export function isComponentType(tdef: kevoree.TypeDefinition) {
@@ -16,6 +16,14 @@ export function isGroupType(tdef: kevoree.TypeDefinition) {
 
 export function isNodeType(tdef: kevoree.TypeDefinition) {
   return tdef.metaClassName().startsWith('org.kevoree.NodeType');
+}
+
+export function isNode(e: kevoree.Klass<any>) {
+  return e.metaClassName().startsWith('org.kevoree.ContainerNode');
+}
+
+export function isModel(e: kevoree.Klass<any>) {
+  return e.metaClassName().startsWith('org.kevoree.ContainerRoot');
 }
 
 export function getType(tdef: kevoree.TypeDefinition) {
@@ -44,5 +52,13 @@ export function isTruish(val: any): boolean {
     return val;
   }
 
+  return false;
+}
+
+export function isSelected(instance: kevoree.Instance): boolean {
+  const sel = instance.findMetaDataByID(KWE_SELECTED);
+  if (sel) {
+    return isTruish(sel.value);
+  }
   return false;
 }

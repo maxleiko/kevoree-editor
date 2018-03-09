@@ -14,28 +14,12 @@ interface SidebarProps {
   kevoreeService?: KevoreeService;
 }
 
-interface SidebarState {
-  loadAll: boolean;
-}
-
 @inject('sidebarStore', 'kevoreeService')
 @observer
-export class Sidebar extends React.Component<SidebarProps, SidebarState> {
-
-  constructor(props: SidebarProps) {
-    super(props);
-    this.state = { loadAll: false };
-  }
-
-  loadAllNamespaces() {
-    this.props.sidebarStore!.fetchNamespaces()
-      .then(() => {
-        this.setState({ loadAll: true });
-      });
-  }
+export class Sidebar extends React.Component<SidebarProps> {
 
   componentDidMount() {
-    this.props.sidebarStore!.fetchNamespace('kevoree');
+    this.props.sidebarStore!.fetchNamespaces();
   }
 
   renderContent() {
@@ -51,18 +35,6 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
     }
   }
 
-  renderLoadAll() {
-    // TODO change that with a "reload from registry" feature
-    if (!this.state.loadAll) {
-      return (
-        <div>
-          <a href="#" onClick={() => this.loadAllNamespaces()}>Load all namespaces</a>
-        </div>
-      );
-    }
-    return null;
-  }
-
   render() {
     return (
       <div className="Sidebar">
@@ -70,7 +42,6 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
         <div className="Sidebar-content">
           <Scrollbars>
             {this.renderContent()}
-            {this.renderLoadAll()}
           </Scrollbars>
         </div>
       </div>

@@ -122,7 +122,7 @@ declare module 'kevoree-library' {
     packages: KList<Namespace>;
     withGenerated_KMF_ID(s: string | number): Model;
     findPackagesByID(id: string): Namespace;
-    findByPath<T>(path: string): T;
+    findByPath<T = Klass<any>>(path: string): T | null;
     addNodes(node: Node): void;
     addGroups(grp: Group): void;
     addHubs(channel: Channel): void;
@@ -182,6 +182,7 @@ declare module 'kevoree-library' {
     addModelTreeListener(listener: KevoreeModelListener): void;
     removeModelTreeListener(listener: KevoreeModelListener): void;
     removeAllModelTreeListeners(): void;
+    getModelElementListeners(): KList<KevoreeModelListener>;
   }
   
   export interface Named<T, P> extends Klass<P> {

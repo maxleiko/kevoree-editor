@@ -5,7 +5,7 @@ import { inferType } from '../../utils/kevoree';
 import { str2rgb } from '../../utils/colors';
 import { DND_ITEM } from '../../utils/constants';
 
-import './SidebarItem.css';
+import './SidebarItem.scss';
 
 export interface SidebarItemProps {
   tdef: ITypeDefinition;

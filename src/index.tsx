@@ -7,23 +7,32 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'storm-react-diagrams/dist/style.min.css';
 import './assets/font-awesome/css/font-awesome.min.css';
 
-import ErrorBoundary from './components/ErrorBoundary';
+import { KevoreeService, RegistryService, FileService } from './services';
+import { DiagramStore, SidebarStore, SelectionPanelStore } from './stores';
 import App from './App';
-import * as services from './services';
-import createStores from './stores';
 import registerServiceWorker from './registerServiceWorker';
 
 import './index.css';
 
 TinyConf.set('registry', { host: 'registry.kevoree.org', port: 443, ssl: true });
 
-const stores = createStores(services);
+// ==================== Injectables ======================
+const services = {
+  kevoreeService: new KevoreeService(),
+  fileService: new FileService(),
+  registryService: new RegistryService(),
+};
+
+const stores = {
+  sidebarStore: new SidebarStore(services.registryService),
+  diagramStore: new DiagramStore(services.kevoreeService),
+  selectionPanelStore: new SelectionPanelStore(),
+};
+// ========================================================
 
 ReactDOM.render(
-  <Provider {...stores} {...services}>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+  <Provider {...services} {...stores}>
+    <App />
   </Provider>,
   document.getElementById('root') as HTMLElement
 );

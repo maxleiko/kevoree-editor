@@ -1,33 +1,37 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
 import { Collapse } from 'reactstrap';
+import { toast } from 'react-toastify';
 
 import { SidebarGroupStore } from '../../stores/SidebarGroupStore';
+import { DiagramStore } from '../../stores/DiagramStore';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SidebarItem } from './SidebarItem';
 
 import './SidebarGroup.css';
+import { ITypeDefinition } from 'kevoree-registry-client';
 
 export interface SidebarGroupProps {
   store: SidebarGroupStore;
+  diagramStore?: DiagramStore;
   kevoreeService?: KevoreeService;
 }
 
-interface SidebarGroupState {
-  isOpen: boolean;
-}
-
-@inject('kevoreeService')
+@inject('kevoreeService', 'diagramStore')
 @observer
-export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGroupState> {
+export class SidebarGroup extends React.Component<SidebarGroupProps> {
 
   constructor(props: SidebarGroupProps) {
     super(props);
     this.state = { isOpen: true };
   }
 
-  onToggle() {
-    this.setState({ isOpen: !this.state.isOpen });
+  onCreateInstance(tdef: ITypeDefinition) {
+    try {
+      this.props.kevoreeService!.createInstance(tdef, this.props.diagramStore!.path);
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   componentDidMount() {
@@ -49,24 +53,24 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
       <SidebarItem
         key={`${tdef.namespace!}.${tdef.name}`}
         tdef={tdef}
-        onDblClick={() => this.props.kevoreeService!.createInstance(tdef)}
+        onDblClick={() => this.onCreateInstance(tdef)}
       />
     ));
   }
 
   render() {
-    const { namespace, tdefs, filteredTdefs } = this.props.store!;
+    const { namespace, tdefs, filteredTdefs, isOpen, toggle } = this.props.store!;
 
     return (
       <div className="SidebarGroup">
-        <div className="SidebarGroup-header" onClick={() => this.onToggle()}>
+        <div className="SidebarGroup-header" onClick={toggle}>
           <div>
             <i className="SidebarGroup-header-icon fa fa-th-list" />
             <span className="SidebarGroup-header-title">{namespace.name}</span>
           </div>
           <span className="SidebarGroup-header-details">{filteredTdefs.length}/{tdefs.length}</span>
         </div>
-        <Collapse className="SidebarGroup-body" isOpen={this.state.isOpen}>
+        <Collapse className="SidebarGroup-body" isOpen={isOpen}>
           {this.renderBody()}
         </Collapse>
       </div>

@@ -31,7 +31,11 @@ export class SidebarStore {
   }
 
   @action.bound fetchNamespaceSuccess(namespace: INamespace) {
-    this._namespaces.set(namespace.name, new SidebarGroupStore(this, namespace, this.registryService));
+    if (namespace.name === 'kevoree') {
+      this._namespaces.set(namespace.name, new SidebarGroupStore(namespace, this, this.registryService, true));
+    } else {
+      this._namespaces.set(namespace.name, new SidebarGroupStore(namespace, this, this.registryService));
+    }
   }
 
   @action.bound fetchError(err: any) {

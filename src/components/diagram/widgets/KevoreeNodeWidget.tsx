@@ -4,7 +4,7 @@ import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
 import { inject, observer } from 'mobx-react';
 
-import { KevoreeService } from '../../../services/KevoreeService';
+import { DiagramStore } from '../../../stores/DiagramStore';
 import { KevoreeNodeModel } from '../models/KevoreeNodeModel';
 import { Editable } from '../../editable';
 
@@ -13,14 +13,14 @@ import './KevoreeNodeWidget.scss';
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
   diagramEngine: DiagramEngine;
-  kevoreeService?: KevoreeService;
+  diagramStore?: DiagramStore;
 }
 
 interface KevoreeNodeWidgetState {
   canDrop: boolean;
 }
 
-@inject('kevoreeService')
+@inject('kevoreeService', 'diagramStore')
 @observer
 export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, KevoreeNodeWidgetState> {
 
@@ -38,7 +38,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   }
 
   openNodeView() {
-    this.props.kevoreeService!.openNodeView(this.props.node);
+    this.props.diagramStore!.changePath(this.props.node.instance!.path());
   }
 
   onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
@@ -82,8 +82,8 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
         </div>
         <div className="body">
           <ul className="components">
-            {this.props.node.components.map((comp) => (
-              <li key={comp.instance!.name}>{comp.instance!.name}: {comp.instance!.typeDefinition.name}</li>
+            {this.props.node.instance!.components.array.map((comp) => (
+              <li key={comp.name}>{comp.name}: {comp.typeDefinition.name}</li>
             ))}
           </ul>
         </div>

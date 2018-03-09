@@ -3,12 +3,13 @@ import { DiagramWidget, BaseAction, MoveItemsAction, MoveCanvasAction } from 'st
 import { observer, inject } from 'mobx-react';
 import * as kevoree from 'kevoree-library';
 import { ITypeDefinition } from 'kevoree-registry-client';
+import { toast } from 'react-toastify';
 
 import { AbstractModel } from './models/AbstractModel';
 import { KevoreeService } from '../../services/KevoreeService';
+import { DiagramStore } from '../../stores/DiagramStore';
 import { Hoverlay } from '../hoverlay';
-import { DND_ITEM, DIAGRAM_DEFAULT_ZOOM } from '../../utils/constants';
-import { distributeElements } from '../../utils/dagreify';
+import { DND_ITEM } from '../../utils/constants';
 import { DiagramOverlay, OverlayIcon } from '../diagram-overlay';
 import { SelectionPanel } from '../selection-panel';
 import { SelectionPanelStore } from '../../stores/SelectionPanelStore';
@@ -16,43 +17,23 @@ import { SelectionPanelStore } from '../../stores/SelectionPanelStore';
 import './Diagram.css';
 
 export interface DiagramProps {
+  diagramStore?: DiagramStore;
   selectionPanelStore?: SelectionPanelStore;
   kevoreeService?: KevoreeService;
 }
 
-interface DiagramState {
-  smartRouting: boolean; // TODO: move it to AppStore
-}
-
-@inject('selectionPanelStore', 'kevoreeService')
+@inject('diagramStore', 'selectionPanelStore', 'kevoreeService')
 @observer
-export class Diagram extends React.Component<DiagramProps, DiagramState> {
-
-  private _listener: kevoree.KevoreeModelListener = {
-    elementChanged: (event) => {
-      // tslint:disable-next-line
-      console.log('=== DIAGRAM KEVOREE LISTENER ===');
-      // tslint:disable-next-line
-      console.log(event);
-      // tslint:disable-next-line
-      console.log('================================');
-      this.props.kevoreeService!.diagram.repaintCanvas();
-    }
-  };
-
-  constructor(props: DiagramProps) {
-    super(props);
-    this.state = {
-      smartRouting: true,
-    };
-  }
+export class Diagram extends React.Component<DiagramProps> {
 
   onDrop(event: React.DragEvent<HTMLElement>) {
     try {
-      const point = this.props.kevoreeService!.diagram.getRelativeMousePoint(event);
+      const point = this.props.diagramStore!.engine.getRelativeMousePoint(event);
       const tdef: ITypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-      this.props.kevoreeService!.createInstance(tdef, point);
-    } catch (ignore) {/* noop */}
+      this.props.kevoreeService!.createInstance(tdef, this.props.diagramStore!.path, point);
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   onActionStarted(action: BaseAction) {
@@ -75,56 +56,24 @@ export class Diagram extends React.Component<DiagramProps, DiagramState> {
     return true;
   }
 
-  zoomIn() {
-    const model = this.props.kevoreeService!.diagram.getDiagramModel();
-    model.setZoomLevel(model.getZoomLevel() + 10);
-    this.props.kevoreeService!.diagram.repaintCanvas();
-  }
-
-  zoomOut() {
-    const model = this.props.kevoreeService!.diagram.getDiagramModel();
-    model.setZoomLevel(model.getZoomLevel() - 10);
-    this.props.kevoreeService!.diagram.repaintCanvas();
-  }
-
-  zoomToFit() {
-    this.props.kevoreeService!.diagram.zoomToFit();
-  }
-
-  autoLayout() {
-    distributeElements(this.props.kevoreeService!.diagram.getDiagramModel());
-    this.props.kevoreeService!.diagram.repaintCanvas();
-  }
-
-  smartRoutingToggle() {
-    this.setState({ smartRouting: !this.state.smartRouting });
-  }
-
-  componentDidMount() {
-    const kevoreeService = this.props.kevoreeService!;
-    kevoreeService.diagram.getDiagramModel().setZoomLevel(DIAGRAM_DEFAULT_ZOOM);
-    kevoreeService.model.addModelElementListener(this._listener);
-  }
-
-  componentWillUnmount() {
-    this.props.kevoreeService!.model.removeModelElementListener(this._listener);
-  }
-
   generateOverlay() {
-    const smartRouting = `Smart routing: ${this.state.smartRouting ? 'on' : 'off'}`;
+    const store = this.props.diagramStore!;
+    const smartRouting = `Smart routing: ${store.smartRouting ? 'on' : 'off'}`;
 
     return (
       <DiagramOverlay>
-        <OverlayIcon name="Zoom in" onClick={() => this.zoomIn()} icon="fa fa-2x fa-search-plus" />
-        <OverlayIcon name="Zoom out" onClick={() => this.zoomOut()} icon="fa fa-2x fa-search-minus" />
-        <OverlayIcon name="Zoom to fit" onClick={() => this.zoomToFit()} icon="fa fa-2x fa-search" />
-        <OverlayIcon name="Auto layout" onClick={() => this.autoLayout()} icon="fa fa-2x fa-th" />
-        <OverlayIcon name={smartRouting} onClick={() => this.smartRoutingToggle()} icon="fa fa-2x fa-sitemap" />
+        <OverlayIcon name="Zoom in" onClick={() => store.zoomIn()} icon="fa fa-2x fa-search-plus" />
+        <OverlayIcon name="Zoom out" onClick={() => store.zoomOut()} icon="fa fa-2x fa-search-minus" />
+        <OverlayIcon name="Zoom to fit" onClick={() => store.zoomToFit()} icon="fa fa-2x fa-search" />
+        <OverlayIcon name="Auto layout" onClick={() => store.autoLayout()} icon="fa fa-2x fa-th" />
+        <OverlayIcon name={smartRouting} onClick={() => store.toggleSmartRouting()} icon="fa fa-2x fa-sitemap" />
       </DiagramOverlay>
     );
   }
 
   render() {
+    const { engine, smartRouting } = this.props.diagramStore!;
+
     return (
       <div
         className="Diagram"
@@ -133,11 +82,11 @@ export class Diagram extends React.Component<DiagramProps, DiagramState> {
       >
         <Hoverlay overlay={this.generateOverlay()}>
           <DiagramWidget
-            diagramEngine={this.props.kevoreeService!.diagram}
+            diagramEngine={engine}
             inverseZoom={true}
             allowLooseLinks={false}
             deleteKeys={[46]}
-            smartRouting={this.state.smartRouting}
+            smartRouting={smartRouting}
             actionStartedFiring={(action) => this.onActionStarted(action)}
             actionStoppedFiring={(action) => this.onActionStopped(action)}
           />

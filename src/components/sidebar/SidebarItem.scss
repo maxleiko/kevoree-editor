@@ -1,0 +1,92 @@
+.SidebarItem {
+  color: #fff;
+  padding: 8px 10px;
+  margin: 5px 0;
+  border: 2px solid black;
+  border-radius: 5px;
+  word-wrap: break-word;
+  text-shadow: -1px 0 #444, 0 1px #444, 1px 0 #444, 0 -1px #444;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    cursor: grab;
+    // box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  }
+
+  &.SidebarItem-component {
+    &:hover {
+      background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1)
+      );
+    }
+  }
+
+  &.SidebarItem-node {
+    background-image: repeating-linear-gradient(
+      125deg,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.1) 10px,
+      rgba(0, 0, 0, 0.2) 10px,
+      rgba(0, 0, 0, 0.2) 20px
+    );
+
+    &:hover {
+      background-image: repeating-linear-gradient(
+        125deg,
+        rgba(0, 0, 0, 0.2), 
+        rgba(0, 0, 0, 0.2) 10px,
+        rgba(0, 0, 0, 0.3) 10px,
+        rgba(0, 0, 0, 0.3) 20px
+      );
+    }
+  }
+
+  &.SidebarItem-group {
+    background-image: repeating-linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.1) 10px,
+      rgba(0, 0, 0, 0.2) 10px,
+      rgba(0, 0, 0, 0.2) 20px
+    );
+
+    &:hover {
+      background-image: repeating-linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0.2) 10px,
+      rgba(0, 0, 0, 0.3) 10px,
+      rgba(0, 0, 0, 0.3) 20px
+    );
+    }
+  }
+
+  &.SidebarItem-channel {
+    background-size: 100% 20px;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.1) 50%,
+      rgba(0, 0, 0, 0.2) 50%,
+      rgba(0, 0, 0, 0.2)
+    );
+
+    &:hover {
+      background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.2), 
+        rgba(0, 0, 0, 0.2) 50%, 
+        rgba(0, 0, 0, 0.3) 50%, 
+        rgba(0, 0, 0, 0.3)
+      );
+    }
+  }
+}

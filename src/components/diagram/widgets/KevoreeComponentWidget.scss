@@ -28,15 +28,39 @@
     display: flex;
     justify-content: space-between;
 
-    .in .name { padding-left: 5px; }
-    .out .name { padding-right: 5px; }
-    .in, .out {
-      .port {
-        background-color: rgba(255, 255, 255, 0.4);
+    .in {
+      .name {
+        padding-left: 5px;
       }
 
-      .port.srd-port--selected {
-        background-color: rgba(155, 245, 52, 0.4) !important;
+      .port {
+        background-color: rgba(255, 255, 255, 0.4);
+
+        &.srd-port--selected {
+          background-color: rgba(155, 245, 52, 0.4);
+        }
+      }
+
+      .kevoree-port {
+        justify-content: flex-start;
+      }
+    }
+
+    .out {
+      .name {
+        padding-right: 5px;
+      }
+
+      .port {
+        background-color: rgba(255, 255, 255, 0.4);
+
+        &.srd-port--selected {
+          background-color: rgba(155, 245, 52, 0.4);
+        }
+      }
+
+      .kevoree-port {
+        justify-content: flex-end;
       }
     }
   }

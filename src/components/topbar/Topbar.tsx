@@ -4,12 +4,14 @@ import { observer, inject } from 'mobx-react';
 import { Navbar, NavbarBrand, NavbarToggler, Collapse, Nav, NavItem, NavLink } from 'reactstrap';
 
 import { KevoreeService } from '../../services/KevoreeService';
+import { DiagramStore } from '../../stores/DiagramStore';
 import { FileService } from '../../services/FileService';
 
 import './Topbar.css';
 
 export interface TopbarProps {
   kevoreeService?: KevoreeService;
+  diagramStore?: DiagramStore;
   fileService?: FileService;
 }
 
@@ -17,7 +19,7 @@ interface TopbarState {
   isOpen: boolean;
 }
 
-@inject('kevoreeService', 'fileService')
+@inject('kevoreeService', 'diagramStore', 'fileService')
 @observer
 export class Topbar extends React.Component<TopbarProps, TopbarState> {
 
@@ -43,18 +45,17 @@ export class Topbar extends React.Component<TopbarProps, TopbarState> {
   }
 
   render() {
-    const kevoreeService = this.props.kevoreeService!;
-    const node = kevoreeService.nodeView;
+    const diagramStore = this.props.diagramStore!;
 
     return (
       <Navbar className="Topbar" color="faded" dark={true} expand="md">
-        <NavbarBrand>{node ? `Node View: ${node.instance!.name}` : 'Model View'}</NavbarBrand>
+        <NavbarBrand>{`Diagram: ${diagramStore.path}`}</NavbarBrand>
         <NavbarToggler onClick={() => this.toggle()} />
         <Collapse isOpen={this.state.isOpen} navbar={true}>
           <Nav className="ml-auto" navbar={true}>
-            {node && (
-              <NavLink className="Topbar-link" href="#" onClick={() => kevoreeService.openModelView()}>
-                <i className="fa fa-arrow-circle-left" />Model View
+            {diagramStore.previousPath && (
+              <NavLink className="Topbar-link" href="#" onClick={() => diagramStore.previousView()}>
+                <i className="fa fa-arrow-circle-left" />Previous view
               </NavLink>
             )}
             <NavItem>

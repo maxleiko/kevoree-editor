@@ -19,6 +19,8 @@ export class KevoreePortModel extends PortModel {
     if (!link) {
       return new KevoreeLinkModel();
     }
+    // tslint:disable-next-line
+    console.log('create link !!!');
     return null;
   }
 }

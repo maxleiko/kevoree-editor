@@ -1,98 +1,77 @@
 import * as kevoree from 'kevoree-library';
 import * as Kotlin from 'kevoree-kotlin';
 import * as _ from 'lodash';
-import { DiagramEngine, DiagramModel } from 'storm-react-diagrams';
-import { toast } from 'react-toastify';
-import { observable, computed, action } from 'mobx';
 import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
-import { isComponentType, isNodeType, isChannelType, isGroupType, isTruish } from '../utils/kevoree';
 import {
-  KevoreeNodeFactory, KevoreeComponentFactory, KevoreeChannelFactory, KevoreeGroupFactory
-} from '../components/diagram/factories';
-import {
-  KevoreeNodeModel, KevoreeComponentModel, KevoreeChannelModel, KevoreeGroupModel
-} from '../components/diagram/models';
-import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
+  isComponentType,
+  isNodeType,
+  isChannelType,
+  isGroupType,
+  isTruish,
+  isNode,
+  isSelected,
+} from '../utils/kevoree';
+import { KWE_POSITION } from '../utils/constants';
+
+export interface KevoreeServiceListener {
+  modelChanged: () => void;
+}
 
 export class KevoreeService {
   
-  @observable private _nodeView: KevoreeNodeModel | null;
-
-  private _diagram = new DiagramEngine();
   private _factory: kevoree.KevoreeFactory = new kevoree.factory.DefaultKevoreeFactory();
   private _model = this._factory.createContainerRoot().withGenerated_KMF_ID(0);
   private _loader = this._factory.createJSONLoader();
   private _serializer = this._factory.createJSONSerializer();
-  private _previousModel: DiagramModel | null;
+  private _listeners: KevoreeServiceListener[] = [];
 
   constructor() {
-    this._diagram.registerNodeFactory(new KevoreeComponentFactory());
-    this._diagram.registerNodeFactory(new KevoreeNodeFactory());
-    this._diagram.registerNodeFactory(new KevoreeChannelFactory());
-    this._diagram.registerNodeFactory(new KevoreeGroupFactory());
-    this._diagram.installDefaultFactories();
-    this._diagram.setDiagramModel(new DiagramModel());
     this._factory.root(this._model);
 
-    if (process.env.ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       // tslint:disable-next-line
       window['model'] = this._model;
     }
   }
 
-  createInstance(
-    rTdef: ITypeDefinition,
-    point: kwe.Point = { x: 100, y: 100 },
-    container: kevoree.Model | kevoree.Node = this.model
-  ) {
+  createInstance(rTdef: ITypeDefinition, containerPath: string, point: kwe.Point = { x: 100, y: 100 }) {
     const tdef: kevoree.TypeDefinition = this.findOrCreateTypeDefinition(rTdef);
-    const diagramModel = this._diagram.getDiagramModel();
+    const container = this._model.findByPath(containerPath);
 
-    if (this._nodeView) {
-      if (isComponentType(tdef)) {
-        const uiComp = this.createComponent(<kevoree.ComponentType> tdef, this._nodeView.instance!);
-        uiComp.setPosition(point.x, point.y);
-        diagramModel.addNode(uiComp);
-        this._nodeView.addComponent(uiComp);
-        this._diagram.repaintCanvas();
-      } else if (isChannelType(tdef)) {
-        toast.error('Channels must be added to model root');
-      } else if (isGroupType(tdef)) {
-        toast.error('Groups must be added to model root');
-      } else if (isNodeType(tdef)) {
-        toast.error('Nodes must be added to model root');
+    if (container) {
+      if (isNode(container)) {
+        if (isComponentType(tdef)) {
+          this.createComponent(<kevoree.ComponentType> tdef, container as kevoree.Node, point);
+        } else if (isChannelType(tdef)) {
+          throw new Error('Channels must be added to model root');
+        } else if (isGroupType(tdef)) {
+          throw new Error('Groups must be added to model root');
+        } else if (isNodeType(tdef)) {
+          throw new Error('Nodes must be added to model root');
+        } else {
+          throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
+        }
       } else {
-        throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
+        if (isComponentType(tdef)) {
+          if (this.selectedNodes.length > 0) {
+            this.selectedNodes
+              .map((node) => this.createComponent(tdef as kevoree.ComponentType, node, point));
+          } else {
+            throw new Error('Components must be added in Nodes');
+          }
+        } else if (isChannelType(tdef)) {
+          this.createChannel(tdef as kevoree.ChannelType, container as kevoree.Model, point);
+        } else if (isGroupType(tdef)) {
+          this.createGroup(tdef as kevoree.GroupType, container as kevoree.Model, point);
+        } else if (isNodeType(tdef)) {
+          this.createNode(tdef as kevoree.NodeType, container as kevoree.Model, point);
+        } else {
+          throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
+        }
       }
     } else {
-      if (isComponentType(tdef)) {
-        const nodes = diagramModel.getSelectedItems()
-          .filter((model) => model instanceof KevoreeNodeModel);
-        if (nodes.length > 0) {
-          nodes.map((node: KevoreeNodeModel) => {
-            const uiComp = this.createComponent(<kevoree.ComponentType> tdef, node.instance!);
-            uiComp.setPosition(100, 100);
-            node.addComponent(uiComp);
-          });
-        } else {
-          toast.error('Components must be added in Nodes');
-        }
-      } else if (isChannelType(tdef)) {
-        const uiChan = this.createChannel(<kevoree.ChannelType> tdef, <kevoree.Model> container);
-        uiChan.setPosition(point.x, point.y);
-        diagramModel.addNode(uiChan);
-      } else if (isGroupType(tdef)) {
-        const uiGroup = this.createGroup(<kevoree.GroupType> tdef, <kevoree.Model> container);
-        uiGroup.setPosition(point.x, point.y);
-        diagramModel.addNode(uiGroup);
-      } else if (isNodeType(tdef)) {
-        const uiNode = this.createNode(<kevoree.NodeType> tdef, <kevoree.Model> container);
-        uiNode.setPosition(point.x, point.y);
-        diagramModel.addNode(uiNode);
-      } else {
-        throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
-      }
+      throw new Error(`Unable to find "${containerPath}" in the model`);
     }
   }
 
@@ -135,36 +114,18 @@ export class KevoreeService {
   deserialize(data: string) {
     try {
       this._model = this._loader.loadModelFromString<kevoree.Model>(data).get(0);
-      this.updateDiagram();
-      toast.success(`Model loaded`);
-    } catch (ignore) {
-      toast.error('Unable to load given model');
+      this._listeners.forEach((listener) => listener.modelChanged());
+    } catch (err) {
+      throw new Error('Unable to deserialize the model');
     }
   }
 
-  @action openNodeView(node: KevoreeNodeModel) {
-    this._nodeView = node;
-    this._previousModel = this._diagram.getDiagramModel();
-    const newModel = new DiagramModel();
-    newModel.setZoomLevel(DIAGRAM_DEFAULT_ZOOM);
-    node.instance!.components.array
-      .forEach((comp) => newModel.addNode(new KevoreeComponentModel(comp)));
-    this._diagram.setDiagramModel(newModel);
-    this._diagram.repaintCanvas();
+  addListener(listener: KevoreeServiceListener) {
+    this._listeners.push(listener);
   }
 
-  @action openModelView() {
-    if (this._previousModel) {
-      this._previousModel.clearSelection();
-      this._diagram.setDiagramModel(this._previousModel);
-      this._diagram.repaintCanvas();
-      this._nodeView = null;
-      this._previousModel = null;
-    }
-  }
-
-  @computed get nodeView() {
-    return this._nodeView;
+  removeListener(listener: KevoreeServiceListener) {
+    this._listeners.splice(this._listeners.findIndex((l) => l === listener), 1);
   }
 
   private findOrCreateTypeDefinition(rTdef: ITypeDefinition) {
@@ -172,46 +133,55 @@ export class KevoreeService {
     let tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
     if (!tdef) {
       this.updateTypeDefinitions(rTdef.namespace!, [rTdef]);
-      tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
+      tdef = this._model.findByPath<kevoree.TypeDefinition>(path)!;
     }
     return tdef;
   }
 
-  private createComponent(tdef: kevoree.ComponentType, container: kevoree.Node) {
+  private createComponent(tdef: kevoree.ComponentType, container: kevoree.Node, point: kwe.Point) {
     const instance: kevoree.Component = this._factory.createComponentInstance();
     instance.name = `comp${container.components.size()}`;
     instance.typeDefinition = tdef;
+    this.initPosition(instance, point);
     this.initDictionaries(instance);
     this.initPorts(instance);
     container.addComponents(instance);
-    return new KevoreeComponentModel(instance);
   }
 
-  private createNode(tdef: kevoree.NodeType, container: kevoree.Model) {
+  private createNode(tdef: kevoree.NodeType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Node = this._factory.createContainerNode();
     instance.name = `node${container.nodes.size()}`;
     instance.typeDefinition = tdef;
+    this.initPosition(instance, point);
     this.initDictionaries(instance);
     container.addNodes(instance);
-    return new KevoreeNodeModel(instance);
   }
 
-  private createChannel(tdef: kevoree.ChannelType, container: kevoree.Model) {
+  private createChannel(tdef: kevoree.ChannelType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Channel = this._factory.createChannel();
     instance.name = `chan${container.nodes.size()}`;
     instance.typeDefinition = tdef;
+    this.initPosition(instance, point);
     this.initDictionaries(instance);
     container.addHubs(instance);
-    return new KevoreeChannelModel(instance);
   }
 
-  private createGroup(tdef: kevoree.GroupType, container: kevoree.Model) {
+  private createGroup(tdef: kevoree.GroupType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Group = this._factory.createGroup();
     instance.name = `group${container.nodes.size()}`;
     instance.typeDefinition = tdef;
+    this.initPosition(instance, point);
     this.initDictionaries(instance);
     container.addGroups(instance);
-    return new KevoreeGroupModel(instance);
+  }
+
+  private initPosition(instance: kevoree.Instance, point: kwe.Point) {
+    let position = instance.findMetaDataByID(KWE_POSITION);
+    if (!position) {
+      position = this._factory.createValue<kevoree.Instance>().withName(KWE_POSITION);
+      instance.addMetaData(position);
+    }
+    position.value = JSON.stringify(point);
   }
 
   private initDictionaries(instance: kevoree.Instance) {
@@ -284,32 +254,23 @@ export class KevoreeService {
     }
   }
 
-  private updateDiagram() {
-    const diagramModel = this._diagram.getDiagramModel();
-
-    this.nodes.forEach((node) => {
-      const uiNode = new KevoreeNodeModel(node);
-      diagramModel.addNode(uiNode);
-
-      node.components.array.forEach((comp) => {
-        const uiComp = new KevoreeComponentModel(comp);
-        uiNode.addComponent(uiComp);
-      });
-    });
-
-    this._diagram.repaintCanvas();
-  }
+  // private updateDiagram() {
+  //   // TODO improve this KevoreeModel to DiagramModel algo
+  //   this.nodes.forEach((node) => this._dStore.addNode(node));
+  //   this.groups.forEach((group) => this._dStore.addGroup(group));
+  //   this.channels.forEach((chan) => this._dStore.addChannel(chan));
+  // }
 
   get model() {
     return this._model;
   }
 
-  get diagram() {
-    return this._diagram;
-  }
-
   get nodes() {
     return this._model.nodes.array;
+  }
+
+  get selectedNodes() {
+    return this.nodes.filter(isSelected);
   }
 
   get components() {

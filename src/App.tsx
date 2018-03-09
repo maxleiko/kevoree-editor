@@ -4,7 +4,7 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { KevoreeService } from './services/KevoreeService';
+import { DiagramStore } from './stores/DiagramStore';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
@@ -12,23 +12,23 @@ import { Diagram } from './components/diagram';
 import './App.css';
 
 interface AppProps {
-  kevoreeService?: KevoreeService;
+  diagramStore?: DiagramStore;
 }
 
-@inject('kevoreeService')
+@inject('diagramStore')
 @observer
 export default class App extends React.Component<AppProps> {
 
   private hkMap = {
     undo: ['ctrl+z', 'command+z'],
     redo: ['ctrl+y', 'command+y'],
-    modelView:  ['esc', 'backspace'],
+    previousView:  ['esc', 'backspace'],
   };
 
   private hkActions = {
     undo: () => toast.warn(<span><strong>undo:</strong> not implemented yet</span>),
     redo: () => toast.warn(<span><strong>redo:</strong> not implemented yet</span>),
-    modelView: () => this.props.kevoreeService!.openModelView(),
+    previousView: () => this.props.diagramStore!.previousView(),
   };
 
   componentDidMount() {
