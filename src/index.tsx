@@ -23,10 +23,12 @@ const services = {
   registryService: new RegistryService(),
 };
 
+const selectionPanelStore = new SelectionPanelStore();
+
 const stores = {
   sidebarStore: new SidebarStore(services.registryService),
-  diagramStore: new DiagramStore(services.kevoreeService),
-  selectionPanelStore: new SelectionPanelStore(),
+  diagramStore: new DiagramStore(services.kevoreeService, selectionPanelStore),
+  selectionPanelStore,
 };
 // ========================================================
 

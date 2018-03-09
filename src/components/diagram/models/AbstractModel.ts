@@ -2,6 +2,7 @@ import * as kevoree from 'kevoree-library';
 import { NodeModel, DiagramEngine } from 'storm-react-diagrams';
 import { KWE_POSITION } from '../../../utils/constants';
 import { str2rgb } from '../../../utils/colors';
+import * as kUtils from '../../../utils/kevoree';
 
 export abstract class AbstractModel<T extends kevoree.Instance> extends NodeModel {
 
@@ -15,11 +16,9 @@ export abstract class AbstractModel<T extends kevoree.Instance> extends NodeMode
     super(nodeType);
     if (instance) {
       this.color = str2rgb(instance.typeDefinition.name);
-      const position = instance.findMetaDataByID(KWE_POSITION);
-      if (position) {
-        const point: kwe.Point = JSON.parse(position.value);
-        this.setPosition(point.x, point.y);
-      }
+      const { x, y } = kUtils.getPosition(instance);
+      this.setPosition(x, y);
+      this.setSelected(kUtils.isSelected(instance));
     }
   }
 

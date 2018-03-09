@@ -8,7 +8,7 @@ import {
   isNodeType,
   isChannelType,
   isGroupType,
-  isTruish,
+  toBoolean,
   isNode,
   isSelected,
 } from '../utils/kevoree';
@@ -191,7 +191,7 @@ export class KevoreeService {
     if (dicType) {
       dicType.attributes.array.forEach((attr) => {
         let val: kevoree.Value<kevoree.Dictionary>;
-        if (!isTruish(attr.fragmentDependant)) {
+        if (!toBoolean(attr.fragmentDependant)) {
           // attribute is not fragment dependant
           val = instance.dictionary.findValuesByID(attr.name);
           if (!val) {

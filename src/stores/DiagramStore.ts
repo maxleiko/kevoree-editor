@@ -20,10 +20,12 @@ import {
 import { KevoreeService, KevoreeServiceListener } from '../services/KevoreeService';
 import { isNode, isModel } from '../utils/kevoree';
 import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
+import { SelectionPanelStore } from './SelectionPanelStore';
 
 export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeModelListener {
 
   private _kService: KevoreeService;
+  private _selectionPanelStore: SelectionPanelStore;
   
   @observable private _path: string = '/';
   @observable private _previousPath: string | null = null;
@@ -31,8 +33,9 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   @observable private _model: DiagramModel = new DiagramModel();
   @observable private _smartRouting = false;
 
-  constructor(kService: KevoreeService) {
+  constructor(kService: KevoreeService, selectionPanelStore: SelectionPanelStore) {
     this._kService = kService;
+    this._selectionPanelStore = selectionPanelStore;
 
     this.initModel();
 
@@ -53,11 +56,13 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   }
 
   @action addNode(node: kevoree.Node) {
-    this._model.addNode(new KevoreeNodeModel(node));
+    const vm = new KevoreeNodeModel(node);
+    this._model.addNode(vm);
   }
 
   @action addComponent(comp: kevoree.Component) {
-    this._model.addNode(new KevoreeComponentModel(comp));
+    const vm = new KevoreeComponentModel(comp);
+    this._model.addNode(vm);
   }
 
   @action addChannel(chan: kevoree.Channel) {
@@ -74,7 +79,8 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
       this.removeModelListener();
       this._previousPath = this._path;
       this._path = path;
-      const prevZoomLevel = this._model.getZoomLevel(); 
+      const prevZoomLevel = this._model.getZoomLevel();
+      this._selectionPanelStore.clear();
       this._model = new DiagramModel();
       this.initModel(prevZoomLevel);
       this._engine.setDiagramModel(this._model);
@@ -122,7 +128,8 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
     switch (event.etype.name$) {
       case 'ADD':
         if (event.elementAttributeName === 'nodes') {
-          this.addNode(event.value as kevoree.Node);
+          const node = event.value as kevoree.Node;
+          this.addNode(node);
         } else if (event.elementAttributeName === 'groups') {
           this.addGroup(event.value as kevoree.Group);
         } else if (event.elementAttributeName === 'hubs') {

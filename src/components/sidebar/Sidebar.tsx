@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import { Scrollbars } from 'react-custom-scrollbars';
+import { toast } from 'react-toastify';
 
 import { SidebarStore } from '../../stores/SidebarStore';
 import { KevoreeService } from '../../services/KevoreeService';
@@ -36,6 +37,11 @@ export class Sidebar extends React.Component<SidebarProps> {
   }
 
   render() {
+    const error = this.props.sidebarStore!.error;
+    if (error) {
+      toast.error(<span><strong>Error: </strong>Unable to load namespace from registry</span>);
+    }
+
     return (
       <div className="Sidebar">
         <SidebarHeader />

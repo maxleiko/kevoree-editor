@@ -1,5 +1,5 @@
 import * as kevoree from 'kevoree-library';
-import { KEVOREE_CHANNEL, KEVOREE_COMPONENT, KEVOREE_GROUP, KEVOREE_NODE, KWE_SELECTED } from './constants';
+import { KEVOREE_CHANNEL, KEVOREE_COMPONENT, KEVOREE_GROUP, KEVOREE_NODE, KWE_SELECTED, KWE_POSITION } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
 export function isComponentType(tdef: kevoree.TypeDefinition) {
@@ -43,22 +43,33 @@ export function inferType(tdef: ITypeDefinition) {
   throw new Error(`Unknown Kevoree type "${model.class}"`);
 }
 
-export function isTruish(val: any): boolean {
-  if (typeof val === 'string') {
-    return val.toLowerCase() === 'true';
-  }
-
-  if (typeof val === 'boolean') {
-    return val;
-  }
-
-  return false;
+export function toBoolean(val: any): boolean {
+  return val === 'true';
 }
 
 export function isSelected(instance: kevoree.Instance): boolean {
   const sel = instance.findMetaDataByID(KWE_SELECTED);
   if (sel) {
-    return isTruish(sel.value);
+    return toBoolean(sel.value);
   }
   return false;
+}
+
+export function getPosition(instance: kevoree.Instance, defaultPoint: kwe.Point = { x: 100, y: 100 }) {
+  const position = instance.findMetaDataByID(KWE_POSITION);
+  if (position) {
+    const point: kwe.Point = JSON.parse(position.value);
+    return point;
+  }
+  return defaultPoint;
+}
+
+export function setSelected(instance: kevoree.Instance, value: boolean) {
+  let selected = instance.findMetaDataByID(KWE_SELECTED);
+  if (!selected) {
+    const factory = new kevoree.factory.DefaultKevoreeFactory();
+    selected = factory.createValue<kevoree.Instance>().withName(KWE_SELECTED);
+    instance.addMetaData(selected);
+  }
+  selected.value = value + '';
 }

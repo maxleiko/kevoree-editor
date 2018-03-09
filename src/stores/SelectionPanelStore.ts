@@ -2,6 +2,7 @@ import { observable, computed, action } from 'mobx';
 import * as kevoree from 'kevoree-library';
 
 import { AbstractModel } from '../components/diagram/models/AbstractModel';
+import { setSelected } from '../utils/kevoree';
 
 export class SelectionPanelStore {
 
@@ -15,9 +16,11 @@ export class SelectionPanelStore {
 
   @action setSelection(selection: AbstractModel<kevoree.Instance>[]) {
     this._selection = selection;
+    this._selection.forEach((model) => setSelected(model.instance!, true));
   }
 
   @action clear() {
+    this._selection.forEach((model) => setSelected(model.instance!, false));
     this._selection = [];
   }
 

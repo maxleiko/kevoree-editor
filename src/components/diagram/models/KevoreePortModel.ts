@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as kevoree from 'kevoree-library';
 import { PortModel } from 'storm-react-diagrams';
 
@@ -14,13 +15,10 @@ export class KevoreePortModel extends PortModel {
     this.port = port;
   }
 
-  createLinkModel(): KevoreeLinkModel | null {
-    const link = super.createLinkModel();
-    if (!link) {
+  createLinkModel() {
+    if (this.maximumLinks < _.size(this.links)) {
       return new KevoreeLinkModel();
     }
-    // tslint:disable-next-line
-    console.log('create link !!!');
     return null;
   }
 }
