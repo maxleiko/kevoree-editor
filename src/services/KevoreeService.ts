@@ -3,22 +3,23 @@ import * as Kotlin from 'kevoree-kotlin';
 import * as _ from 'lodash';
 import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
+import * as kUtils from '../utils/kevoree';
 import {
-  isComponentType,
-  isNodeType,
-  isChannelType,
-  isGroupType,
-  toBoolean,
-  isNode,
-  isSelected,
-} from '../utils/kevoree';
-import { KWE_POSITION } from '../utils/constants';
+  DiagramListener,
+  NodeEvent,
+  LinkEvent,
+  OffsetEvent,
+  ZoomEvent,
+  GridEvent 
+} from 'storm-react-diagrams';
+import { AbstractModel } from '../components/diagram/models';
+import { KevoreeLinkModel } from '../components/diagram/models/KevoreeLinkModel';
 
 export interface KevoreeServiceListener {
   modelChanged: () => void;
 }
 
-export class KevoreeService {
+export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLinkModel> {
   
   private _factory: kevoree.KevoreeFactory = new kevoree.factory.DefaultKevoreeFactory();
   private _model = this._factory.createContainerRoot().withGenerated_KMF_ID(0);
@@ -40,31 +41,31 @@ export class KevoreeService {
     const container = this._model.findByPath(containerPath);
 
     if (container) {
-      if (isNode(container)) {
-        if (isComponentType(tdef)) {
+      if (kUtils.isNode(container)) {
+        if (kUtils.isComponentType(tdef)) {
           this.createComponent(<kevoree.ComponentType> tdef, container as kevoree.Node, point);
-        } else if (isChannelType(tdef)) {
+        } else if (kUtils.isChannelType(tdef)) {
           throw new Error('Channels must be added to model root');
-        } else if (isGroupType(tdef)) {
+        } else if (kUtils.isGroupType(tdef)) {
           throw new Error('Groups must be added to model root');
-        } else if (isNodeType(tdef)) {
+        } else if (kUtils.isNodeType(tdef)) {
           throw new Error('Nodes must be added to model root');
         } else {
           throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
         }
       } else {
-        if (isComponentType(tdef)) {
+        if (kUtils.isComponentType(tdef)) {
           if (this.selectedNodes.length > 0) {
             this.selectedNodes
               .map((node) => this.createComponent(tdef as kevoree.ComponentType, node, point));
           } else {
             throw new Error('Components must be added in Nodes');
           }
-        } else if (isChannelType(tdef)) {
+        } else if (kUtils.isChannelType(tdef)) {
           this.createChannel(tdef as kevoree.ChannelType, container as kevoree.Model, point);
-        } else if (isGroupType(tdef)) {
+        } else if (kUtils.isGroupType(tdef)) {
           this.createGroup(tdef as kevoree.GroupType, container as kevoree.Model, point);
-        } else if (isNodeType(tdef)) {
+        } else if (kUtils.isNodeType(tdef)) {
           this.createNode(tdef as kevoree.NodeType, container as kevoree.Model, point);
         } else {
           throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
@@ -107,6 +108,25 @@ export class KevoreeService {
     ns.addAllTypeDefinitions(newTdefs);
   }
 
+  getSelection(path: string) {
+    let selection: kevoree.Instance[] = [];
+    const elem = this._model.findByPath(path);
+    if (elem) {
+      if (kUtils.isNode(elem)) {
+        const node = elem as kevoree.Node;
+        selection = selection
+          .concat(node.components.array);
+      } else if (kUtils.isModel(elem)) {
+        const model = elem as kevoree.Model;
+        selection = selection
+          .concat(model.nodes.array)
+          .concat(model.groups.array)
+          .concat(model.hubs.array);
+      }
+    }
+    return selection.filter(kUtils.isSelected);
+  }
+
   serialize() {
     return this._serializer.serialize(this._model);
   }
@@ -128,6 +148,41 @@ export class KevoreeService {
     this._listeners.splice(this._listeners.findIndex((l) => l === listener), 1);
   }
 
+  nodesUpdated(event: NodeEvent<AbstractModel>) {
+    if (event.isCreated) {
+      const uid = event.node.addListener({
+        selectionChanged: ({ entity, isSelected }) => {
+          kUtils.setSelected((entity as AbstractModel).instance, isSelected);
+        },
+        entityRemoved: () => {
+          event.node.removeListener(uid);
+          event.node.instance.delete();
+        }
+      });
+    }
+  }
+  
+  linksUpdated(event: LinkEvent<KevoreeLinkModel>) {
+    if (event.isConnected) {
+      // TODO create a binding
+      const input = event.link.getSourcePort();
+      const output = event.link.getTargetPort();
+      
+    }
+  }
+  
+  offsetUpdated(event: OffsetEvent) {
+    // TODO
+  }
+  
+  zoomUpdated(event: ZoomEvent) {
+    // TODO
+  }
+
+  gridUpdated(event: GridEvent) {
+    // TODO
+  }
+
   private findOrCreateTypeDefinition(rTdef: ITypeDefinition) {
     const path = `/packages[${rTdef.namespace!}]/typeDefinitions[name=${rTdef.name},version=${rTdef.version}]`;
     let tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
@@ -142,7 +197,7 @@ export class KevoreeService {
     const instance: kevoree.Component = this._factory.createComponentInstance();
     instance.name = `comp${container.components.size()}`;
     instance.typeDefinition = tdef;
-    this.initPosition(instance, point);
+    kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     this.initPorts(instance);
     container.addComponents(instance);
@@ -152,7 +207,7 @@ export class KevoreeService {
     const instance: kevoree.Node = this._factory.createContainerNode();
     instance.name = `node${container.nodes.size()}`;
     instance.typeDefinition = tdef;
-    this.initPosition(instance, point);
+    kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     container.addNodes(instance);
   }
@@ -161,7 +216,7 @@ export class KevoreeService {
     const instance: kevoree.Channel = this._factory.createChannel();
     instance.name = `chan${container.nodes.size()}`;
     instance.typeDefinition = tdef;
-    this.initPosition(instance, point);
+    kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     container.addHubs(instance);
   }
@@ -170,28 +225,29 @@ export class KevoreeService {
     const instance: kevoree.Group = this._factory.createGroup();
     instance.name = `group${container.nodes.size()}`;
     instance.typeDefinition = tdef;
-    this.initPosition(instance, point);
+    kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     container.addGroups(instance);
   }
 
-  private initPosition(instance: kevoree.Instance, point: kwe.Point) {
-    let position = instance.findMetaDataByID(KWE_POSITION);
-    if (!position) {
-      position = this._factory.createValue<kevoree.Instance>().withName(KWE_POSITION);
-      instance.addMetaData(position);
+  private createPort(isInput: boolean, portType: kevoree.PortTypeRef, comp: kevoree.Component) {
+    const port = this._factory.createPort().withName(portType.name);
+    port.portTypeRef = portType;
+    if (isInput) {
+      comp.addProvided(port);
+    } else {
+      comp.addRequired(port);
     }
-    position.value = JSON.stringify(point);
   }
 
   private initDictionaries(instance: kevoree.Instance) {
     instance.dictionary = instance.dictionary || this._factory.createDictionary()
       .withGenerated_KMF_ID('0.0');
-    const dicType = instance.typeDefinition.dictionaryType;
+    const dicType = instance.typeDefinition!.dictionaryType;
     if (dicType) {
       dicType.attributes.array.forEach((attr) => {
         let val: kevoree.Value<kevoree.Dictionary>;
-        if (!toBoolean(attr.fragmentDependant)) {
+        if (!kUtils.toBoolean(attr.fragmentDependant)) {
           // attribute is not fragment dependant
           val = instance.dictionary.findValuesByID(attr.name);
           if (!val) {
@@ -203,7 +259,7 @@ export class KevoreeService {
         } else {
           // attribute is fragment dependant
           // create fragment dictionaries if needed
-          if (isChannelType(instance.typeDefinition)) {
+          if (kUtils.isChannelType(instance.typeDefinition!)) {
             (instance as kevoree.Channel).bindings.array.forEach((binding) => {
               if (binding.port) {
                 if (!instance.findFragmentDictionaryByID(binding.port.eContainer().eContainer().name)) {
@@ -213,7 +269,7 @@ export class KevoreeService {
                 }
               }
             });
-          } else if (isGroupType(instance.typeDefinition)) {
+          } else if (kUtils.isGroupType(instance.typeDefinition!)) {
             (instance as kevoree.Group).subNodes.array.forEach((node) => {
               if (!instance.findFragmentDictionaryByID(node.name)) {
                 const fragDic = this._factory.createFragmentDictionary();
@@ -244,23 +300,6 @@ export class KevoreeService {
     tdef.required.array.forEach((portType) => this.createPort(false, portType, comp));
   }
 
-  private createPort(isInput: boolean, portType: kevoree.PortTypeRef, comp: kevoree.Component) {
-    const port = this._factory.createPort().withName(portType.name);
-    port.portTypeRef = portType;
-    if (isInput) {
-      comp.addProvided(port);
-    } else {
-      comp.addRequired(port);
-    }
-  }
-
-  // private updateDiagram() {
-  //   // TODO improve this KevoreeModel to DiagramModel algo
-  //   this.nodes.forEach((node) => this._dStore.addNode(node));
-  //   this.groups.forEach((group) => this._dStore.addGroup(group));
-  //   this.channels.forEach((chan) => this._dStore.addChannel(chan));
-  // }
-
   get model() {
     return this._model;
   }
@@ -270,11 +309,7 @@ export class KevoreeService {
   }
 
   get selectedNodes() {
-    return this.nodes.filter(isSelected);
-  }
-
-  get components() {
-    return _.flatMap(this._model.nodes.array, (n) => n.components.array);
+    return this.nodes.filter(kUtils.isSelected);
   }
 
   get channels() {

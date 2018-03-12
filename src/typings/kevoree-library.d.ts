@@ -183,6 +183,7 @@ declare module 'kevoree-library' {
     removeModelTreeListener(listener: KevoreeModelListener): void;
     removeAllModelTreeListeners(): void;
     getModelElementListeners(): KList<KevoreeModelListener>;
+    delete(): void;
   }
   
   export interface Named<T, P> extends Klass<P> {
@@ -192,7 +193,7 @@ declare module 'kevoree-library' {
 
   export interface Instance<T = Node | Component | Channel | Group, P = Model | Node> extends Named<T, P> {
     started: boolean;
-    typeDefinition: TypeDefinition;
+    typeDefinition?: TypeDefinition;
     dictionary: Dictionary;
     fragmentDictionary: KList<FragmentDictionary>;
     metaData: KList<Value<Instance<T, P>>>;

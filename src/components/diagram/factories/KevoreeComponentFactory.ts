@@ -1,13 +1,15 @@
 
 import * as React from 'react';
 import { DiagramEngine, AbstractNodeFactory } from 'storm-react-diagrams';
+import * as kevoree from 'kevoree-library';
 
 import { KevoreeComponentModel } from '../models/KevoreeComponentModel';
 import { KevoreeComponentWidget } from '../widgets/KevoreeComponentWidget';
+import { KevoreeService } from '../../../services';
 
 export class KevoreeComponentFactory extends AbstractNodeFactory {
 
-  constructor() {
+  constructor(private _kService: KevoreeService) {
     super('kevoree-component');
   }
 
@@ -15,7 +17,11 @@ export class KevoreeComponentFactory extends AbstractNodeFactory {
     return React.createElement(KevoreeComponentWidget, { node, diagramEngine });
   }
 
-  getNewInstance() {
-    return new KevoreeComponentModel();
+  getNewInstance(initConf?: any) {
+    const comp = this._kService.model.findByPath<kevoree.Component>(initConf.path);
+    if (comp) {
+      return new KevoreeComponentModel(comp);
+    }
+    throw new Error(`Unable to find instance "${initConf.path}" in current model`);
   }
 }

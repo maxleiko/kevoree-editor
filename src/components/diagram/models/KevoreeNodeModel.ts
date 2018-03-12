@@ -4,10 +4,7 @@ import { AbstractModel } from './AbstractModel';
 
 export class KevoreeNodeModel extends AbstractModel<kevoree.Node> {
 
-  constructor(instance?: kevoree.Node) {
+  constructor(instance: kevoree.Node) {
     super('kevoree-node', instance);
-    if (instance) {
-      this.instance = instance;
-    }
   }
 }

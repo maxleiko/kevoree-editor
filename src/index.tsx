@@ -27,7 +27,7 @@ const selectionPanelStore = new SelectionPanelStore();
 
 const stores = {
   sidebarStore: new SidebarStore(services.registryService),
-  diagramStore: new DiagramStore(services.kevoreeService, selectionPanelStore),
+  diagramStore: new DiagramStore(services.kevoreeService),
   selectionPanelStore,
 };
 // ========================================================

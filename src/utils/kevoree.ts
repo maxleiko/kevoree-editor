@@ -1,5 +1,12 @@
 import * as kevoree from 'kevoree-library';
-import { KEVOREE_CHANNEL, KEVOREE_COMPONENT, KEVOREE_GROUP, KEVOREE_NODE, KWE_SELECTED, KWE_POSITION } from './constants';
+import {
+  KEVOREE_CHANNEL,
+  KEVOREE_COMPONENT,
+  KEVOREE_GROUP,
+  KEVOREE_NODE,
+  KWE_SELECTED,
+  KWE_POSITION
+} from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
 export function isComponentType(tdef: kevoree.TypeDefinition) {
@@ -27,19 +34,35 @@ export function isModel(e: kevoree.Klass<any>) {
 }
 
 export function getType(tdef: kevoree.TypeDefinition) {
-  if (isChannelType(tdef)) { return KEVOREE_CHANNEL; }
-  if (isComponentType(tdef)) { return KEVOREE_COMPONENT; }
-  if (isGroupType(tdef)) { return KEVOREE_GROUP; }
-  if (isNodeType(tdef)) { return KEVOREE_NODE; }
+  if (isChannelType(tdef)) {
+    return KEVOREE_CHANNEL;
+  }
+  if (isComponentType(tdef)) {
+    return KEVOREE_COMPONENT;
+  }
+  if (isGroupType(tdef)) {
+    return KEVOREE_GROUP;
+  }
+  if (isNodeType(tdef)) {
+    return KEVOREE_NODE;
+  }
   throw new Error(`Unknown Kevoree type "${tdef.metaClassName()}"`);
 }
 
 export function inferType(tdef: ITypeDefinition) {
   const model = JSON.parse(tdef.model);
-  if (model.class.startsWith('org.kevoree.ChannelType')) { return KEVOREE_CHANNEL; }
-  if (model.class.startsWith('org.kevoree.ComponentType')) { return KEVOREE_COMPONENT; }
-  if (model.class.startsWith('org.kevoree.GroupType')) { return KEVOREE_GROUP; }
-  if (model.class.startsWith('org.kevoree.NodeType')) { return KEVOREE_NODE; }
+  if (model.class.startsWith('org.kevoree.ChannelType')) {
+    return KEVOREE_CHANNEL;
+  }
+  if (model.class.startsWith('org.kevoree.ComponentType')) {
+    return KEVOREE_COMPONENT;
+  }
+  if (model.class.startsWith('org.kevoree.GroupType')) {
+    return KEVOREE_GROUP;
+  }
+  if (model.class.startsWith('org.kevoree.NodeType')) {
+    return KEVOREE_NODE;
+  }
   throw new Error(`Unknown Kevoree type "${model.class}"`);
 }
 
@@ -55,13 +78,24 @@ export function isSelected(instance: kevoree.Instance): boolean {
   return false;
 }
 
-export function getPosition(instance: kevoree.Instance, defaultPoint: kwe.Point = { x: 100, y: 100 }) {
-  const position = instance.findMetaDataByID(KWE_POSITION);
-  if (position) {
-    const point: kwe.Point = JSON.parse(position.value);
-    return point;
+export function getPosition(instance: kevoree.Instance) {
+  let position = instance.findMetaDataByID(KWE_POSITION);
+  if (!position) {
+    // if instance has no position yet, then create default to [100,100]
+    position = setPosition(instance, { x: 100, y: 100 });
   }
-  return defaultPoint;
+  return JSON.parse(position.value);
+}
+
+export function setPosition(instance: kevoree.Instance, point: kwe.Point) {
+  let position = instance.findMetaDataByID(KWE_POSITION);
+  if (!position) {
+    const factory = new kevoree.factory.DefaultKevoreeFactory();
+    position = factory.createValue<kevoree.Instance>().withName(KWE_POSITION);
+    instance.addMetaData(position);
+  }
+  position.value = JSON.stringify(point);
+  return position;
 }
 
 export function setSelected(instance: kevoree.Instance, value: boolean) {

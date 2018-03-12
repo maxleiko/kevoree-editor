@@ -1,1 +1,1 @@
-export { Diagram } from './Diagram';
+export * from './Diagram';

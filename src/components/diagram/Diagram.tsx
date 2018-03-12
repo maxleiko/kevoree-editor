@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { DiagramWidget, BaseAction, MoveItemsAction, MoveCanvasAction } from 'storm-react-diagrams';
+import { DiagramWidget, BaseAction, MoveItemsAction } from 'storm-react-diagrams';
 import { observer, inject } from 'mobx-react';
-import * as kevoree from 'kevoree-library';
 import { ITypeDefinition } from 'kevoree-registry-client';
 import { toast } from 'react-toastify';
 
@@ -9,16 +8,15 @@ import { AbstractModel } from './models/AbstractModel';
 import { KevoreeService } from '../../services/KevoreeService';
 import { DiagramStore } from '../../stores/DiagramStore';
 import { Hoverlay } from '../hoverlay';
+import * as kUtils from '../../utils/kevoree';
 import { DND_ITEM } from '../../utils/constants';
 import { DiagramOverlay, OverlayIcon } from '../diagram-overlay';
 import { SelectionPanel } from '../selection-panel';
-import { SelectionPanelStore } from '../../stores/SelectionPanelStore';
 
 import './Diagram.css';
 
 export interface DiagramProps {
   diagramStore?: DiagramStore;
-  selectionPanelStore?: SelectionPanelStore;
   kevoreeService?: KevoreeService;
 }
 
@@ -39,20 +37,22 @@ export class Diagram extends React.Component<DiagramProps> {
   onActionStarted(action: BaseAction) {
     // tslint:disable-next-line
     console.log('Diagram.onActionStarted', action);
-    if (action instanceof MoveItemsAction) {
-      const selection: AbstractModel<kevoree.Instance>[] = action.selectionModels
-        .filter((item) => item.model.hasOwnProperty('instance'))
-        .map((selModel) => selModel.model as AbstractModel<kevoree.Instance>);
-      this.props.selectionPanelStore!.setSelection(selection);
-    } else if (action instanceof MoveCanvasAction) {
-      this.props.selectionPanelStore!.clear();
-    }
     return true;
   }
 
   onActionStopped(action: BaseAction) {
     // tslint:disable-next-line
     console.log('Diagram.onActionStopped', action);
+    if (action instanceof MoveItemsAction) {
+      action.selectionModels.forEach((selModel) => {
+        if (selModel.model instanceof AbstractModel) {
+          const model = selModel.model as AbstractModel;
+          if (model.x !== selModel.initialX && model.y !== selModel.initialY) {
+            kUtils.setPosition(model.instance, { x: model.x, y: model.y });
+          }
+        }
+      });
+    }
     return true;
   }
 
@@ -72,6 +72,8 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   render() {
+    // tslint:disable-next-line
+    console.log('=== DIAGRAM render() ===');
     const { engine, smartRouting } = this.props.diagramStore!;
 
     return (

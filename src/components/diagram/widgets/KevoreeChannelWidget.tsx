@@ -40,7 +40,7 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
         style={{ background: this.props.node.color }}
       >
         <div className="title">
-          <div className="name">{this.props.node.instance!.name}: {this.props.node.instance!.typeDefinition.name}</div>
+          <div className="name">{this.props.node.instance!.name}: {this.props.node.instance!.typeDefinition!.name}</div>
         </div>
       </div>
     );

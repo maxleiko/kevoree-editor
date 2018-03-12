@@ -27,9 +27,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   private _elem: HTMLDivElement | null;
 
   private _listener: kevoree.KevoreeModelListener = {
-    elementChanged: (event) => {
-      this.forceUpdate();
-    }
+    elementChanged: (event) => this.forceUpdate()
   };
 
   constructor(props: KevoreeNodeWidgetProps) {
@@ -62,6 +60,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
 
   render() {
     const instance = this.props.node.instance!;
+    const tdef = instance.typeDefinition ? instance.typeDefinition : { name: '???', version: -1 };
     const { r, g, b } = this.props.node.color;
 
     return (
@@ -78,12 +77,12 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
             onCommit={(name) => instance.name = name}
             className="name"
           />
-          <span className="type">{instance.typeDefinition.name}/{instance.typeDefinition.version}</span>
+          <span className="type">{tdef.name}/{tdef.version}</span>
         </div>
         <div className="body">
           <ul className="components">
             {this.props.node.instance!.components.array.map((comp) => (
-              <li key={comp.name}>{comp.name}: {comp.typeDefinition.name}</li>
+              <li key={comp.name}>{comp.name}: {comp.typeDefinition ? comp.typeDefinition.name : '???'}</li>
             ))}
           </ul>
         </div>

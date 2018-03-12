@@ -8,13 +8,10 @@ export class KevoreeComponentModel extends AbstractModel<kevoree.Component> {
 
   ports: { [s: string]: KevoreePortModel };
 
-  constructor(instance?: kevoree.Component) {
+  constructor(instance: kevoree.Component) {
     super('kevoree-component', instance);
-    if (instance) {
-      this.instance = instance;
-      instance.provided.array.forEach((port) => this.addInput(port));
-      instance.required.array.forEach((port) => this.addOutput(port));
-    }
+    instance.provided.array.forEach((port) => this.addInput(port));
+    instance.required.array.forEach((port) => this.addOutput(port));
   }
 
   addInput(port: kevoree.Port) {

@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
 import { DiagramStore } from './stores/DiagramStore';
+import { KevoreeService } from './services/KevoreeService';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
@@ -13,9 +14,10 @@ import './App.css';
 
 interface AppProps {
   diagramStore?: DiagramStore;
+  kevoreeService?: KevoreeService;
 }
 
-@inject('diagramStore')
+@inject('diagramStore', 'kevoreeService')
 @observer
 export default class App extends React.Component<AppProps> {
 
