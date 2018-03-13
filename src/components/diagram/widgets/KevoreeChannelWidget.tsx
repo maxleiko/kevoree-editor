@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DiagramEngine, DefaultPortLabel, DefaultPortModel } from 'storm-react-diagrams';
 
 import { KevoreeChannelModel } from '../models/KevoreeChannelModel';
+import { InstanceHeader } from '../../kevoree';
 
 import './KevoreeChannelWidget.scss';
 
@@ -39,9 +40,7 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
         className="kevoree-channel"
         style={{ background: this.props.node.color }}
       >
-        <div className="title">
-          <div className="name">{this.props.node.instance!.name}: {this.props.node.instance!.typeDefinition!.name}</div>
-        </div>
+        <InstanceHeader instance={this.props.node.instance} />
       </div>
     );
   }

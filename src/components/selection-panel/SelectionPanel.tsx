@@ -1,14 +1,15 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
-import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
 import Resizable from 're-resizable';
 
 import { SelectionPanelStore, DiagramStore } from '../../stores';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SelectionListener } from '../../listeners';
+import { InstanceDetails } from '../instance-details';
 
 import './SelectionPanel.scss';
+import { KevoreeServiceListener } from '../../services';
 
 export interface SelectionPanelProps {
   diagramStore?: DiagramStore;
@@ -18,24 +19,23 @@ export interface SelectionPanelProps {
 
 @inject('kevoreeService', 'diagramStore', 'selectionPanelStore')
 @observer
-export class SelectionPanel extends React.Component<SelectionPanelProps> {
+export class SelectionPanel extends React.Component<SelectionPanelProps> implements KevoreeServiceListener {
 
   private _listener = new SelectionListener(() => this.forceUpdate());
 
+  modelChanged() {
+    this.forceUpdate();
+    this.props.kevoreeService!.model.addModelTreeListener(this._listener);
+  }
+
   componentDidMount() {
+    this.props.kevoreeService!.addListener(this);
     this.props.kevoreeService!.model.addModelTreeListener(this._listener);
   }
 
   componentWillUnmount() {
+    this.props.kevoreeService!.removeListener(this);
     this.props.kevoreeService!.model.removeModelTreeListener(this._listener);
-  }
-
-  renderInstance(instance: kevoree.Instance) {
-    const tdef = instance.typeDefinition ? instance.typeDefinition : { name: '???', version: -1 };
-
-    return (
-      <li key={instance.path()}>{instance.name}: {tdef.name}/{tdef.version}</li>
-    );
   }
 
   render() {
@@ -52,9 +52,7 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> {
         onResizeStop={(e, dir, el, d) => setWidth(width + d.width)}
       >
         <div className="content">
-          <ul>
-            {selection.map((instance) => this.renderInstance(instance))}
-          </ul>
+          {selection.map((instance) => <InstanceDetails key={instance.path()} instance={instance} />)}
         </div>
       </Resizable>
     );

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DiagramEngine } from 'storm-react-diagrams';
 
 import { KevoreeGroupModel } from '../models/KevoreeGroupModel';
+import { InstanceHeader } from '../../kevoree';
 
 import './KevoreeGroupWidget.scss';
 
@@ -35,9 +36,7 @@ export class KevoreeGroupWidget extends React.Component<KevoreeGroupWidgetProps,
         className="kevoree-group"
         style={{ background: this.props.node.color }}
       >
-        <div className="title">
-          <div className="name">{this.props.node.instance!.name}: {this.props.node.instance!.typeDefinition!.name}</div>
-        </div>
+        <InstanceHeader instance={this.props.node.instance} />
       </div>
     );
   }

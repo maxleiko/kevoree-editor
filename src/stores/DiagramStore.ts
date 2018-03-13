@@ -85,8 +85,8 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
       this._model = new DiagramModel();
       this.initModel(prevZoomLevel);
       this._engine.setDiagramModel(this._model);
-      this.updateDiagram(elem);
       this.registerListeners();
+      this.updateDiagram(elem);
       this._engine.repaintCanvas();
     } else {
       throw new Error(`Unable to find "${path}" in the Kevoree model`);
@@ -208,7 +208,10 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
 
   @action private updateDiagram(elem: kevoree.Klass<any>) {
     if (isNode(elem)) {
-      (elem as kevoree.Node).components.array.forEach((comp) => this.addComponent(comp));
+      const node = elem as kevoree.Node;
+      node.components.array.forEach((comp) => this.addComponent(comp));
+      const model = node.eContainer() as kevoree.Model;
+      model.hubs.array.forEach((chan) => this.addChannel(chan));
     } else if (isModel(elem)) {
       const model = elem as kevoree.Model;
       model.nodes.array.forEach((node) => this.addNode(node));

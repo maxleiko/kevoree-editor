@@ -8,22 +8,6 @@
   flex-flow: column;
   min-width: 160px;
 
-  .header {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 10px;
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
-
-    .name {
-      margin-right: 10px;
-      
-      font-weight: bold;
-    }
-  }
-
   .ports {
     display: flex;
     justify-content: space-between;

@@ -5,7 +5,7 @@ export class SelectionPanelStore {
   @observable private _width = 250;
   @observable private _minWidth = 250;
 
-  @action setWidth(width: number) {
+  @action.bound setWidth(width: number) {
     this._width = width;
   }
 
