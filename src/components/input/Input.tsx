@@ -20,8 +20,7 @@ export class Input extends React.Component<Props, InputState> {
       this.state = { editing: false };
     }
   
-    startEditing(event: React.MouseEvent<HTMLSpanElement>) {
-      event.stopPropagation();
+    startEditing() {
       this.setState({ editing: true });
     }
   
@@ -45,6 +44,10 @@ export class Input extends React.Component<Props, InputState> {
       } else if (event.keyCode === 27) {
         // "esc"
         this.cancelEditing();
+      } else {
+        if (!this.state.editing) {
+          this.startEditing();
+        }
       }
     }
   
@@ -52,9 +55,6 @@ export class Input extends React.Component<Props, InputState> {
       if (this.state.editing) {
         if (this._elem) {
           this._elem.focus();
-          if (this._elem.setSelectionRange) {
-            this._elem.setSelectionRange(0, this._elem.value.length, 'forward');
-          }
         }
       }
     }
@@ -64,6 +64,10 @@ export class Input extends React.Component<Props, InputState> {
         if (typeof type === 'undefined') {
           type = 'text';
         }
+
+        const style = this.state.editing
+          ? { backgroundColor: 'rgba(255, 0, 0, 0.2)' }
+          : { backgroundColor: 'rgba(0, 0, 0, 0.2)' };
     
         return (
           <input
@@ -71,8 +75,10 @@ export class Input extends React.Component<Props, InputState> {
             ref={(elem) => this._elem = elem!}
             type={type}
             defaultValue={this.props.value}
+            onFocus={() => this.startEditing()}
             onKeyDown={(event) => this.onKeyDown(event)}
             onBlur={() => this.cancelEditing()}
+            style={style}
           />
         );
     }
