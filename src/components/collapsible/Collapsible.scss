@@ -1,4 +1,7 @@
 .Collapsible {
+    display: flex;
+    flex-flow: column;
+    flex-grow: 1;
     margin: 4px;
     background-color: #333;
     color: #eee;

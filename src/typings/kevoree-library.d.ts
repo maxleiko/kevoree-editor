@@ -259,6 +259,8 @@ declare module 'kevoree-library' {
     deployUnits: KList<DeployUnit>;
     dictionaryType: DictionaryType;
     metaData: KList<Value<TypeDefinition>>;
+
+    findMetaDataByID(id: string): Value<TypeDefinition> | null;
   }
   
   export interface PortTypeRef extends Named<PortTypeRef, ComponentType> {
@@ -320,16 +322,8 @@ declare module 'kevoree-library' {
     addAllDeployUnits(dus: any): void;
   }
   
-  export enum DataType {
-    Byte = 'Byte',
-    Short = 'Short',
-    Int = 'Int',
-    Long = 'Long',
-    Float = 'Float',
-    Double = 'Double',
-    Boolean = 'Boolean',
-    Char = 'Char',
-    String = 'String'
+  export class DataType {
+    name$: 'BYTE' | 'SHORT' | 'INT' | 'LONG' | 'FLOAT' | 'DOUBLE' | 'BOOLEAN' | 'CHAR' | 'STRING';
   }
   
   export interface RTypeDefinition {

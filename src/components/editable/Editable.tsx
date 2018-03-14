@@ -5,6 +5,7 @@ import './Editable.css';
 
 export interface EditableProps {
   value: string;
+  type?: 'text' | 'number';
   className?: string;
   onCommit: (val: string) => void;
 }
@@ -22,7 +23,8 @@ export class Editable extends React.Component<EditableProps, EditableState> {
     this.state = { editing: false };
   }
 
-  startEditing() {
+  startEditing(event: React.MouseEvent<HTMLSpanElement>) {
+    event.stopPropagation();
     this.setState({ editing: true });
   }
 
@@ -37,8 +39,7 @@ export class Editable extends React.Component<EditableProps, EditableState> {
     this.setState({ editing: false });
   }
 
-  onKeyUp(event: React.KeyboardEvent<HTMLInputElement>) {
-    event.preventDefault();
+  onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     event.stopPropagation();
 
     if (event.keyCode === 13) {
@@ -54,7 +55,7 @@ export class Editable extends React.Component<EditableProps, EditableState> {
     return (
       <span
         className={cx('Editable-span', this.props.className)}
-        onDoubleClick={() => this.startEditing()}
+        onClick={(event) => this.startEditing(event)}
       >
         {this.props.value}
       </span>
@@ -73,13 +74,18 @@ export class Editable extends React.Component<EditableProps, EditableState> {
   }
 
   renderEditable() {
+    let type = this.props.type!;
+    if (typeof type === 'undefined') {
+      type = 'text';
+    }
+
     return (
       <input
         className={cx('Editable-input', this.props.className)}
         ref={(elem) => this._elem = elem!}
-        type="text"
+        type={type}
         defaultValue={this.props.value}
-        onKeyUp={(event) => this.onKeyUp(event)}
+        onKeyDown={(event) => this.onKeyDown(event)}
         onBlur={() => this.cancelEditing()}
       />
     );

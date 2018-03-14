@@ -1,5 +1,6 @@
 .SelectionPanel {
   display: flex;
+  flex-flow: column;
   position: relative;
   top: 0;
   right: 0;
@@ -22,7 +23,5 @@
     }
   }
 
-  .content {
-    flex-grow: 1;
-  }
+  .content {}
 }

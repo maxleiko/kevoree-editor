@@ -5,7 +5,8 @@ import {
   KEVOREE_GROUP,
   KEVOREE_NODE,
   KWE_SELECTED,
-  KWE_POSITION
+  KWE_POSITION,
+  KEV_DESCRIPTION,
 } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
@@ -85,6 +86,14 @@ export function getPosition(instance: kevoree.Instance) {
     position = setPosition(instance, { x: 100, y: 100 });
   }
   return JSON.parse(position.value);
+}
+
+export function getDescription(tdef: kevoree.TypeDefinition) {
+  const desc = tdef.findMetaDataByID(KEV_DESCRIPTION);
+  if (desc) {
+    return desc.value;
+  }
+  return null;
 }
 
 export function setPosition(instance: kevoree.Instance, point: kwe.Point) {

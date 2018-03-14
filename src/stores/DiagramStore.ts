@@ -50,11 +50,6 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
     // init
     this.changePath(this._path);
     this._previousPath = null;
-
-    if (process.env.NODE_ENV !== 'production') {
-      // tslint:disable-next-line
-      window['diagram'] = this._engine;
-    }
   }
 
   @action addNode(node: kevoree.Node) {
@@ -83,6 +78,10 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
       this._path = path;
       const prevZoomLevel = this._model.getZoomLevel();
       this._model = new DiagramModel();
+      if (process.env.NODE_ENV !== 'production') {
+        // tslint:disable-next-line
+        window['diagram'] = this._engine;
+      }
       this.initModel(prevZoomLevel);
       this._engine.setDiagramModel(this._model);
       this.registerListeners();

@@ -5,8 +5,8 @@ import { Collapse } from 'reactstrap';
 import './Collapsible.scss';
 
 export interface CollapsibleProps {
-    header: React.ReactElement<any>;
-    content: React.ReactElement<any>;
+    header: React.ReactElement<any> | string;
+    content: React.ReactElement<any> | string;
     defaultOpen?: boolean;
 }
 
@@ -25,12 +25,14 @@ export class Collapsible
     }
 
     render() {
+        const { isOpen } = this.state;
+
         return (
             <div className={cx('Collapsible', this.props.className)}>
-                <div className="Collapsible-header" onClick={() => this.setState({ isOpen: !this.state.isOpen })}>
+                <div className="Collapsible-header" onClick={() => this.setState({ isOpen: !isOpen })}>
                     {this.props.header}
                 </div>
-                <Collapse className="Collapsible-content" isOpen={this.state.isOpen}>
+                <Collapse className="Collapsible-content" isOpen={isOpen}>
                     {this.props.content}
                 </Collapse>
             </div>

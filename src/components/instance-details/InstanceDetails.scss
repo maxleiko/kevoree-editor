@@ -5,4 +5,11 @@
         flex-grow: 1;
         justify-content: space-between;
     }
+
+    .InstanceDetails-content {
+        font-size: 12px;
+        display: block;
+        word-wrap: break-word;
+        white-space: normal;
+    }
 }

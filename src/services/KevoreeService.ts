@@ -134,6 +134,10 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   deserialize(data: string) {
     try {
       this._model = this._loader.loadModelFromString<kevoree.Model>(data).get(0);
+      if (process.env.NODE_ENV !== 'production') {
+        // tslint:disable-next-line
+        window['model'] = this._model;
+      }
       this._listeners.forEach((listener) => listener.modelChanged());
     } catch (err) {
       throw new Error('Unable to deserialize the model');

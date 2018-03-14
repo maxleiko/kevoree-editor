@@ -2,9 +2,10 @@ import * as React from 'react';
 import * as cx from 'classnames';
 import * as kevoree from 'kevoree-library';
 
+import { Editable } from '../../editable';
+// import { KevoreeUpdate } from '../../kevoree';
 import { str2rgb } from '../../../utils/colors';
 import { getType } from '../../../utils/kevoree';
-import { Editable } from '../../editable';
 
 import './InstanceHeader.scss';
 

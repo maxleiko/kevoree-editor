@@ -6,3 +6,4 @@ export const KEVOREE_GROUP = 'group';
 export const DIAGRAM_DEFAULT_ZOOM = 100;
 export const KWE_POSITION = 'kwe_position';
 export const KWE_SELECTED = 'kwe_selected';
+export const KEV_DESCRIPTION = 'description';

@@ -1,0 +1,28 @@
+.Param {
+    display: flex;
+    flex-flow: column;
+
+    .name {
+        display: flex;
+        flex-grow: 1;
+        font-weight: bold;
+    }
+
+    .value {
+        display: flex;
+        flex-grow: 1;
+        justify-content: flex-end;
+
+        input {
+            border: 1px solid #999;
+            color: #ccc;
+            background-color: #444;
+            display: flex;
+            flex-grow: 1;
+
+            &[type=checkbox] {
+                flex-grow: 0;
+            }
+        }
+    }
+}
