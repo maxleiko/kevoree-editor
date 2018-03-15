@@ -70,12 +70,11 @@ export class SidebarGroup extends React.Component<SidebarGroupProps> {
 
   render() {
     return (
-      <div className="SidebarGroup">
-        <Collapsible
-          header={this.renderHeader()}
-          content={this.renderContent()}
-        />
-      </div>
+      <Collapsible
+        className="SidebarGroup"
+        header={this.renderHeader()}
+        content={this.renderContent()}
+      />
     );
   }
 }

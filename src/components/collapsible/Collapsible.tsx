@@ -5,9 +5,10 @@ import { Collapse } from 'reactstrap';
 import './Collapsible.scss';
 
 export interface CollapsibleProps {
-    header: React.ReactElement<any> | string;
-    content: React.ReactElement<any> | string;
+    header: React.ReactNode;
+    content: React.ReactNode;
     defaultOpen?: boolean;
+    withIcons?: boolean;
 }
 
 interface CollapsibleState {
@@ -24,12 +25,20 @@ export class Collapsible
         };
     }
 
+    renderIcons() {
+        if (typeof this.props.withIcons === 'boolean' && this.props.withIcons) {
+            return <span style={{ width: 12, textAlign: 'center' }}>{this.state.isOpen ? '-' : '+'}</span>;
+        }
+        return null;
+    }
+
     render() {
         const { isOpen } = this.state;
 
         return (
             <div className={cx('Collapsible', this.props.className)}>
                 <div className="Collapsible-header" onClick={() => this.setState({ isOpen: !isOpen })}>
+                    {this.renderIcons()}
                     {this.props.header}
                 </div>
                 <Collapse className="Collapsible-content" isOpen={isOpen}>

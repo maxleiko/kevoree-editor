@@ -33,12 +33,11 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
         return (
             <div className="InstanceDetails-content">
                 <Collapsible
-                    defaultOpen={true}
                     header={<span style={{ fontWeight: 'bold' }}>Description</span>}
                     content={<div dangerouslySetInnerHTML={{ __html: desc }} />}
+                    withIcons={true}
                 />
                 <Collapsible
-                    defaultOpen={true}
                     header={<span style={{ fontWeight: 'bold' }}>Params</span>}
                     content={
                         <Params
@@ -46,6 +45,7 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
                             attrs={instance.typeDefinition!.dictionaryType.attributes.array}
                         />
                     }
+                    withIcons={true}
                 />
             </div>
         );
@@ -55,7 +55,6 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
         return (
             <Collapsible
                 className="InstanceDetails"
-                defaultOpen={false}
                 header={<InstanceHeader instance={this.props.instance} />}
                 content={this.renderContent()}
             />

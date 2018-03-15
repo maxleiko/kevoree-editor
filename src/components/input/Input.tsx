@@ -66,7 +66,7 @@ export class Input extends React.Component<Props, InputState> {
         }
 
         const style = this.state.editing
-          ? { backgroundColor: 'rgba(255, 0, 0, 0.2)' }
+          ? { backgroundColor: 'rgba(244, 163, 65, 0.2)' }
           : { backgroundColor: 'rgba(0, 0, 0, 0.2)' };
     
         return (
