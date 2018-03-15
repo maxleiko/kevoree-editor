@@ -8,7 +8,7 @@ import 'storm-react-diagrams/dist/style.min.css';
 import './assets/font-awesome/css/font-awesome.min.css';
 
 import { KevoreeService, RegistryService, FileService } from './services';
-import { DiagramStore, SidebarStore, SelectionPanelStore } from './stores';
+import { DiagramStore, SidebarStore, SelectionPanelStore, ModalStore } from './stores';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
@@ -23,12 +23,11 @@ const services = {
   registryService: new RegistryService(),
 };
 
-const selectionPanelStore = new SelectionPanelStore();
-
 const stores = {
   sidebarStore: new SidebarStore(services.registryService),
   diagramStore: new DiagramStore(services.kevoreeService),
-  selectionPanelStore,
+  selectionPanelStore: new SelectionPanelStore(),
+  modalStore: new ModalStore(),
 };
 // ========================================================
 

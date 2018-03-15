@@ -39,7 +39,7 @@ export class FileService {
   }
 
   load() {
-    return new Promise<File & { data: string }>((resolve, reject) => {
+    return new Promise<{ name: string, lastModified: number, size: number, data: string }>((resolve, reject) => {
       const input = document.createElement('input');
       input.id = 'upload-file';
       input.type = 'file';
@@ -51,7 +51,8 @@ export class FileService {
           // get rid of input
           document.body.removeChild(input);
           const data = (onLoadEvt.target as any).result;
-          resolve({ ...file, data });
+          // spreading "file" with ...file makes you lose the properties (they must not be enumerable I guess?)
+          resolve({ name: file.name, lastModified: file.lastModified, size: file.size, data });
         };
   
         try {

@@ -3,23 +3,23 @@ import { toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 import { Navbar, NavbarBrand, NavbarToggler, Collapse, Nav, NavItem, NavLink } from 'reactstrap';
 
-import { KevoreeService } from '../../services/KevoreeService';
-import { DiagramStore } from '../../stores/DiagramStore';
-import { FileService } from '../../services/FileService';
+import { DiagramStore, ModalStore } from '../../stores';
+import { KevoreeService, FileService } from '../../services';
 
 import './Topbar.css';
 
 export interface TopbarProps {
-  kevoreeService?: KevoreeService;
   diagramStore?: DiagramStore;
+  modalStore?: ModalStore;
   fileService?: FileService;
+  kevoreeService?: KevoreeService;
 }
 
 interface TopbarState {
   isOpen: boolean;
 }
 
-@inject('kevoreeService', 'diagramStore', 'fileService')
+@inject('diagramStore', 'modalStore', 'kevoreeService', 'fileService')
 @observer
 export class Topbar extends React.Component<TopbarProps, TopbarState> {
 
@@ -35,7 +35,21 @@ export class Topbar extends React.Component<TopbarProps, TopbarState> {
   onLoad() {
     this.props.fileService!.load()
       .then(
-        (file) => this.props.kevoreeService!.deserialize(file.data),
+        (file) => {
+          this.props.modalStore!.confirm({
+            header: 'Load model',
+            body: (
+              <div>
+                <p>Are you sure you want to load the model from:</p>
+                <ul>
+                  <li><strong>{file.name}</strong></li>
+                </ul>
+                <p className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
+              </div>
+            ),
+            onConfirm: () => this.props.kevoreeService!.deserialize(file.data)
+          });
+        },
         (err) => toast.error(`Unable to load file ${err.filename}`));
   }
 
