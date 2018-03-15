@@ -1,8 +1,13 @@
+.Editable-input:hover, .Editable-span:hover {
+  cursor: text !important;
+}
+
 .Editable-input {
   border: none;
   background: transparent;
   width: 0;
-  min-width: 0;
+  min-width: 60px;
   display: flex;
   flex-grow: 1;
+  color: #eee;
 }

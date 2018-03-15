@@ -1,5 +1,5 @@
 import * as kevoree from 'kevoree-library';
-import { NodeModel, DiagramEngine } from 'storm-react-diagrams';
+import { NodeModel, DiagramEngine, BaseModelListener, BaseModel } from 'storm-react-diagrams';
 import { str2rgb } from '../../../utils/colors';
 import * as kUtils from '../../../utils/kevoree';
 
@@ -23,8 +23,15 @@ export abstract class AbstractModel<T extends kevoree.Instance = kevoree.Instanc
 
   setSelected(isSelected: boolean = true) {
     super.setSelected(isSelected);
-    // TODO might be damn slow
     kUtils.setSelected(this.instance, isSelected);
+  }
+
+  getSelectedEntities(): BaseModel<any, BaseModelListener>[] {
+    const isSelected = kUtils.isSelected(this.instance);
+    if (isSelected) {
+      return [this];
+    }
+    return [];
   }
 
   serialize() {

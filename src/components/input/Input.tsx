@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import './Input.scss';
+
 export interface InputProps {
     value: string;
     type?: 'text' | 'number';

@@ -53,7 +53,13 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
         className="kevoree-component"
         style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
       >
-        <InstanceHeader className="header" instance={instance} alpha={0.4} rgb={{ r: 0, g: 0, b: 0 }} />
+        <InstanceHeader
+          className="header"
+          instance={instance}
+          alpha={0.4}
+          rgb={{ r: 0, g: 0, b: 0 }}
+          hoverable={false}
+        />
         <div className="ports">
           <div className="in">{this.props.node.getInputs().map((port) => this.generatePort(port))}</div>
           <div className="out">{this.props.node.getOutputs().map((port) => this.generatePort(port))}</div>

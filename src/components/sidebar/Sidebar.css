@@ -1,7 +1,7 @@
 .Sidebar {
   background-color: #222;
-  width: 240px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+  width: 256px;
+  box-shadow: -2px 0 20px rgba(0, 0, 0, 0.8);
   z-index: 1;
   display: flex;
   flex-flow: column;
@@ -12,15 +12,11 @@
   height: 100%;
 }
 
-.Sidebar-scrollbar {
-  color: #666;
+.Sidebar-content .inner {
+  padding-right: 6px;
 }
 
-.Sidebar-innerscroll {
-  padding: 4px 8px;
-}
-
-.Sidebar-content-empty {
+.Sidebar-content .empty {
   font-style: italic;
   color: #ccc;
 }

@@ -69,7 +69,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
         onDoubleClick={() => this.openNodeView()}
         onKeyDown={(event) => this.onKeyDown(event)}
       >
-        <InstanceHeader className="header" instance={instance} />
+        <InstanceHeader className="header" instance={instance} hoverable={false} />
         <div className="body">
           <ul className="components">
             {this.props.node.instance!.components.array.map((comp) => (

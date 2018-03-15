@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { Scrollbars } from 'react-custom-scrollbars';
 import { toast } from 'react-toastify';
 
 import { SidebarStore } from '../../stores/SidebarStore';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarGroup } from './SidebarGroup';
+import { CustomScrollbar } from '../scrollbars';
 
 import './Sidebar.css';
 
@@ -27,12 +27,15 @@ export class Sidebar extends React.Component<SidebarProps> {
     const { namespaces, namespacesMap } = this.props.sidebarStore!;
 
     if (namespaces.length === 0) {
-      return <span className="Sidebar-content-empty">No result</span>;
+      return <span className="empty">No result</span>;
     } else {
-      return namespaces
-        .map((ns) => (
-          <SidebarGroup key={ns.name} store={namespacesMap.get(ns.name)!} />
-        ));
+      return (
+        <div className="inner">
+          {namespaces.map((ns) =>
+            <SidebarGroup key={ns.name} store={namespacesMap.get(ns.name)!} />
+          )}
+        </div>
+      );
     }
   }
 
@@ -46,9 +49,9 @@ export class Sidebar extends React.Component<SidebarProps> {
       <div className="Sidebar">
         <SidebarHeader />
         <div className="Sidebar-content">
-          <Scrollbars>
+          <CustomScrollbar>
             {this.renderContent()}
-          </Scrollbars>
+          </CustomScrollbar>
         </div>
       </div>
     );

@@ -40,7 +40,7 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
         className="kevoree-channel"
         style={{ background: this.props.node.color }}
       >
-        <InstanceHeader instance={this.props.node.instance} />
+        <InstanceHeader instance={this.props.node.instance} hoverable={false} />
       </div>
     );
   }

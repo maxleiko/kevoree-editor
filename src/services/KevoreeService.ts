@@ -26,9 +26,14 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   private _loader = this._factory.createJSONLoader();
   private _serializer = this._factory.createJSONSerializer();
   private _listeners: KevoreeServiceListener[] = [];
+  private _nodesCount = 0;
+  private _groupsCount = 0;
+  private _chansCount = 0;
+  private _compsCount: Map<string, number> = new Map();
 
   constructor() {
     this._factory.root(this._model);
+    this.initInstanceCounters();
 
     if (process.env.NODE_ENV !== 'production') {
       // tslint:disable-next-line
@@ -134,6 +139,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   deserialize(data: string) {
     try {
       this._model = this._loader.loadModelFromString<kevoree.Model>(data).get(0);
+      this.initInstanceCounters();
       if (process.env.NODE_ENV !== 'production') {
         // tslint:disable-next-line
         window['model'] = this._model;
@@ -188,6 +194,16 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     // TODO
   }
 
+  private initInstanceCounters() {
+    this._nodesCount = this._model.nodes.array.length;
+    this._groupsCount = this._model.groups.array.length;
+    this._chansCount = this._model.hubs.array.length;
+    this._compsCount = new Map();
+    this._model.nodes.array.forEach((node) => {
+      this._compsCount.set(node.name, node.components.array.length - 1);
+    });
+  }
+
   private findOrCreateTypeDefinition(rTdef: ITypeDefinition) {
     const path = `/packages[${rTdef.namespace!}]/typeDefinitions[name=${rTdef.name},version=${rTdef.version}]`;
     let tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
@@ -200,7 +216,13 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createComponent(tdef: kevoree.ComponentType, container: kevoree.Node, point: kwe.Point) {
     const instance: kevoree.Component = this._factory.createComponentInstance();
-    instance.name = `comp${container.components.size()}`;
+    let compCount = this._compsCount.get(container.name)!;
+    if (typeof compCount === 'undefined') {
+      compCount = -1;
+    }
+    compCount++;
+    this._compsCount.set(container.name, compCount);
+    instance.name = `comp${compCount}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -210,7 +232,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createNode(tdef: kevoree.NodeType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Node = this._factory.createContainerNode();
-    instance.name = `node${container.nodes.size()}`;
+    instance.name = `node${this._nodesCount++}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -219,7 +241,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createChannel(tdef: kevoree.ChannelType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Channel = this._factory.createChannel();
-    instance.name = `chan${container.nodes.size()}`;
+    instance.name = `chan${this._chansCount++}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -228,7 +250,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createGroup(tdef: kevoree.GroupType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Group = this._factory.createGroup();
-    instance.name = `group${container.nodes.size()}`;
+    instance.name = `group${this._groupsCount++}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);

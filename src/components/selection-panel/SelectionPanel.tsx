@@ -7,6 +7,7 @@ import { SelectionPanelStore, DiagramStore } from '../../stores';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SelectionListener } from '../../listeners';
 import { InstanceDetails } from '../instance-details';
+import { CustomScrollbar } from '../scrollbars';
 
 import './SelectionPanel.scss';
 import { KevoreeServiceListener } from '../../services';
@@ -51,9 +52,11 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> impleme
         enable={{ left: true }}
         onResizeStop={(e, dir, el, d) => setWidth(width + d.width)}
       >
-        <div className="content">
-          {selection.map((instance) => <InstanceDetails key={instance.path()} instance={instance} />)}
-        </div>
+        <CustomScrollbar>
+          <div className="content">
+            {selection.map((instance) => <InstanceDetails key={instance.path()} instance={instance} />)}
+          </div>
+        </CustomScrollbar>
       </Resizable>
     );
   }

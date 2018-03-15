@@ -15,7 +15,7 @@ export interface InstanceDetailsProps {
 export class InstanceDetails extends React.Component<InstanceDetailsProps> {
 
     private _listener: kevoree.KevoreeModelListener = {
-        elementChanged: () => this.forceUpdate()
+        elementChanged: (event) => this.forceUpdate()
     };
 
     componentDidMount() {
@@ -28,27 +28,31 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
 
     renderContent() {
         const { instance } = this.props;
-        const desc = kUtils.getDescription(instance.typeDefinition!) || '<em>no description</em>';
+        if (instance.typeDefinition) {
+            const desc = kUtils.getDescription(instance.typeDefinition) || '<em>no description</em>';
 
-        return (
-            <div className="InstanceDetails-content">
-                <Collapsible
-                    header={<span style={{ fontWeight: 'bold' }}>Description</span>}
-                    content={<div dangerouslySetInnerHTML={{ __html: desc }} />}
-                    withIcons={true}
-                />
-                <Collapsible
-                    header={<span style={{ fontWeight: 'bold' }}>Params</span>}
-                    content={
-                        <Params
-                            params={instance.dictionary.values.array}
-                            attrs={instance.typeDefinition!.dictionaryType.attributes.array}
-                        />
-                    }
-                    withIcons={true}
-                />
-            </div>
-        );
+            return (
+                <div className="InstanceDetails-content">
+                    <Collapsible
+                        header={<span style={{ fontWeight: 'bold' }}>Description</span>}
+                        content={<div dangerouslySetInnerHTML={{ __html: desc }} />}
+                        withIcons={true}
+                    />
+                    <Collapsible
+                        header={<span style={{ fontWeight: 'bold' }}>Params</span>}
+                        content={
+                            <Params
+                                params={instance.dictionary.values.array}
+                                attrs={instance.typeDefinition!.dictionaryType.attributes.array}
+                            />
+                        }
+                        withIcons={true}
+                    />
+                </div>
+            );
+        }
+
+        return null;
     }
 
     render() {

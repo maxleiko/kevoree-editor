@@ -158,7 +158,7 @@ declare module 'kevoree-library' {
 
   export interface ActionType {
     code: string;
-    name$: string;
+    name$: 'ADD' | 'REMOVE' | 'SET' | 'REMOVE_ALL' | 'ADD_ALL' | 'RENEW_INDEX';
   }
 
   export interface ElementAttributeType {

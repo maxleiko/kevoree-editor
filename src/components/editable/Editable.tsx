@@ -67,15 +67,8 @@ export class Editable extends React.Component<EditableProps, EditableState> {
     }
   }
 
-  renderStatic() {
-    return (
-      <span
-        className={cx('Editable-span', this.props.className)}
-        onClick={(event) => this.startEditing(event)}
-      >
-        {this.props.value}
-      </span>
-    );
+  stopPropagation(event: React.MouseEvent<any>) {
+    event.stopPropagation();
   }
 
   componentDidUpdate() {
@@ -87,6 +80,19 @@ export class Editable extends React.Component<EditableProps, EditableState> {
         }
       }
     }
+  }
+
+  renderStatic() {
+    return (
+      <span
+        className={cx('Editable-span', this.props.className)}
+        onClick={(event) => this.startEditing(event)}
+        // onTouchStart={(event) => this.startEditing(event)}
+        onDoubleClick={(event) => this.stopPropagation(event)}
+      >
+        {this.props.value}
+      </span>
+    );
   }
 
   renderEditable() {
@@ -106,6 +112,9 @@ export class Editable extends React.Component<EditableProps, EditableState> {
         type={type}
         defaultValue={this.props.value}
         onKeyDown={(event) => this.onKeyDown(event)}
+        onMouseDown={(event) => this.stopPropagation(event)}
+        onClick={(event) => this.stopPropagation(event)}
+        onDoubleClick={(event) => this.stopPropagation(event)}
         onBlur={() => this.cancelEditing()}
         style={style}
       />
