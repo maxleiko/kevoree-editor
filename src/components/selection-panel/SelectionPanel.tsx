@@ -6,7 +6,7 @@ import Resizable from 're-resizable';
 import { SelectionPanelStore, DiagramStore } from '../../stores';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SelectionListener } from '../../listeners';
-import { InstanceDetails } from '../instance-details';
+import { InstanceDetails } from '../kevoree';
 import { CustomScrollbar } from '../scrollbars';
 
 import './SelectionPanel.scss';

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as kevoree from 'kevoree-library';
 
-import { Input } from '../input';
-import { toBoolean } from '../../utils/kevoree';
+import { Input } from '../../input';
+import { toBoolean } from '../../../utils/kevoree';
 
 import './Param.scss';
 

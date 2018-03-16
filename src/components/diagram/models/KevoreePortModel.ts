@@ -5,7 +5,7 @@ import { KevoreeLinkModel } from './KevoreeLinkModel';
 
 export class KevoreePortModel extends PortModel {
 
-  readonly isInput: boolean;
+  isInput: boolean;
   port: kevoree.Port;
 
   constructor(isInput: boolean, port: kevoree.Port) {

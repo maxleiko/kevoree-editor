@@ -7,11 +7,16 @@
     color: #eee;
 
     .Collapsible-header {
-        display: flex;
-
         &:hover {
             cursor: pointer;
             background-color: #2b2b2b;
+        }
+
+        .Collapsible-header-icons {
+            padding: 0 3px;
+            display: inline-block;
+            font-family: monospace;
+            text-align: center;
         }
     }
 

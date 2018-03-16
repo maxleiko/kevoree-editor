@@ -173,12 +173,23 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   }
   
   linksUpdated(event: LinkEvent<KevoreeLinkModel>) {
-    if (event.isConnected) {
-      // TODO create a binding
-      const input = event.link.getSourcePort();
-      const output = event.link.getTargetPort();
-      // tslint:disable-next-line
-      console.log('TODO create binding', input, output);
+    // tslint:disable-next-line
+    console.log('>>> linksUpdated <<<', event);
+    if (event.isCreated) {
+     const uid = event.link.addListener({
+        sourcePortChanged: (port) => {
+          // tslint:disable-next-line
+          console.log('(re-)bind source', port);
+        },
+        targetPortChanged: (port) => {
+          // tslint:disable-next-line
+          console.log('(re-)bind target', port);
+        },
+        entityRemoved: () => {
+          event.link.removeListener(uid);
+          event.link.binding.delete();
+        }
+      });
     }
   }
   

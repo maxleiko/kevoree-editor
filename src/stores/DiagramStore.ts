@@ -9,6 +9,7 @@ import {
   KevoreeChannelFactory,
   KevoreeGroupFactory,
   KevoreePortFactory,
+  KevoreeChannelPortFactory,
   KevoreeLinkFactory,
 } from '../components/diagram/factories';
 import {
@@ -20,11 +21,14 @@ import {
 import { KevoreeService, KevoreeServiceListener } from '../services/KevoreeService';
 import { isNode, isModel } from '../utils/kevoree';
 import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
+import { AdaptationEngine, NodeAdaptationEngine, ModelAdaptationEngine } from '../adaptations';
 
 export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeModelListener {
 
   private _kService: KevoreeService;
   private _kListenerUid: string;
+  private _modelAdaptEngine: AdaptationEngine<kevoree.Model> = new ModelAdaptationEngine(this);
+  private _nodeAdaptEngine: AdaptationEngine<kevoree.Node> = new NodeAdaptationEngine(this);
   
   @observable private _path: string = '/';
   @observable private _previousPath: string | null = null;
@@ -40,6 +44,7 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
     this._engine.registerNodeFactory(new KevoreeChannelFactory(kService));
     this._engine.registerNodeFactory(new KevoreeGroupFactory(kService));
     this._engine.registerPortFactory(new KevoreePortFactory());
+    this._engine.registerPortFactory(new KevoreeChannelPortFactory());
     this._engine.registerLinkFactory(new KevoreeLinkFactory());
     this._engine.registerLabelFactory(new DefaultLabelFactory());
     this._engine.setDiagramModel(this._model);
@@ -125,41 +130,16 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   @action elementChanged(event: kevoree.ModelEvent) {
     // tslint:disable-next-line
     console.log('=== KEVOREE MODEL EVENT ===', event);
-    switch (event.etype.name$) {
-      case 'ADD':
-        if (event.elementAttributeName === 'nodes') {
-          const node = event.value as kevoree.Node;
-          this.addNode(node);
-        } else if (event.elementAttributeName === 'groups') {
-          this.addGroup(event.value as kevoree.Group);
-        } else if (event.elementAttributeName === 'hubs') {
-          this.addChannel(event.value as kevoree.Channel);
-        } else if (event.elementAttributeName === 'components') {
-          this.addComponent(event.value as kevoree.Component);
-        }
-        // TODO handle other cases
-        break;
 
-      case 'REMOVE':
-        switch (event.elementAttributeName) {
-          case 'nodes':
-          case 'groups':
-          case 'hubs':
-          case 'components':
-            const vm = this._model.getNode(event.previous_value);
-            if (vm) {
-              vm.remove();
-            }
-            break;
-
-          default:
-            break;
-        }
-        // TODO handle other cases
-        break;
-
-      default:
-        break;
+    const elem = this._kService.model.findByPath(this._path);
+    if (elem) {
+      if (isNode(elem)) {
+        this._nodeAdaptEngine.adapt(event);
+      } else if (isModel(elem)) {
+        this._modelAdaptEngine.adapt(event);
+      } else {
+        throw new Error(`TODO add elementChanged behavior for type ${elem.path()} in DiagramStore`);
+      }
     }
     this._engine.repaintCanvas();
   }
@@ -187,35 +167,24 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   }
 
   private registerKevoreeModelListener() {
-    const elem = this._kService.model.findByPath(this._path);
-    if (elem) {
-      elem.addModelElementListener(this);
-    }
+    this._kService.model.addModelTreeListener(this);
   }
 
   private removeKevoreeModelListener() {
-    const elem = this._kService.model.findByPath(this._path);
-    if (elem) {
-      elem.removeModelElementListener(this);
-    }
+    this._kService.model.removeModelTreeListener(this);
   }
 
   private initModel(zoomLevel: number = DIAGRAM_DEFAULT_ZOOM) {
     this._model.setZoomLevel(zoomLevel);
-    // this._model.setGridSize(gridSize);
   }
 
   @action private updateDiagram(elem: kevoree.Klass<any>) {
     if (isNode(elem)) {
-      const node = elem as kevoree.Node;
-      node.components.array.forEach((comp) => this.addComponent(comp));
-      const model = node.eContainer() as kevoree.Model;
-      model.hubs.array.forEach((chan) => this.addChannel(chan));
+      this._nodeAdaptEngine.createInstances(elem as kevoree.Node);
     } else if (isModel(elem)) {
-      const model = elem as kevoree.Model;
-      model.nodes.array.forEach((node) => this.addNode(node));
-      model.groups.array.forEach((group) => this.addGroup(group));
-      model.hubs.array.forEach((chan) => this.addChannel(chan));
+      this._modelAdaptEngine.createInstances(elem as kevoree.Model);
+    } else {
+      throw new Error(`TODO add updateDiagram behavior for type ${elem.path()} in DiagramStore`);
     }
   }
 

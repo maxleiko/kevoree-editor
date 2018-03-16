@@ -1,19 +1,17 @@
 import * as React from 'react';
-import { PortWidget } from 'storm-react-diagrams';
-
-import { KevoreePortModel } from '../models/KevoreePortModel';
+import { PortWidget, PortModel } from 'storm-react-diagrams';
 
 import './KevoreePortWidget.scss';
 
 export interface KevoreePortWidgetProps {
-  model: KevoreePortModel;
+  model: { isInput: boolean; } & PortModel;
 }
 
 export class KevoreePortWidget extends React.Component<KevoreePortWidgetProps> {
 
   render() {
     const port = <PortWidget node={this.props.model.getParent()} name={this.props.model.name} />;
-    const label = <span className="name">{this.props.model.port.name}</span>;
+    const label = <span className="name">{this.props.model.name}</span>;
 
     return (
       <div className="kevoree-port">

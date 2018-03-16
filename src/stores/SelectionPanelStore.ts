@@ -2,8 +2,10 @@ import { observable, computed, action } from 'mobx';
 
 export class SelectionPanelStore {
 
-  @observable private _width = 250;
-  @observable private _minWidth = 250;
+  private static WIDTH = 280;
+
+  @observable private _width = SelectionPanelStore.WIDTH;
+  @observable private _minWidth = SelectionPanelStore.WIDTH;
 
   @action.bound setWidth(width: number) {
     this._width = width;

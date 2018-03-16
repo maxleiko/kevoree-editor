@@ -3,8 +3,6 @@
     flex-grow: 1;
     justify-content: space-between;
     padding: 5px 10px;
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
     background-color: rgba(0, 0, 0, 0.3);
 
     &.node {
@@ -73,9 +71,10 @@
             );
         }
     }
-
+    
     .name {
         margin-right: 10px;
         font-weight: bold;
     }
+
 }

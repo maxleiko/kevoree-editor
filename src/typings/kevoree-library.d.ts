@@ -183,6 +183,7 @@ declare module 'kevoree-library' {
     removeModelTreeListener(listener: KevoreeModelListener): void;
     removeAllModelTreeListeners(): void;
     getModelElementListeners(): KList<KevoreeModelListener>;
+    getRefInParent(): string | null;
     delete(): void;
   }
   
@@ -216,9 +217,9 @@ declare module 'kevoree-library' {
     portTypeRef: PortTypeRef;
   }
   
-  export interface Binding {
-    port: Port;
-    hub: Channel;
+  export interface Binding extends Klass<Binding> {
+    port?: Port;
+    hub?: Channel;
   }
   
   export interface Channel extends Instance<Channel, Model> {

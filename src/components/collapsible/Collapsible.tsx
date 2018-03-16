@@ -27,7 +27,7 @@ export class Collapsible
 
     renderIcons() {
         if (typeof this.props.withIcons === 'boolean' && this.props.withIcons) {
-            return <span style={{ width: 12, textAlign: 'center' }}>{this.state.isOpen ? '-' : '+'}</span>;
+            return <span className="Collapsible-header-icons">{this.state.isOpen ? '-' : '+'}</span>;
         }
         return null;
     }

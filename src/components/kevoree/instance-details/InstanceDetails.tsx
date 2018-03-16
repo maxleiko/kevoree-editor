@@ -1,10 +1,9 @@
 import * as React from 'react';
 import * as kevoree from 'kevoree-library';
 
-import { Collapsible } from '../collapsible';
-import { InstanceHeader } from '../kevoree';
-import { Params } from './Params';
-import * as kUtils from '../../utils/kevoree';
+import { Collapsible } from '../../collapsible';
+import { InstanceHeader, Params } from '..';
+import * as kUtils from '../../../utils/kevoree';
 
 import './InstanceDetails.scss';
 
@@ -34,12 +33,14 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
             return (
                 <div className="InstanceDetails-content">
                     <Collapsible
-                        header={<span style={{ fontWeight: 'bold' }}>Description</span>}
-                        content={<div dangerouslySetInnerHTML={{ __html: desc }} />}
+                        className="InstanceDetails-group"
+                        header={<span className="InstanceDetails-group-header">Description</span>}
+                        content={<div className="InstanceDetails-desc" dangerouslySetInnerHTML={{ __html: desc }} />}
                         withIcons={true}
                     />
                     <Collapsible
-                        header={<span style={{ fontWeight: 'bold' }}>Params</span>}
+                        className="InstanceDetails-group"
+                        header={<span className="InstanceDetails-group-header">Params</span>}
                         content={
                             <Params
                                 params={instance.dictionary.values.array}
@@ -59,7 +60,7 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
         return (
             <Collapsible
                 className="InstanceDetails"
-                header={<InstanceHeader instance={this.props.instance} />}
+                header={<InstanceHeader className="InstanceDetails-header" instance={this.props.instance} />}
                 content={this.renderContent()}
             />
         );
