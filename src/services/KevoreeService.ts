@@ -139,14 +139,15 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   deserialize(data: string) {
     try {
       this._model = this._loader.loadModelFromString<kevoree.Model>(data).get(0);
+    } catch (err) {
+      throw new Error('Unable to deserialize the model');
+    } finally {
       this.initInstanceCounters();
       if (process.env.NODE_ENV !== 'production') {
         // tslint:disable-next-line
         window['model'] = this._model;
       }
       this._listeners.forEach((listener) => listener.modelChanged());
-    } catch (err) {
-      throw new Error('Unable to deserialize the model');
     }
   }
 
@@ -174,16 +175,18 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   
   linksUpdated(event: LinkEvent<KevoreeLinkModel>) {
     // tslint:disable-next-line
-    console.log('>>> linksUpdated <<<', event);
+    console.log('links.updated', event);
     if (event.isCreated) {
      const uid = event.link.addListener({
-        sourcePortChanged: (port) => {
+        sourcePortChanged: (e) => {
           // tslint:disable-next-line
-          console.log('(re-)bind source', port);
+          console.log('links.source', e);
         },
-        targetPortChanged: (port) => {
+        targetPortChanged: (e) => {
           // tslint:disable-next-line
-          console.log('(re-)bind target', port);
+          console.log('links.target', e);
+          // create new binding
+          
         },
         entityRemoved: () => {
           event.link.removeListener(uid);

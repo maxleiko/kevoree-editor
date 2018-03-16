@@ -4,10 +4,14 @@ import { KevoreeLinkModel } from './KevoreeLinkModel';
 
 export class KevoreeChannelPortModel extends PortModel {
 
+  static INPUTS = 'inputs';
+  static OUTPUTS = 'outputs';
+
   readonly isInput: boolean;
 
   constructor(isInput: boolean) {
-    super(isInput ? 'inputs' : 'outputs', 'kevoree-channel-port');
+    const name = isInput ? KevoreeChannelPortModel.INPUTS : KevoreeChannelPortModel.OUTPUTS;
+    super(name, 'kevoree-channel-port', name);
     this.isInput = isInput;
   }
 

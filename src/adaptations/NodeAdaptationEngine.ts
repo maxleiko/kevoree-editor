@@ -57,6 +57,7 @@ export class NodeAdaptationEngine extends AbstractAdaptationEngine<kevoree.Node>
                   this._store.addChannel(binding.hub);
                 }
               }
+              this._store.addBinding(binding);
             });
           });
       });

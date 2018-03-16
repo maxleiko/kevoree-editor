@@ -36,11 +36,13 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
   }
 
   render() {
+    const { r, g, b } = this.props.node.color;
+
     return (
       <div
         ref={(elem) => this._elem = elem}
         className="kevoree-channel"
-        style={{ background: this.props.node.color }}
+        style={{ background: `rgb(${r}, ${g}, ${b})` }}
       >
         <InstanceHeader instance={this.props.node.instance} hoverable={false} />
         <div className="ports">

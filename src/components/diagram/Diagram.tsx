@@ -24,7 +24,7 @@ export interface DiagramProps {
 @observer
 export class Diagram extends React.Component<DiagramProps> {
 
-  onDrop(event: React.DragEvent<HTMLElement>) {
+  onDrop(event: React.DragEvent<HTMLDivElement>) {
     try {
       const point = this.props.diagramStore!.engine.getRelativeMousePoint(event);
       const tdef: ITypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
@@ -34,9 +34,17 @@ export class Diagram extends React.Component<DiagramProps> {
     }
   }
 
+  onMouseDown(event: React.MouseEvent<HTMLDivElement>) {
+    if (event.shiftKey) {
+      // prevent selection panel's text from being selected when selecting nodes
+      document.getSelection().removeAllRanges();
+    }
+  }
+
   onActionStarted(action: BaseAction) {
     // tslint:disable-next-line
     console.log('Diagram.onActionStarted', action);
+
     return true;
   }
 
@@ -79,6 +87,7 @@ export class Diagram extends React.Component<DiagramProps> {
     return (
       <div
         className="Diagram"
+        onMouseDown={(event) => this.onMouseDown(event)}
         onDrop={(event) => this.onDrop(event)}
         onDragOver={(event) => event.preventDefault()}
       >

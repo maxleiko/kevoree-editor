@@ -1,10 +1,17 @@
 .kevoree-channel {
     color: #eee;
-    border: 2px solid black;
+    border: 2px solid #bbb;
+    border-radius: 4px;
+    outline-width: 0;
+    display: flex;
+    flex-flow: column;
+    min-width: 160px;
     
     .ports {
         display: flex;
         justify-content: space-between;
+        background-color: rgba(0, 0, 0, 0.4);
+
         .in {
             padding-right: 20px;
             .name {

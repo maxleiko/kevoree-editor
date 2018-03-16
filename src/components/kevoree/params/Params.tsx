@@ -17,6 +17,10 @@ export class Params extends React.Component<ParamsProps> {
     render() {
         const { params } = this.props;
 
+        if (params.length === 0) {
+            return <em className="text-muted">no parameters</em>;
+        }
+
         return (
             <div>
                 {params.map((param) => (

@@ -22,6 +22,8 @@ export interface SelectionPanelProps {
 @observer
 export class SelectionPanel extends React.Component<SelectionPanelProps> implements KevoreeServiceListener {
 
+  // only forces update when selection changes
+  // => prevents the whole component tree to re-render for every changes in the model
   private _listener = new SelectionListener(() => this.forceUpdate());
 
   modelChanged() {

@@ -16,7 +16,9 @@ import {
   KevoreeNodeModel,
   KevoreeComponentModel,
   KevoreeChannelModel,
-  KevoreeGroupModel
+  KevoreeGroupModel,
+  KevoreeLinkModel,
+  KevoreeChannelPortModel,
 } from '../components/diagram/models';
 import { KevoreeService, KevoreeServiceListener } from '../services/KevoreeService';
 import { isNode, isModel } from '../utils/kevoree';
@@ -60,19 +62,45 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   @action addNode(node: kevoree.Node) {
     const vm = new KevoreeNodeModel(node);
     this._model.addNode(vm);
+    return vm;
   }
 
   @action addComponent(comp: kevoree.Component) {
     const vm = new KevoreeComponentModel(comp);
     this._model.addNode(vm);
+    return vm;
   }
 
   @action addChannel(chan: kevoree.Channel) {
-    this._model.addNode(new KevoreeChannelModel(chan));
+    const vm = new KevoreeChannelModel(chan);
+    this._model.addNode(vm);
+    return vm;
   }
 
   @action addGroup(group: kevoree.Group) {
-    this._model.addNode(new KevoreeGroupModel(group));
+    const vm = new KevoreeGroupModel(group);
+    this._model.addNode(vm);
+    return vm;
+  }
+
+  @action addBinding(binding: kevoree.Binding) {
+    const vm = new KevoreeLinkModel();
+    if (binding.port && binding.hub) {
+      const compVM = this._model.getNode(binding.port.eContainer().path()) as KevoreeComponentModel;
+      const portVM = compVM.getPortFromID(binding.port.path());
+      if (portVM) {
+        vm.setSourcePort(portVM);
+        const chanVM = this._model.getNode(binding.hub.path()) as KevoreeChannelModel;
+        if (chanVM) {
+          const chanPortVM = binding.port.getRefInParent() === 'provided'
+            ? chanVM.getPortFromID(KevoreeChannelPortModel.INPUTS)!
+            : chanVM.getPortFromID(KevoreeChannelPortModel.OUTPUTS)!;
+          vm.setTargetPort(chanPortVM);
+          this._model.addLink(vm);
+        }
+      }
+    }
+    return vm;
   }
 
   @action changePath(path: string) {
@@ -146,6 +174,7 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
 
   @action modelChanged() {
     this.changePath('/');
+    this._previousPath = null;
   }
 
   private registerListeners() {

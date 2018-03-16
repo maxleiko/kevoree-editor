@@ -9,7 +9,7 @@ export class KevoreePortModel extends PortModel {
   port: kevoree.Port;
 
   constructor(isInput: boolean, port: kevoree.Port) {
-    super(port.name, 'kevoree-port');
+    super(port.name, 'kevoree-port', port.path());
     this.isInput = isInput;
     this.port = port;
   }

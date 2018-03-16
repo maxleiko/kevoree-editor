@@ -13,7 +13,7 @@ export class ModalStore {
 
     @action confirm(props: ConfirmModalProps) {
         const id = uid();
-        this._modals.set(id, { type: 'confirm', props: { id, ...props }});
+        this._modals.set(id, { type: 'confirm', props: { id, ...props } });
         return id;
     }
 
