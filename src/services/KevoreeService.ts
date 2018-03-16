@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
 import * as kUtils from '../utils/kevoree';
+import { hash } from '../utils/hash';
 import {
   DiagramListener,
   NodeEvent,
@@ -12,7 +13,12 @@ import {
   ZoomEvent,
   GridEvent 
 } from 'storm-react-diagrams';
-import { AbstractModel } from '../components/diagram/models';
+import {
+  AbstractModel,
+  KevoreeChannelPortModel,
+  KevoreeChannelModel,
+  KevoreePortModel,
+} from '../components/diagram/models';
 import { KevoreeLinkModel } from '../components/diagram/models/KevoreeLinkModel';
 
 export interface KevoreeServiceListener {
@@ -79,6 +85,18 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     } else {
       throw new Error(`Unable to find "${containerPath}" in the model`);
     }
+  }
+
+  createBinding(chan: kevoree.Channel, port: kevoree.Port): boolean {
+    const id = hash(`${chan.path()}_${port.path()}`);
+    let binding = this._model.findMBindingsByID(id);
+    if (!binding) {
+      binding = this._factory.createMBinding().withGenerated_KMF_ID(id);
+      binding.hub = chan;
+      binding.port = port;
+      this._model.addMBindings(binding);
+    }
+    return false;
   }
 
   updateNamespaces(nss: INamespace[]) {
@@ -185,8 +203,34 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
         targetPortChanged: (e) => {
           // tslint:disable-next-line
           console.log('links.target', e);
-          // create new binding
-          
+          // check whether or not one of the end is a channel port
+          const link = e.entity as KevoreeLinkModel;
+          const source = link.getSourcePort();
+          const target = link.getTargetPort();
+
+          let chanVM, portVM;
+
+          if (source instanceof KevoreeChannelPortModel) {
+            // source port is a channel port
+            chanVM = source as KevoreeChannelPortModel;
+            portVM = target as KevoreePortModel;
+          } else if (target instanceof KevoreeChannelPortModel) {
+            // target port is a channel port
+            chanVM = target as KevoreeChannelPortModel;
+            portVM = source as KevoreePortModel;
+          } else {
+            // TODO
+          }
+
+          if (chanVM) {
+            const success = this.createBinding(
+              (chanVM.parent as KevoreeChannelModel).instance,
+              (portVM as KevoreePortModel).port
+            );
+            if (!success) {
+              link.remove();
+            }
+          }
         },
         entityRemoved: () => {
           event.link.removeListener(uid);

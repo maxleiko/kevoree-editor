@@ -10,7 +10,7 @@ export class KevoreeChannelPortModel extends PortModel {
   readonly isInput: boolean;
 
   constructor(isInput: boolean) {
-    const name = isInput ? KevoreeChannelPortModel.INPUTS : KevoreeChannelPortModel.OUTPUTS;
+    const name = isInput ? KevoreeChannelPortModel.OUTPUTS : KevoreeChannelPortModel.INPUTS;
     super(name, 'kevoree-channel-port', name);
     this.isInput = isInput;
   }

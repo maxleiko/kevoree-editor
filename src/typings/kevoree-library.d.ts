@@ -120,14 +120,19 @@ declare module 'kevoree-library' {
     hubs: KList<Channel>;
     mBindings: KList<Binding>;
     packages: KList<Namespace>;
-    withGenerated_KMF_ID(s: string | number): Model;
-    findPackagesByID(id: string): Namespace;
-    findByPath<T = Klass<any>>(path: string): T | null;
+    
     addNodes(node: Node): void;
     addGroups(grp: Group): void;
     addHubs(channel: Channel): void;
+    addMBindings(binding: Binding): void;
     addPackages(pkg: Namespace): void;
     addAllPackages(pkgs: any): void;
+
+    findPackagesByID(id: string): Namespace;
+    findByPath<T = Klass<any>>(path: string): T | null;
+    findMBindingsByID(id: string): Binding | null;
+
+    withGenerated_KMF_ID(s: string | number): Model;
   }
 
   export interface KevoreeSerializer {
@@ -220,6 +225,7 @@ declare module 'kevoree-library' {
   export interface Binding extends Klass<Binding> {
     port?: Port;
     hub?: Channel;
+    withGenerated_KMF_ID(s: string | number): Binding;
   }
   
   export interface Channel extends Instance<Channel, Model> {
