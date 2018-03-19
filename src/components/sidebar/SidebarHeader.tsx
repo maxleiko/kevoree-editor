@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 
-import { SidebarStore } from '../../stores/SidebarStore';
+import { RegistryStore } from '../../stores';
 
 import './SidebarHeader.css';
 
 interface SidebarHeaderProps {
-  sidebarStore?: SidebarStore;
+  registryStore?: RegistryStore;
 }
 
-@inject('sidebarStore')
+@inject('registryStore')
 @observer
 export class SidebarHeader extends React.Component<SidebarHeaderProps> {
 
   render() {
-    const sidebarStore = this.props.sidebarStore!;
+    const registryStore = this.props.registryStore!;
 
     return (
       <div className="Sidebar-header">
@@ -25,8 +25,8 @@ export class SidebarHeader extends React.Component<SidebarHeaderProps> {
           <input
             type="text"
             className="form-control"
-            value={sidebarStore.nameFilter}
-            onChange={(e) => sidebarStore.onChangeNameFilter(e)}
+            value={registryStore.nameFilter}
+            onChange={(e) => registryStore.onChangeNameFilter(e)}
           />
         </div>
       </div>

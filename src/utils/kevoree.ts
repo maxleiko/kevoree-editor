@@ -5,7 +5,8 @@ import {
   KEVOREE_GROUP,
   KEVOREE_NODE,
   KWE_SELECTED,
-  KWE_POSITION
+  KWE_POSITION,
+  KEV_DESCRIPTION,
 } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
@@ -31,6 +32,18 @@ export function isNode(e: kevoree.Klass<any>) {
 
 export function isModel(e: kevoree.Klass<any>) {
   return e.metaClassName().startsWith('org.kevoree.ContainerRoot');
+}
+
+export function isComponent(e: kevoree.Klass<any>) {
+  return e.metaClassName().startsWith('org.kevoree.ComponentInstance');
+}
+
+export function isChannel(e: kevoree.Klass<any>) {
+  return e.metaClassName().startsWith('org.kevoree.Channel');
+}
+
+export function isGroup(e: kevoree.Klass<any>) {
+  return e.metaClassName().startsWith('org.kevoree.Group');
 }
 
 export function getType(tdef: kevoree.TypeDefinition) {
@@ -87,7 +100,15 @@ export function getPosition(instance: kevoree.Instance) {
   return JSON.parse(position.value);
 }
 
-export function setPosition(instance: kevoree.Instance, point: kwe.Point) {
+export function getDescription(tdef: kevoree.TypeDefinition) {
+  const desc = tdef.findMetaDataByID(KEV_DESCRIPTION);
+  if (desc) {
+    return desc.value;
+  }
+  return null;
+}
+
+export function setPosition(instance: kevoree.Instance, point: kwe.Point): kevoree.Value<kevoree.Instance> {
   let position = instance.findMetaDataByID(KWE_POSITION);
   if (!position) {
     const factory = new kevoree.factory.DefaultKevoreeFactory();
@@ -98,7 +119,7 @@ export function setPosition(instance: kevoree.Instance, point: kwe.Point) {
   return position;
 }
 
-export function setSelected(instance: kevoree.Instance, value: boolean) {
+export function setSelected(instance: kevoree.Instance, value: boolean): void {
   let selected = instance.findMetaDataByID(KWE_SELECTED);
   if (!selected) {
     const factory = new kevoree.factory.DefaultKevoreeFactory();
@@ -106,4 +127,30 @@ export function setSelected(instance: kevoree.Instance, value: boolean) {
     instance.addMetaData(selected);
   }
   selected.value = value + '';
+}
+
+export function isNameValid(instance: kevoree.Instance, name: string): boolean {
+  if (isNode(instance)) {
+    const node = instance as kevoree.Node;
+    const model = node.eContainer() as kevoree.Model;
+    return model.nodes.array
+      .filter((n) => n.path() !== instance.path())
+      .find((n) => n.name === name) === undefined;
+  } else if (isComponent(instance)) {
+    const comp = instance as kevoree.Component;
+    return comp.eContainer().components.array
+      .filter((c) => c.path() !== instance.path())
+      .find((c) => c.name === name) === undefined;
+  } else if (isChannel(instance)) {
+    const chan = instance as kevoree.Channel;
+    return chan.eContainer().hubs.array
+      .filter((c) => c.path() !== instance.path())
+      .find((c) => c.name === name) === undefined;
+  } else if (isGroup(instance)) {
+    const group = instance as kevoree.Channel;
+    return group.eContainer().groups.array
+      .filter((g) => g.path() !== instance.path())
+      .find((g) => g.name === name) === undefined;
+  }
+  return false;
 }

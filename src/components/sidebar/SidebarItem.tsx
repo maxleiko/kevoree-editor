@@ -23,7 +23,7 @@ export const SidebarItem = ({ tdef, onDblClick = () => {/*noop*/}}: SidebarItemP
       onDoubleClick={() => onDblClick()}
       style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
     >
-      {tdef.name}
+      <span className="type">{tdef.name}</span>
     </div>
   );
 };

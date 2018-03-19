@@ -1,0 +1,19 @@
+.InstanceDetails {
+
+    .InstanceDetails-group {
+        .InstanceDetails-group-header {
+            font-weight: bold;
+        }
+    }
+
+    .InstanceDetails-header {
+        flex-wrap: wrap;
+    }
+
+    .InstanceDetails-content {
+        font-size: 12px;
+        display: block;
+        word-wrap: break-word;
+        white-space: normal;
+    }
+}

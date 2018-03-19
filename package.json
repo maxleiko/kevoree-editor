@@ -41,7 +41,7 @@
     "react-toastify": "^3.3.3",
     "reactstrap": "^5.0.0-beta",
     "source-map-loader": "^0.2.1",
-    "storm-react-diagrams": "/home/leiko/dev/maxleiko/react-diagrams",
+    "storm-react-diagrams": "^5.0.0",
     "style-loader": "0.19.0",
     "sw-precache-webpack-plugin": "0.11.4",
     "ts-jest": "^20.0.7",

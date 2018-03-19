@@ -120,14 +120,19 @@ declare module 'kevoree-library' {
     hubs: KList<Channel>;
     mBindings: KList<Binding>;
     packages: KList<Namespace>;
-    withGenerated_KMF_ID(s: string | number): Model;
-    findPackagesByID(id: string): Namespace;
-    findByPath<T = Klass<any>>(path: string): T | null;
+    
     addNodes(node: Node): void;
     addGroups(grp: Group): void;
     addHubs(channel: Channel): void;
+    addMBindings(binding: Binding): void;
     addPackages(pkg: Namespace): void;
     addAllPackages(pkgs: any): void;
+
+    findPackagesByID(id: string): Namespace;
+    findByPath<T = Klass<any>>(path: string): T | null;
+    findMBindingsByID(id: string): Binding | null;
+
+    withGenerated_KMF_ID(s: string | number): Model;
   }
 
   export interface KevoreeSerializer {
@@ -158,7 +163,7 @@ declare module 'kevoree-library' {
 
   export interface ActionType {
     code: string;
-    name$: string;
+    name$: 'ADD' | 'REMOVE' | 'SET' | 'REMOVE_ALL' | 'ADD_ALL' | 'RENEW_INDEX';
   }
 
   export interface ElementAttributeType {
@@ -183,6 +188,7 @@ declare module 'kevoree-library' {
     removeModelTreeListener(listener: KevoreeModelListener): void;
     removeAllModelTreeListeners(): void;
     getModelElementListeners(): KList<KevoreeModelListener>;
+    getRefInParent(): string | null;
     delete(): void;
   }
   
@@ -216,9 +222,10 @@ declare module 'kevoree-library' {
     portTypeRef: PortTypeRef;
   }
   
-  export interface Binding {
-    port: Port;
-    hub: Channel;
+  export interface Binding extends Klass<Binding> {
+    port?: Port;
+    hub?: Channel;
+    withGenerated_KMF_ID(s: string | number): Binding;
   }
   
   export interface Channel extends Instance<Channel, Model> {
@@ -259,6 +266,8 @@ declare module 'kevoree-library' {
     deployUnits: KList<DeployUnit>;
     dictionaryType: DictionaryType;
     metaData: KList<Value<TypeDefinition>>;
+
+    findMetaDataByID(id: string): Value<TypeDefinition> | null;
   }
   
   export interface PortTypeRef extends Named<PortTypeRef, ComponentType> {
@@ -320,16 +329,8 @@ declare module 'kevoree-library' {
     addAllDeployUnits(dus: any): void;
   }
   
-  export enum DataType {
-    Byte = 'Byte',
-    Short = 'Short',
-    Int = 'Int',
-    Long = 'Long',
-    Float = 'Float',
-    Double = 'Double',
-    Boolean = 'Boolean',
-    Char = 'Char',
-    String = 'String'
+  export class DataType {
+    name$: 'BYTE' | 'SHORT' | 'INT' | 'LONG' | 'FLOAT' | 'DOUBLE' | 'BOOLEAN' | 'CHAR' | 'STRING';
   }
   
   export interface RTypeDefinition {

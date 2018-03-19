@@ -1,5 +1,6 @@
 .SelectionPanel {
   display: flex;
+  flex-flow: column;
   position: relative;
   top: 0;
   right: 0;
@@ -13,6 +14,7 @@
   white-space: nowrap;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
   transition: width 0.2s, min-width 0.2s;
+  user-select: none !important;
 
   .resizer {
     min-width: 6px;
@@ -23,6 +25,6 @@
   }
 
   .content {
-    flex-grow: 1;
+    padding-right: 6px;
   }
 }

@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
-import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
 import Resizable from 're-resizable';
 
 import { SelectionPanelStore, DiagramStore } from '../../stores';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SelectionListener } from '../../listeners';
+import { InstanceDetails } from '../kevoree';
+import { CustomScrollbar } from '../scrollbars';
 
 import './SelectionPanel.scss';
+import { KevoreeServiceListener } from '../../services';
 
 export interface SelectionPanelProps {
   diagramStore?: DiagramStore;
@@ -18,24 +20,25 @@ export interface SelectionPanelProps {
 
 @inject('kevoreeService', 'diagramStore', 'selectionPanelStore')
 @observer
-export class SelectionPanel extends React.Component<SelectionPanelProps> {
+export class SelectionPanel extends React.Component<SelectionPanelProps> implements KevoreeServiceListener {
 
+  // only forces update when selection changes
+  // => prevents the whole component tree to re-render for every changes in the model
   private _listener = new SelectionListener(() => this.forceUpdate());
 
+  modelChanged() {
+    this.forceUpdate();
+    this.props.kevoreeService!.model.addModelTreeListener(this._listener);
+  }
+
   componentDidMount() {
+    this.props.kevoreeService!.addListener(this);
     this.props.kevoreeService!.model.addModelTreeListener(this._listener);
   }
 
   componentWillUnmount() {
+    this.props.kevoreeService!.removeListener(this);
     this.props.kevoreeService!.model.removeModelTreeListener(this._listener);
-  }
-
-  renderInstance(instance: kevoree.Instance) {
-    const tdef = instance.typeDefinition ? instance.typeDefinition : { name: '???', version: -1 };
-
-    return (
-      <li key={instance.path()}>{instance.name}: {tdef.name}/{tdef.version}</li>
-    );
   }
 
   render() {
@@ -51,11 +54,11 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> {
         enable={{ left: true }}
         onResizeStop={(e, dir, el, d) => setWidth(width + d.width)}
       >
-        <div className="content">
-          <ul>
-            {selection.map((instance) => this.renderInstance(instance))}
-          </ul>
-        </div>
+        <CustomScrollbar>
+          <div className="content">
+            {selection.map((instance) => <InstanceDetails key={instance.path()} instance={instance} />)}
+          </div>
+        </CustomScrollbar>
       </Resizable>
     );
   }

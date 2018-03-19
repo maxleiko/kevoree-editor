@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
 import * as kUtils from '../utils/kevoree';
+import { hash } from '../utils/hash';
 import {
   DiagramListener,
   NodeEvent,
@@ -12,7 +13,12 @@ import {
   ZoomEvent,
   GridEvent 
 } from 'storm-react-diagrams';
-import { AbstractModel } from '../components/diagram/models';
+import {
+  AbstractModel,
+  KevoreeChannelPortModel,
+  KevoreeChannelModel,
+  KevoreePortModel,
+} from '../components/diagram/models';
 import { KevoreeLinkModel } from '../components/diagram/models/KevoreeLinkModel';
 
 export interface KevoreeServiceListener {
@@ -26,9 +32,14 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   private _loader = this._factory.createJSONLoader();
   private _serializer = this._factory.createJSONSerializer();
   private _listeners: KevoreeServiceListener[] = [];
+  private _nodesCount = 0;
+  private _groupsCount = 0;
+  private _chansCount = 0;
+  private _compsCount: Map<string, number> = new Map();
 
   constructor() {
     this._factory.root(this._model);
+    this.initInstanceCounters();
 
     if (process.env.NODE_ENV !== 'production') {
       // tslint:disable-next-line
@@ -45,7 +56,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
         if (kUtils.isComponentType(tdef)) {
           this.createComponent(<kevoree.ComponentType> tdef, container as kevoree.Node, point);
         } else if (kUtils.isChannelType(tdef)) {
-          this.createChannel(tdef as kevoree.ChannelType, this._model, point);
+          this.createChannel(tdef as kevoree.ChannelType, this._model as kevoree.Model, point);
         } else if (kUtils.isGroupType(tdef)) {
           this.createGroup(tdef as kevoree.GroupType, this._model, point);
         } else if (kUtils.isNodeType(tdef)) {
@@ -74,6 +85,18 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     } else {
       throw new Error(`Unable to find "${containerPath}" in the model`);
     }
+  }
+
+  createBinding(chan: kevoree.Channel, port: kevoree.Port): boolean {
+    const id = hash(`${chan.path()}_${port.path()}`);
+    let binding = this._model.findMBindingsByID(id);
+    if (!binding) {
+      binding = this._factory.createMBinding().withGenerated_KMF_ID(id);
+      binding.hub = chan;
+      binding.port = port;
+      this._model.addMBindings(binding);
+    }
+    return false;
   }
 
   updateNamespaces(nss: INamespace[]) {
@@ -134,9 +157,15 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   deserialize(data: string) {
     try {
       this._model = this._loader.loadModelFromString<kevoree.Model>(data).get(0);
-      this._listeners.forEach((listener) => listener.modelChanged());
     } catch (err) {
       throw new Error('Unable to deserialize the model');
+    } finally {
+      this.initInstanceCounters();
+      if (process.env.NODE_ENV !== 'production') {
+        // tslint:disable-next-line
+        window['model'] = this._model;
+      }
+      this._listeners.forEach((listener) => listener.modelChanged());
     }
   }
 
@@ -163,12 +192,51 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   }
   
   linksUpdated(event: LinkEvent<KevoreeLinkModel>) {
-    if (event.isConnected) {
-      // TODO create a binding
-      const input = event.link.getSourcePort();
-      const output = event.link.getTargetPort();
-      // tslint:disable-next-line
-      console.log('TODO create binding', input, output);
+    // tslint:disable-next-line
+    console.log('links.updated', event);
+    if (event.isCreated) {
+     const uid = event.link.addListener({
+        sourcePortChanged: (e) => {
+          // tslint:disable-next-line
+          console.log('links.source', e);
+        },
+        targetPortChanged: (e) => {
+          // tslint:disable-next-line
+          console.log('links.target', e);
+          // check whether or not one of the end is a channel port
+          const link = e.entity as KevoreeLinkModel;
+          const source = link.getSourcePort();
+          const target = link.getTargetPort();
+
+          let chanVM, portVM;
+
+          if (source instanceof KevoreeChannelPortModel) {
+            // source port is a channel port
+            chanVM = source as KevoreeChannelPortModel;
+            portVM = target as KevoreePortModel;
+          } else if (target instanceof KevoreeChannelPortModel) {
+            // target port is a channel port
+            chanVM = target as KevoreeChannelPortModel;
+            portVM = source as KevoreePortModel;
+          } else {
+            // TODO
+          }
+
+          if (chanVM) {
+            const success = this.createBinding(
+              (chanVM.parent as KevoreeChannelModel).instance,
+              (portVM as KevoreePortModel).port
+            );
+            if (!success) {
+              link.remove();
+            }
+          }
+        },
+        entityRemoved: () => {
+          event.link.removeListener(uid);
+          event.link.binding.delete();
+        }
+      });
     }
   }
   
@@ -184,6 +252,16 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     // TODO
   }
 
+  private initInstanceCounters() {
+    this._nodesCount = this._model.nodes.array.length;
+    this._groupsCount = this._model.groups.array.length;
+    this._chansCount = this._model.hubs.array.length;
+    this._compsCount = new Map();
+    this._model.nodes.array.forEach((node) => {
+      this._compsCount.set(node.name, node.components.array.length - 1);
+    });
+  }
+
   private findOrCreateTypeDefinition(rTdef: ITypeDefinition) {
     const path = `/packages[${rTdef.namespace!}]/typeDefinitions[name=${rTdef.name},version=${rTdef.version}]`;
     let tdef = this._model.findByPath<kevoree.TypeDefinition>(path);
@@ -196,7 +274,13 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createComponent(tdef: kevoree.ComponentType, container: kevoree.Node, point: kwe.Point) {
     const instance: kevoree.Component = this._factory.createComponentInstance();
-    instance.name = `comp${container.components.size()}`;
+    let compCount = this._compsCount.get(container.name)!;
+    if (typeof compCount === 'undefined') {
+      compCount = -1;
+    }
+    compCount++;
+    this._compsCount.set(container.name, compCount);
+    instance.name = `comp${compCount}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -206,7 +290,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createNode(tdef: kevoree.NodeType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Node = this._factory.createContainerNode();
-    instance.name = `node${container.nodes.size()}`;
+    instance.name = `node${this._nodesCount++}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -215,7 +299,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createChannel(tdef: kevoree.ChannelType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Channel = this._factory.createChannel();
-    instance.name = `chan${container.nodes.size()}`;
+    instance.name = `chan${this._chansCount++}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -224,7 +308,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
 
   private createGroup(tdef: kevoree.GroupType, container: kevoree.Model, point: kwe.Point) {
     const instance: kevoree.Group = this._factory.createGroup();
-    instance.name = `group${container.nodes.size()}`;
+    instance.name = `group${this._groupsCount++}`;
     instance.typeDefinition = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);

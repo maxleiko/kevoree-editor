@@ -1,0 +1,45 @@
+.kevoree-channel {
+    color: #eee;
+    border: 2px solid #bbb;
+    border-radius: 4px;
+    outline-width: 0;
+    display: flex;
+    flex-flow: column;
+    min-width: 160px;
+    
+    .ports {
+        display: flex;
+        justify-content: space-between;
+        background-color: rgba(0, 0, 0, 0.4);
+
+        .in {
+            padding-right: 20px;
+            .name {
+                padding-left: 5px;
+            }
+            .port {
+                background-color: rgba(255, 255, 255, 0.4);
+                &.srd-port--selected {
+                    background-color: rgba(155, 245, 52, 0.4);
+                }
+            }
+            .kevoree-port {
+                justify-content: flex-start;
+            }
+        }
+        .out {
+            .name {
+                padding-right: 5px;
+            }
+            .port {
+                background-color: rgba(255, 255, 255, 0.4);
+                &.srd-port--selected {
+                    background-color: rgba(155, 245, 52, 0.4);
+                }
+            }
+            .kevoree-port {
+                justify-content: flex-end;
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@ import { observable, computed, action } from 'mobx';
 import { RegistryService } from '../services/RegistryService';
 import * as kUtils from '../utils/kevoree';
 
-export class SidebarStore {
+export class RegistryStore {
 
   @observable private _nameFilter = '';
   @observable private _error: any = null;

@@ -6,7 +6,7 @@ import { inject, observer } from 'mobx-react';
 
 import { DiagramStore } from '../../../stores/DiagramStore';
 import { KevoreeNodeModel } from '../models/KevoreeNodeModel';
-import { Editable } from '../../editable';
+import { InstanceHeader } from '../../kevoree';
 
 import './KevoreeNodeWidget.scss';
 
@@ -60,8 +60,6 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
 
   render() {
     const instance = this.props.node.instance!;
-    const tdef = instance.typeDefinition ? instance.typeDefinition : { name: '???', version: -1 };
-    const { r, g, b } = this.props.node.color;
 
     return (
       <div
@@ -71,14 +69,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
         onDoubleClick={() => this.openNodeView()}
         onKeyDown={(event) => this.onKeyDown(event)}
       >
-        <div className="header" style={{ backgroundColor: `rgba(${r}, ${g}, ${b}, 0.8)` }}>
-          <Editable
-            value={instance.name}
-            onCommit={(name) => instance.name = name}
-            className="name"
-          />
-          <span className="type">{tdef.name}/{tdef.version}</span>
-        </div>
+        <InstanceHeader className="header" instance={instance} hoverable={false} />
         <div className="body">
           <ul className="components">
             {this.props.node.instance!.components.array.map((comp) => (

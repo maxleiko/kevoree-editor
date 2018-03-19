@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
-import { Collapse } from 'reactstrap';
 import { toast } from 'react-toastify';
 
 import { DiagramStore } from '../../stores/DiagramStore';
 import { KevoreeService } from '../../services/KevoreeService';
 import { SidebarItem } from './SidebarItem';
+import { Collapsible } from '../collapsible';
 
 import './SidebarGroup.css';
 import { ITypeDefinition } from 'kevoree-registry-client';
@@ -17,18 +17,9 @@ export interface SidebarGroupProps {
   kevoreeService?: KevoreeService;
 }
 
-interface SidebarGroupState {
-  isOpen: boolean;
-}
-
 @inject('kevoreeService', 'diagramStore')
 @observer
-export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGroupState> {
-
-  constructor(props: SidebarGroupProps) {
-    super(props);
-    this.state = { isOpen: true };
-  }
+export class SidebarGroup extends React.Component<SidebarGroupProps> {
 
   onCreateInstance(tdef: ITypeDefinition) {
     try {
@@ -38,7 +29,21 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
     }
   }
 
-  renderBody() {
+  renderHeader() {
+    const { tdefs } = this.props!;
+
+    return (
+      <div className="SidebarGroup-header">
+        <div>
+          <i className="SidebarGroup-header-icon fa fa-th-list" />
+          <span className="SidebarGroup-header-title">{this.props.name}</span>
+        </div>
+        <span className="SidebarGroup-header-details">{tdefs.length}/{tdefs.length}</span>
+      </div>
+    );
+  }
+
+  renderContent() {
     const { tdefs } = this.props;
 
     if (tdefs.length === 0) {
@@ -59,21 +64,12 @@ export class SidebarGroup extends React.Component<SidebarGroupProps, SidebarGrou
   }
 
   render() {
-    const { tdefs } = this.props!;
-
     return (
-      <div className="SidebarGroup">
-        <div className="SidebarGroup-header" onClick={() => this.setState({ isOpen: !this.state.isOpen })}>
-          <div>
-            <i className="SidebarGroup-header-icon fa fa-th-list" />
-            <span className="SidebarGroup-header-title">{this.props.name}</span>
-          </div>
-          <span className="SidebarGroup-header-details">{tdefs.length}/{tdefs.length}</span>
-        </div>
-        <Collapse className="SidebarGroup-body" isOpen={this.state.isOpen}>
-          {this.renderBody()}
-        </Collapse>
-      </div>
+      <Collapsible
+        className="SidebarGroup"
+        header={this.renderHeader()}
+        content={this.renderContent()}
+      />
     );
   }
 }

@@ -4,11 +4,12 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { DiagramStore } from './stores/DiagramStore';
-import { KevoreeService } from './services/KevoreeService';
+import { DiagramStore } from './stores';
+import { KevoreeService } from './services';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
+import { ModalContainer } from './components/modal';
 
 import './App.css';
 
@@ -53,6 +54,7 @@ export default class App extends React.Component<AppProps> {
           className="Toastify"
           position={toast.POSITION.TOP_RIGHT}
         />
+        <ModalContainer />
       </div>
     );
   }

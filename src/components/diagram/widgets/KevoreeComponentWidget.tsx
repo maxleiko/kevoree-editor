@@ -3,7 +3,7 @@ import * as kevoree from 'kevoree-library';
 import { DiagramEngine } from 'storm-react-diagrams';
 import { KevoreeComponentModel } from '../models/KevoreeComponentModel';
 
-import { Editable } from '../../editable';
+import { InstanceHeader } from '../../kevoree';
 
 import './KevoreeComponentWidget.scss';
 import { KevoreePortModel } from '../models/KevoreePortModel';
@@ -53,14 +53,13 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
         className="kevoree-component"
         style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
       >
-        <div className="header">
-          <Editable
-            value={instance.name}
-            onCommit={(name) => instance.name = name}
-            className="name"
-          />
-          <span className="type">{instance.typeDefinition ? instance.typeDefinition.name : '???'}</span>
-        </div>
+        <InstanceHeader
+          className="header"
+          instance={instance}
+          alpha={0.4}
+          rgb={{ r: 0, g: 0, b: 0 }}
+          hoverable={false}
+        />
         <div className="ports">
           <div className="in">{this.props.node.getInputs().map((port) => this.generatePort(port))}</div>
           <div className="out">{this.props.node.getOutputs().map((port) => this.generatePort(port))}</div>

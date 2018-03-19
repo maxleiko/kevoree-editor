@@ -23,7 +23,6 @@ export abstract class AbstractModel<T extends kevoree.Instance = kevoree.Instanc
 
   setSelected(isSelected: boolean = true) {
     super.setSelected(isSelected);
-    // TODO might be damn slow
     kUtils.setSelected(this.instance, isSelected);
   }
 

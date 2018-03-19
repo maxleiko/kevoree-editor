@@ -10,20 +10,9 @@
   min-height: 150px;
 
   .header {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 10px;
+    max-height: 34px;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
-    background-color: rgba(0, 0, 0, 0.3);
-    background-image: repeating-linear-gradient(125deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 10px, rgba(0, 0, 0, 0.2) 10px, rgba(0, 0, 0, 0.2) 20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
-
-    .name {
-      margin-right: 10px;
-      
-      font-weight: bold;
-    }
   }
 
   .body {

@@ -3,4 +3,5 @@ export * from './KevoreeComponentFactory';
 export * from './KevoreeNodeFactory';
 export * from './KevoreeGroupFactory';
 export * from './KevoreePortFactory';
+export * from './KevoreeChannelPortFactory';
 export * from './KevoreeLinkFactory';
