@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { observable, action, computed } from 'mobx';
 import { DiagramModel, DiagramEngine, DefaultLabelFactory } from 'storm-react-diagrams';
 import * as kevoree from 'kevoree-library';
@@ -208,7 +209,21 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
 
   @action private updateDiagram(elem: kevoree.Klass<any>) {
     if (isNode(elem)) {
-      (elem as kevoree.Node).components.array.forEach((comp) => this.addComponent(comp));
+      const node = elem as kevoree.Node;
+      const channels: { [s: string]: kevoree.Channel } = {};
+      node.components.array.forEach((comp) => {
+        this.addComponent(comp);
+
+        comp.provided.array
+          .concat(comp.required.array)
+          .forEach((port) => {
+          port.bindings.array.forEach((binding) => {
+            channels[binding.hub.path()] = binding.hub;
+          });
+        });
+      });
+
+      _.forEach(channels, (chan) => this.addChannel(chan));
     } else if (isModel(elem)) {
       const model = elem as kevoree.Model;
       model.nodes.array.forEach((node) => this.addNode(node));

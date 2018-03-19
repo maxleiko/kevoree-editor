@@ -1,41 +1,51 @@
-import { INamespace } from 'kevoree-registry-client';
+import { ITypeDefinition } from 'kevoree-registry-client';
 import { observable, computed, action } from 'mobx';
 
-import { SidebarGroupStore } from './SidebarGroupStore';
 import { RegistryService } from '../services/RegistryService';
+import * as kUtils from '../utils/kevoree';
 
 export class SidebarStore {
 
   @observable private _nameFilter = '';
-  @observable private _nodeFilter = true;
-  @observable private _compFilter = true;
-  @observable private _chanFilter = true;
-  @observable private _groupFilter = true;
-  @observable private _namespaces: Map<string, SidebarGroupStore> = new Map();
   @observable private _error: any = null;
 
-  constructor(private registryService: RegistryService) {}
+  @observable private _nodes: Map<string, ITypeDefinition> = new Map();
+  @observable private _components: Map<string, ITypeDefinition> = new Map();
+  @observable private _channels: Map<string, ITypeDefinition> = new Map();
+  @observable private _groups: Map<string, ITypeDefinition> = new Map();
 
-  @action fetchNamespaces() {
-    return this.registryService.namespaces()
-      .then(this.fetchNamespacesSuccess, this.fetchError);
+  constructor(private _registryService: RegistryService) {}
+
+  @action fetchAll() {
+    return this._registryService.allTdefs()
+      .then(this.fetchTypeDefinitionsSuccess, this.fetchError);
   }
 
-  @action.bound fetchNamespacesSuccess(namespaces: INamespace[]) {
-    namespaces.forEach((ns) => this.fetchNamespaceSuccess(ns));
-  }
+  @action.bound fetchTypeDefinitionsSuccess(tdefs: ITypeDefinition[]) {
+    tdefs.forEach((tdef) => {
+      const key = `${tdef.namespace!}.${tdef.name}/${tdef.version}`;
 
-  @action fetchNamespace(name: string) {
-    return this.registryService.namespace(name)
-      .then(this.fetchNamespaceSuccess, this.fetchError);
-  }
+      switch (kUtils.inferType(tdef)) {
+        case 'node':
+          this._nodes.set(key, tdef);
+          break;
 
-  @action.bound fetchNamespaceSuccess(namespace: INamespace) {
-    if (namespace.name === 'kevoree') {
-      this._namespaces.set(namespace.name, new SidebarGroupStore(namespace, this, this.registryService, true));
-    } else {
-      this._namespaces.set(namespace.name, new SidebarGroupStore(namespace, this, this.registryService));
-    }
+        case 'component':
+          this._components.set(key, tdef);
+          break;
+
+        case 'channel':
+          this._channels.set(key, tdef);
+          break;
+
+        case 'group':
+          this._groups.set(key, tdef);
+          break;
+
+        default:
+          break;
+      }
+    });
   }
 
   @action.bound fetchError(err: any) {
@@ -46,55 +56,48 @@ export class SidebarStore {
     this._nameFilter = event.target.value.toLowerCase();
   }
 
-  @action onChangeNodeFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this._nodeFilter = event.target.checked;
-  }
-
-  @action onChangeGroupFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this._groupFilter = event.target.checked;
-  }
-
-  @action onChangeChanFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this._chanFilter = event.target.checked;
-  }
-
-  @action onChangeCompFilter(event: React.ChangeEvent<HTMLInputElement>) {
-    this._compFilter = event.target.checked;
-  }
-
-  @computed get namespaces() {
-    return Array.from(this._namespaces.values())
-      .map((store) => store.namespace)
-      .sort((ns0, ns1) => {
-        if (ns0.name === 'kevoree') { return -1; }
-        if (ns0.name > ns1.name) { return 1; }
-        if (ns1.name > ns0.name) { return -1; }
-        return 0;
-      });
-  }
-
-  @computed get namespacesMap() {
-    return this._namespaces;
-  }
-
   @computed get nameFilter() {
     return this._nameFilter;
   }
 
-  @computed get nodeFilter() {
-    return this._nodeFilter;
+  @computed get nodes(): ITypeDefinition[] {
+    return Array.from(this._nodes.values())
+      .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1)
+      .sort((tdef0, tdef1) => {
+        if (tdef0.name > tdef1.name) { return 1; }
+        if (tdef1.name > tdef0.name) { return -1; }
+        return 0;
+      });
   }
 
-  @computed get compFilter() {
-    return this._compFilter;
+  @computed get components(): ITypeDefinition[] {
+    return Array.from(this._components.values())
+      .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1)
+      .sort((tdef0, tdef1) => {
+        if (tdef0.name > tdef1.name) { return 1; }
+        if (tdef1.name > tdef0.name) { return -1; }
+        return 0;
+      });
   }
 
-  @computed get chanFilter() {
-    return this._chanFilter;
+  @computed get channels(): ITypeDefinition[] {
+    return Array.from(this._channels.values())
+      .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1)
+      .sort((tdef0, tdef1) => {
+        if (tdef0.name > tdef1.name) { return 1; }
+        if (tdef1.name > tdef0.name) { return -1; }
+        return 0;
+      });
   }
 
-  @computed get groupFilter() {
-    return this._groupFilter;
+  @computed get groups(): ITypeDefinition[] {
+    return Array.from(this._groups.values())
+      .filter((tdef) => tdef.name.toLowerCase().indexOf(this._nameFilter) > -1)
+      .sort((tdef0, tdef1) => {
+        if (tdef0.name > tdef1.name) { return 1; }
+        if (tdef1.name > tdef0.name) { return -1; }
+        return 0;
+      });
   }
 
   @computed get error() {

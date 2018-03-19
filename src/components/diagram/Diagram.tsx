@@ -72,8 +72,6 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   render() {
-    // tslint:disable-next-line
-    console.log('=== DIAGRAM render() ===');
     const { engine, smartRouting } = this.props.diagramStore!;
 
     return (

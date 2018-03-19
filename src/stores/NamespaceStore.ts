@@ -6,7 +6,7 @@ import { SidebarStore } from './SidebarStore';
 import { inferType } from '../utils/kevoree';
 import { KEVOREE_CHANNEL, KEVOREE_COMPONENT, KEVOREE_GROUP, KEVOREE_NODE } from '../utils/constants';
 
-export class SidebarGroupStore {
+export class NamespaceStore {
 
   private _namespace: INamespace;
   private _sidebarStore: SidebarStore;

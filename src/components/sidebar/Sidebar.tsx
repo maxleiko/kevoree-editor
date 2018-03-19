@@ -20,26 +20,14 @@ interface SidebarProps {
 export class Sidebar extends React.Component<SidebarProps> {
 
   componentDidMount() {
-    this.props.sidebarStore!.fetchNamespaces();
-  }
-
-  renderContent() {
-    const { namespaces, namespacesMap } = this.props.sidebarStore!;
-
-    if (namespaces.length === 0) {
-      return <span className="Sidebar-content-empty">No result</span>;
-    } else {
-      return namespaces
-        .map((ns) => (
-          <SidebarGroup key={ns.name} store={namespacesMap.get(ns.name)!} />
-        ));
-    }
+    this.props.sidebarStore!.fetchAll();
   }
 
   render() {
-    const error = this.props.sidebarStore!.error;
-    if (error) {
-      toast.error(<span><strong>Error: </strong>Unable to load namespace from registry</span>);
+    // tslint:disable-next-line
+    console.log('render sidebar');
+    if (this.props.sidebarStore!.error) {
+      toast.error(<span><strong>Error: </strong>Unable to fetch data from the Kevoree registry</span>);
     }
 
     return (
@@ -47,7 +35,10 @@ export class Sidebar extends React.Component<SidebarProps> {
         <SidebarHeader />
         <div className="Sidebar-content">
           <Scrollbars>
-            {this.renderContent()}
+            <SidebarGroup name="Nodes" tdefs={this.props.sidebarStore!.nodes} />
+            <SidebarGroup name="Components" tdefs={this.props.sidebarStore!.components} />
+            <SidebarGroup name="Channels" tdefs={this.props.sidebarStore!.channels} />
+            <SidebarGroup name="Groups" tdefs={this.props.sidebarStore!.groups} />
           </Scrollbars>
         </div>
       </div>

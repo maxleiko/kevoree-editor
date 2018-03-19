@@ -29,48 +29,6 @@ export class SidebarHeader extends React.Component<SidebarHeaderProps> {
             onChange={(e) => sidebarStore.onChangeNameFilter(e)}
           />
         </div>
-        <div className="Sidebar-checkbox-filters">
-          <div className="form-check form-check-inline">
-            <input
-              id="Sidebar-node-filter"
-              className="form-check-input"
-              type="checkbox"
-              checked={sidebarStore.nodeFilter}
-              onChange={(e) => sidebarStore.onChangeNodeFilter(e)}
-            />
-            <label className="form-check-label" htmlFor="Sidebar-node-filter">Node</label>
-          </div>
-          <div className="form-check form-check-inline">
-            <input
-              id="Sidebar-group-filter"
-              className="form-check-input"
-              type="checkbox"
-              checked={sidebarStore.groupFilter}
-              onChange={(e) => sidebarStore.onChangeGroupFilter(e)}
-            />
-            <label className="form-check-label" htmlFor="Sidebar-group-filter">Group</label>
-          </div>
-          <div className="form-check form-check-inline">
-            <input
-              id="Sidebar-chan-filter"
-              className="form-check-input"
-              type="checkbox"
-              checked={sidebarStore.chanFilter}
-              onChange={(e) => sidebarStore.onChangeChanFilter(e)}
-            />
-            <label className="form-check-label" htmlFor="Sidebar-chan-filter">Chan</label>
-          </div>
-          <div className="form-check form-check-inline">
-            <input
-              id="Sidebar-comp-filter"
-              className="form-check-input"
-              type="checkbox"
-              checked={sidebarStore.compFilter}
-              onChange={(e) => sidebarStore.onChangeCompFilter(e)}
-            />
-            <label className="form-check-label" htmlFor="Sidebar-comp-filter">Comp</label>
-          </div>
-        </div>
       </div>
     );
   }

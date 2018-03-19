@@ -225,7 +225,7 @@ declare module 'kevoree-library' {
     bindings: KList<Binding>;
   }
   
-  export interface Node extends Instance<Channel, Model | Node> {
+  export interface Node extends Instance<Node, Model | Node> {
     components: KList<Component>;
     hosts: KList<Node>;
     host: Node;

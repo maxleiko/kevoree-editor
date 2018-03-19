@@ -13,4 +13,8 @@ export class RegistryService {
   tdefs(namespace: string) {
     return kRegistry.tdef.getLatestsByNamespace(namespace);
   }
+
+  allTdefs() {
+    return kRegistry.tdef.all();
+  }
 }

@@ -45,9 +45,9 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
         if (kUtils.isComponentType(tdef)) {
           this.createComponent(<kevoree.ComponentType> tdef, container as kevoree.Node, point);
         } else if (kUtils.isChannelType(tdef)) {
-          throw new Error('Channels must be added to model root');
+          this.createChannel(tdef as kevoree.ChannelType, this._model, point);
         } else if (kUtils.isGroupType(tdef)) {
-          throw new Error('Groups must be added to model root');
+          this.createGroup(tdef as kevoree.GroupType, this._model, point);
         } else if (kUtils.isNodeType(tdef)) {
           throw new Error('Nodes must be added to model root');
         } else {
@@ -167,7 +167,8 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
       // TODO create a binding
       const input = event.link.getSourcePort();
       const output = event.link.getTargetPort();
-      
+      // tslint:disable-next-line
+      console.log('TODO create binding', input, output);
     }
   }
   
