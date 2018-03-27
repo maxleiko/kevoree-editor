@@ -1,0 +1,22 @@
+.Sidebar {
+  background-color: #222;
+  width: 256px;
+  box-shadow: -2px 0 20px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+  display: flex;
+  flex-flow: column;
+
+  .content {
+    flex-grow: 1;
+    height: 100%;
+
+    .empty {
+      font-style: italic;
+      color: #ccc;
+    }
+
+    .inner {
+      padding: 6px;
+    }
+  }
+}

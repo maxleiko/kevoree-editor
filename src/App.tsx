@@ -4,8 +4,8 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { DiagramStore } from './stores';
-import { KevoreeService } from './services';
+import { DiagramStore, ModalStore } from './stores';
+import { FileService, KevoreeService } from './services';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
@@ -14,23 +14,53 @@ import { ModalContainer } from './components/modal';
 import './App.css';
 
 interface AppProps {
+  modalStore?: ModalStore;
   diagramStore?: DiagramStore;
+  fileService?: FileService;
   kevoreeService?: KevoreeService;
 }
 
-@inject('diagramStore', 'kevoreeService')
+@inject('modalStore', 'diagramStore', 'fileService', 'kevoreeService')
 @observer
 export default class App extends React.Component<AppProps> {
 
   private hkMap = {
     undo: ['ctrl+z', 'command+z'],
     redo: ['ctrl+y', 'command+y'],
+    open: ['ctrl+o', 'command+o'],
+    save: ['ctrl+s', 'command+s'],
     previousView:  ['esc', 'backspace'],
   };
 
   private hkActions = {
     undo: () => toast.warn(<span><strong>undo:</strong> not implemented yet</span>),
     redo: () => toast.warn(<span><strong>redo:</strong> not implemented yet</span>),
+    open: (event: any) => {
+      event.preventDefault();
+      this.props.fileService!.load()
+          .then(
+            (file) => {
+              this.props.modalStore!.confirm({
+                header: 'Load model',
+                body: (
+                  <div>
+                    <p>Are you sure you want to load the model from:</p>
+                    <ul>
+                      <li><strong>{file.name}</strong></li>
+                    </ul>
+                    <p className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
+                  </div>
+                ),
+                onConfirm: () => this.props.kevoreeService!.deserialize(file.data)
+              });
+            },
+            (err) => toast.error(`Unable to load file ${err.filename}`));
+    },
+    save: (event: any) => {
+      event.preventDefault();
+      const model = this.props.kevoreeService!.serialize();
+      this.props.fileService!.save(model);
+    },
     previousView: () => this.props.diagramStore!.previousView(),
   };
 
@@ -45,9 +75,9 @@ export default class App extends React.Component<AppProps> {
   render() {
     return (
       <div className="App">
-        <Sidebar />
+        <Topbar />
         <div className="App-content">
-          <Topbar />
+          <Sidebar />
           <Diagram />
         </div>
         <ToastContainer

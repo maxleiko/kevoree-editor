@@ -2,6 +2,7 @@ import { observable, action, computed } from 'mobx';
 import { DiagramModel, DiagramEngine, DefaultLabelFactory } from 'storm-react-diagrams';
 import * as kevoree from 'kevoree-library';
 
+import { KevoreeService, KevoreeServiceListener } from '../services';
 import { distributeElements } from '../utils/dagreify';
 import {
   KevoreeNodeFactory,
@@ -18,9 +19,7 @@ import {
   KevoreeChannelModel,
   KevoreeGroupModel,
   KevoreeLinkModel,
-  KevoreeChannelPortModel,
 } from '../components/diagram/models';
-import { KevoreeService, KevoreeServiceListener } from '../services/KevoreeService';
 import { isNode, isModel } from '../utils/kevoree';
 import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
 import { AdaptationEngine, NodeAdaptationEngine, ModelAdaptationEngine } from '../adaptations';
@@ -38,21 +37,24 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   @observable private _model: DiagramModel = new DiagramModel();
   @observable private _smartRouting = false;
 
-  constructor(kService: KevoreeService) {
-    this._kService = kService;
+  constructor(_kService: KevoreeService) {
+    this._kService = _kService;
 
-    this._engine.registerNodeFactory(new KevoreeComponentFactory(kService));
-    this._engine.registerNodeFactory(new KevoreeNodeFactory(kService));
-    this._engine.registerNodeFactory(new KevoreeChannelFactory(kService));
-    this._engine.registerNodeFactory(new KevoreeGroupFactory(kService));
+    // register custom factories
+    this._engine.registerNodeFactory(new KevoreeComponentFactory(this._kService));
+    this._engine.registerNodeFactory(new KevoreeNodeFactory(this._kService));
+    this._engine.registerNodeFactory(new KevoreeChannelFactory(this._kService));
+    this._engine.registerNodeFactory(new KevoreeGroupFactory(this._kService));
     this._engine.registerPortFactory(new KevoreePortFactory());
     this._engine.registerPortFactory(new KevoreeChannelPortFactory());
     this._engine.registerLinkFactory(new KevoreeLinkFactory());
     this._engine.registerLabelFactory(new DefaultLabelFactory());
+
+    // set model
     this._engine.setDiagramModel(this._model);
 
-    // listen to kevoreeService model changing (ie. when ref to kevoree.Model changes)
-    kService.addListener(this);
+    // listen to this._kService model changing (ie. when ref to kevoree.Model changes)
+    this._kService.addListener(this);
 
     // init
     this.changePath(this._path);
@@ -93,8 +95,8 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
         const chanVM = this._model.getNode(binding.hub.path()) as KevoreeChannelModel;
         if (chanVM) {
           const chanPortVM = binding.port.getRefInParent() === 'provided'
-            ? chanVM.getPortFromID(KevoreeChannelPortModel.INPUTS)!
-            : chanVM.getPortFromID(KevoreeChannelPortModel.OUTPUTS)!;
+            ? chanVM.getInputs()
+            : chanVM.getOutputs();
           vm.setTargetPort(chanPortVM);
           this._model.addLink(vm);
         }
@@ -156,20 +158,28 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   }
 
   @action elementChanged(event: kevoree.ModelEvent) {
-    // tslint:disable-next-line
-    console.log('=== KEVOREE MODEL EVENT ===', event);
-
     const elem = this._kService.model.findByPath(this._path);
     if (elem) {
+      let update = false;
       if (isNode(elem)) {
-        this._nodeAdaptEngine.adapt(event);
+        update = this._nodeAdaptEngine.adapt(event);
+        if (process.env.NODE_ENV !== 'production' && update) {
+          // tslint:disable-next-line
+          console.log('=== NodeAdaptationEngine ===', event);
+        }
       } else if (isModel(elem)) {
-        this._modelAdaptEngine.adapt(event);
+        update = this._modelAdaptEngine.adapt(event);
+        if (process.env.NODE_ENV !== 'production' && update) {
+          // tslint:disable-next-line
+          console.log('=== ModelAdaptationEngine ===', event);
+        }
       } else {
         throw new Error(`TODO add elementChanged behavior for type ${elem.path()} in DiagramStore`);
       }
+      if (update) {
+        this._engine.repaintCanvas();
+      }
     }
-    this._engine.repaintCanvas();
   }
 
   @action modelChanged() {

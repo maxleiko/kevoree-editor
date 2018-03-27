@@ -7,7 +7,6 @@ export interface EditableProps {
   value: string;
   onCommit: (val: string) => void;
 
-  type?: 'text' | 'number';
   className?: string;
   validate?: (val: string) => boolean;
 }
@@ -32,23 +31,16 @@ export class Editable extends React.Component<EditableProps, EditableState> {
   }
 
   finishEditing() {
+    let valid = true;
     if (this.props.validate) {
-      const valid = this.props.validate(this._elem.value);
-      if (valid) {
-        this.setState({ invalid: false });
-      } else {
-        this.setState({ invalid: true });
-        return;
-      }
+      valid = this.props.validate(this._elem.value);
     }
-    if (this.props.onCommit) {
+    if (valid) { 
       this.props.onCommit(this._elem.value);
+      this.setState({ editing: false, invalid: false });
+    } else {
+      this.setState({ invalid: true });
     }
-    this.setState({ editing: false, invalid: false });
-  }
-
-  invalid() {
-    this.setState({ invalid: true });
   }
 
   cancelEditing() {
@@ -96,11 +88,6 @@ export class Editable extends React.Component<EditableProps, EditableState> {
   }
 
   renderEditable() {
-    let type = this.props.type!;
-    if (typeof type === 'undefined') {
-      type = 'text';
-    }
-
     const style = this.state.invalid
       ? { backgroundColor: 'rgba(255, 0, 0, 0.2)' }
       : { backgroundColor: 'inherit' };
@@ -109,7 +96,7 @@ export class Editable extends React.Component<EditableProps, EditableState> {
       <input
         className={cx('Editable-input', this.props.className)}
         ref={(elem) => this._elem = elem!}
-        type={type}
+        type="text"
         defaultValue={this.props.value}
         onKeyDown={(event) => this.onKeyDown(event)}
         onMouseDown={(event) => this.stopPropagation(event)}

@@ -1,0 +1,59 @@
+.Topbar {
+  z-index: 3;
+  min-height: 64px;
+  height: 64px;
+  max-height: 64px;
+  color: #eee;
+  display: flex;
+  border-bottom: 1px solid #111;
+
+  .left {
+    display: flex;
+    width: 256px;
+    border-right: 1px solid #444;
+    align-content: center;
+
+    .logo {
+      height: 50px;
+      margin: auto;
+    }
+  }
+
+  .right {
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+
+    .nav {
+      display: flex;
+      flex-flow: column;
+      flex: 1;
+
+      &.fit {
+        flex: 0 1 auto;
+      }
+
+      .header * {
+        font-size: 25px;
+      }
+
+      a {
+        display: flex;
+        flex-grow: 1;
+        color: #bbb;
+        padding: 0 15px;
+        align-items: center;
+        text-decoration: none;
+
+        &:hover, &:active {
+          color: #ccc;
+          background-color: #181818;
+        }
+
+        i {
+          padding-right: 8px;
+        }
+      }
+    }
+  }
+}

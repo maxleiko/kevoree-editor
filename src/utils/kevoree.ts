@@ -10,39 +10,39 @@ import {
 } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
 
-export function isComponentType(tdef: kevoree.TypeDefinition) {
+export function isComponentType(tdef: kevoree.TypeDefinition): tdef is kevoree.ComponentType {
   return tdef.metaClassName().startsWith('org.kevoree.ComponentType');
 }
 
-export function isChannelType(tdef: kevoree.TypeDefinition) {
+export function isChannelType(tdef: kevoree.TypeDefinition): tdef is kevoree.ChannelType {
   return tdef.metaClassName().startsWith('org.kevoree.ChannelType');
 }
 
-export function isGroupType(tdef: kevoree.TypeDefinition) {
+export function isGroupType(tdef: kevoree.TypeDefinition): tdef is kevoree.GroupType {
   return tdef.metaClassName().startsWith('org.kevoree.GroupType');
 }
 
-export function isNodeType(tdef: kevoree.TypeDefinition) {
+export function isNodeType(tdef: kevoree.TypeDefinition): tdef is kevoree.NodeType {
   return tdef.metaClassName().startsWith('org.kevoree.NodeType');
 }
 
-export function isNode(e: kevoree.Klass<any>) {
+export function isNode(e: kevoree.Klass<any>): e is kevoree.Node {
   return e.metaClassName().startsWith('org.kevoree.ContainerNode');
 }
 
-export function isModel(e: kevoree.Klass<any>) {
+export function isModel(e: kevoree.Klass<any>): e is kevoree.Model {
   return e.metaClassName().startsWith('org.kevoree.ContainerRoot');
 }
 
-export function isComponent(e: kevoree.Klass<any>) {
+export function isComponent(e: kevoree.Klass<any>): e is kevoree.Component {
   return e.metaClassName().startsWith('org.kevoree.ComponentInstance');
 }
 
-export function isChannel(e: kevoree.Klass<any>) {
+export function isChannel(e: kevoree.Klass<any>): e is kevoree.Channel {
   return e.metaClassName().startsWith('org.kevoree.Channel');
 }
 
-export function isGroup(e: kevoree.Klass<any>) {
+export function isGroup(e: kevoree.Klass<any>): e is kevoree.Group {
   return e.metaClassName().startsWith('org.kevoree.Group');
 }
 
@@ -59,7 +59,7 @@ export function getType(tdef: kevoree.TypeDefinition) {
   if (isNodeType(tdef)) {
     return KEVOREE_NODE;
   }
-  throw new Error(`Unknown Kevoree type "${tdef.metaClassName()}"`);
+  throw new Error(`Unknown Kevoree type "${tdef!.metaClassName()}"`);
 }
 
 export function inferType(tdef: ITypeDefinition) {
@@ -131,24 +131,20 @@ export function setSelected(instance: kevoree.Instance, value: boolean): void {
 
 export function isNameValid(instance: kevoree.Instance, name: string): boolean {
   if (isNode(instance)) {
-    const node = instance as kevoree.Node;
-    const model = node.eContainer() as kevoree.Model;
+    const model = instance.eContainer() as kevoree.Model;
     return model.nodes.array
       .filter((n) => n.path() !== instance.path())
       .find((n) => n.name === name) === undefined;
   } else if (isComponent(instance)) {
-    const comp = instance as kevoree.Component;
-    return comp.eContainer().components.array
+    return instance.eContainer().components.array
       .filter((c) => c.path() !== instance.path())
       .find((c) => c.name === name) === undefined;
   } else if (isChannel(instance)) {
-    const chan = instance as kevoree.Channel;
-    return chan.eContainer().hubs.array
+    return instance.eContainer().hubs.array
       .filter((c) => c.path() !== instance.path())
       .find((c) => c.name === name) === undefined;
   } else if (isGroup(instance)) {
-    const group = instance as kevoree.Channel;
-    return group.eContainer().groups.array
+    return instance.eContainer().groups.array
       .filter((g) => g.path() !== instance.path())
       .find((g) => g.name === name) === undefined;
   }

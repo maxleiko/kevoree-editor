@@ -4,42 +4,52 @@ import * as kevoree from 'kevoree-library';
 import { toast } from 'react-toastify';
 
 import { Editable } from '../../editable';
-// import { KevoreeUpdate } from '../../kevoree';
 import { str2rgb } from '../../../utils/colors';
+import { isModel } from '../../../utils/kevoree';
 import { getType, isNameValid } from '../../../utils/kevoree';
 
 import './InstanceHeader.scss';
 
 export interface InstanceHeaderProps {
-    instance: kevoree.Instance;
+    instance: kevoree.Instance | kevoree.Model;
     alpha?: number;
     rgb?: kwe.RGB;
     hoverable?: boolean;
+    editable?: boolean;
 }
 
 type Props = InstanceHeaderProps & React.HTMLAttributes<HTMLDivElement>;
 
-export const InstanceHeader = ({ instance, alpha = 0.8, rgb, className, hoverable = true }: Props) => {
-    if (instance.typeDefinition) {
-        let { r, g, b } = str2rgb(instance.typeDefinition!.name);
-        if (typeof rgb !== 'undefined') {
-            r = rgb!.r;
-            g = rgb!.g;
-            b = rgb!.b;
-        }
+export class InstanceHeader extends React.Component<Props> {
 
-        const classNames = cx(
-            'InstanceHeader',
-            getType(instance.typeDefinition!),
-            { hoverable },
-            className
-        );
-    
+    // private _listener: kevoree.KevoreeModelListener = {
+    //     elementChanged: (event) => this.forceUpdate()
+    // };
+
+    // componentDidMount() {
+    //     this.props.instance.addModelElementListener(this._listener);
+    // }
+
+    // componentWillUnmount() {
+    //     this.props.instance.removeModelElementListener(this._listener);
+    // }
+
+    renderAsModel(model: kevoree.Model) {
+        const { className } = this.props;
+
         return (
-            <div
-                className={classNames}
-                style={{ backgroundColor: `rgba(${r}, ${g}, ${b}, ${alpha})` }}
-            >
+            <div className={cx('InstanceHeader', className)}>
+                <span className="name">/</span>
+                <span className="type">Model</span>
+            </div>
+        );
+    }
+
+    renderName(instance: kevoree.Instance) {
+        const { editable = true } = this.props;
+
+        if (editable) {
+            return (
                 <Editable
                     className="name"
                     value={instance.name}
@@ -52,11 +62,50 @@ export const InstanceHeader = ({ instance, alpha = 0.8, rgb, className, hoverabl
                         return valid;
                     }}
                 />
-                <span className="type">
-                    {instance.typeDefinition!.name}/{instance.typeDefinition!.version}
-                </span>
-            </div>
-        );
+            );
+        } else {
+            return <span className="name">{instance.name}</span>;
+        }
     }
-    return null;
-};
+
+    renderAsInstance(instance: kevoree.Instance) {
+        const { rgb, className, alpha = 0.8, hoverable = true, editable = true } = this.props;
+
+        if (instance.typeDefinition) {
+            let { r, g, b } = str2rgb(instance.typeDefinition.name);
+            if (typeof rgb !== 'undefined') {
+                r = rgb!.r;
+                g = rgb!.g;
+                b = rgb!.b;
+            }
+            const classNames = cx(
+                'InstanceHeader',
+                getType(instance.typeDefinition),
+                { hoverable, editable },
+                className
+            );
+    
+            return (
+                <div
+                    className={classNames}
+                    style={{ backgroundColor: `rgba(${r}, ${g}, ${b}, ${alpha})` }}
+                >
+                    {this.renderName(instance)}
+                    <span className="type">
+                        {instance.typeDefinition.name}/{instance.typeDefinition.version}
+                    </span>
+                </div>
+            );
+        }
+
+        return null;
+    }
+
+    render() {
+        const { instance } = this.props;
+
+        return isModel(instance)
+            ? this.renderAsModel(instance)
+            : this.renderAsInstance(instance);
+    }
+}

@@ -7,6 +7,6 @@ export abstract class AbstractAdaptationEngine<T> implements AdaptationEngine<T>
 
     protected constructor(protected _store: DiagramStore) {}
 
-    public abstract adapt(event: kevoree.ModelEvent): void;
+    public abstract adapt(event: kevoree.ModelEvent): boolean;
     public abstract createInstances(elem: T): void;
 }

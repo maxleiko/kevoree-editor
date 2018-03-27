@@ -14,7 +14,7 @@ export interface KevoreeComponentWidgetProps {
   diagramEngine: DiagramEngine;
 }
 
-export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidgetProps, {}> {
+export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidgetProps> {
 
   private _elem: HTMLDivElement | null;
   private _listener: kevoree.KevoreeModelListener = {

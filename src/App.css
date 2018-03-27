@@ -1,15 +1,15 @@
 .App {
   display: flex;
   flex-grow: 1;
+  flex-flow: column;
   background: #222;
 }
 
 .App-content {
   display: flex;
   flex-grow: 1;
-  flex-flow: column;
 }
 
 .Toastify {
-  top: 60px;
+  top: 80px;
 }

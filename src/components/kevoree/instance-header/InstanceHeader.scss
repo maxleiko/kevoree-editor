@@ -74,8 +74,12 @@
     }
     
     .name {
+        align-self: center;
         margin-right: 10px;
         font-weight: bold;
     }
 
+    .type {
+        align-self: center;
+    }
 }

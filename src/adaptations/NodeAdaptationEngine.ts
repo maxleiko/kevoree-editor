@@ -10,14 +10,14 @@ export class NodeAdaptationEngine extends AbstractAdaptationEngine<kevoree.Node>
     }
 
     public adapt(event: kevoree.ModelEvent) {
-      // tslint:disable-next-line
-      console.log('NodeAdaptationEngine', event);
       switch (event.etype.name$) {
         case 'ADD':
           if (event.elementAttributeName === 'hubs') {
             this._store.addChannel(event.value as kevoree.Channel);
+            return true;
           } else if (event.elementAttributeName === 'components') {
             this._store.addComponent(event.value as kevoree.Component);
+            return true;
           }
           // TODO handle other cases
           break;
@@ -26,9 +26,18 @@ export class NodeAdaptationEngine extends AbstractAdaptationEngine<kevoree.Node>
           switch (event.elementAttributeName) {
             case 'hubs':
             case 'components':
-              const vm = this._store.model.getNode(event.previous_value);
-              if (vm) {
-                vm.remove();
+              const node = this._store.model.getNode(event.previous_value);
+              if (node) {
+                node.remove();
+                return true;
+              }
+              break;
+
+            case 'bindings':
+              const link = this._store.model.getLink(event.previous_value);
+              if (link) {
+                link.remove();
+                return true;
               }
               break;
 
@@ -41,6 +50,8 @@ export class NodeAdaptationEngine extends AbstractAdaptationEngine<kevoree.Node>
         default:
           break;
       }
+
+      return false;
     }
 
     public createInstances(node: kevoree.Node) {

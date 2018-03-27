@@ -24,7 +24,11 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> impleme
 
   // only forces update when selection changes
   // => prevents the whole component tree to re-render for every changes in the model
-  private _listener = new SelectionListener(() => this.forceUpdate());
+  private _listener = new SelectionListener((event) => {
+    // tslint:disable-next-line
+    console.log('selection.panel', event);
+    this.forceUpdate();
+  });
 
   modelChanged() {
     this.forceUpdate();
@@ -56,7 +60,9 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> impleme
       >
         <CustomScrollbar>
           <div className="content">
-            {selection.map((instance) => <InstanceDetails key={instance.path()} instance={instance} />)}
+            {selection.map((instance) => 
+              <InstanceDetails key={instance.path()} instance={instance} />
+            )}
           </div>
         </CustomScrollbar>
       </Resizable>

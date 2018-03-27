@@ -8,7 +8,7 @@ import { SidebarHeader } from './SidebarHeader';
 import { SidebarGroup } from './SidebarGroup';
 import { CustomScrollbar } from '../scrollbars';
 
-import './Sidebar.css';
+import './Sidebar.scss';
 
 interface SidebarProps {
   registryStore?: RegistryStore;
@@ -20,23 +20,24 @@ interface SidebarProps {
 export class Sidebar extends React.Component<SidebarProps> {
 
   componentDidMount() {
-    this.props.registryStore!.fetchAll();
+    this.props.registryStore!.fetchAll()
+      .then(() => null, (err) => {
+        toast.error(<span><strong>Error: </strong>Unable to fetch data from the Kevoree registry</span>);
+      });
   }
 
   render() {
-    if (this.props.registryStore!.error) {
-      toast.error(<span><strong>Error: </strong>Unable to fetch data from the Kevoree registry</span>);
-    }
-
     return (
       <div className="Sidebar">
         <SidebarHeader />
-        <div className="Sidebar-content">
+        <div className="content">
           <CustomScrollbar>
-            <SidebarGroup name="Nodes" tdefs={this.props.registryStore!.nodes} />
-            <SidebarGroup name="Components" tdefs={this.props.registryStore!.components} />
-            <SidebarGroup name="Channels" tdefs={this.props.registryStore!.channels} />
-            <SidebarGroup name="Groups" tdefs={this.props.registryStore!.groups} />
+            <div className="inner">
+              <SidebarGroup name="Nodes" tdefs={this.props.registryStore!.nodes} />
+              <SidebarGroup name="Components" tdefs={this.props.registryStore!.components} />
+              <SidebarGroup name="Channels" tdefs={this.props.registryStore!.channels} />
+              <SidebarGroup name="Groups" tdefs={this.props.registryStore!.groups} />
+            </div>
           </CustomScrollbar>
         </div>
       </div>

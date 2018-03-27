@@ -3,4 +3,4 @@ export * from './instance-header';
 export * from './params';
 export * from './bindings';
 export * from './Description';
-export * from './KevoreeUpdate';
+export * from './autoUpdate';

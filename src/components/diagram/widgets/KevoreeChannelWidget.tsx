@@ -46,8 +46,8 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
       >
         <InstanceHeader instance={this.props.node.instance} hoverable={false} />
         <div className="ports">
-          <div className="in">{this.props.node.getInputs().map((port) => this.generatePort(port))}</div>
-          <div className="out">{this.props.node.getOutputs().map((port) => this.generatePort(port))}</div>
+          <div className="in">{this.generatePort(this.props.node.getInputs())}</div>
+          <div className="out">{this.generatePort(this.props.node.getOutputs())}</div>
         </div>
       </div>
     );

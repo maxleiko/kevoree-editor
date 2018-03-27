@@ -42,15 +42,15 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   onActionStarted(action: BaseAction) {
-    // tslint:disable-next-line
-    console.log('Diagram.onActionStarted', action);
+    // // tslint:disable-next-line
+    // console.log('Diagram.onActionStarted', action);
 
     return true;
   }
 
   onActionStopped(action: BaseAction) {
-    // tslint:disable-next-line
-    console.log('Diagram.onActionStopped', action);
+    // // tslint:disable-next-line
+    // console.log('Diagram.onActionStopped', action);
     if (action instanceof MoveItemsAction) {
       action.selectionModels.forEach((selModel) => {
         if (selModel.model instanceof AbstractModel) {

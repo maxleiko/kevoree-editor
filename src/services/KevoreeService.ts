@@ -1,6 +1,8 @@
 import * as kevoree from 'kevoree-library';
 import * as Kotlin from 'kevoree-kotlin';
 import * as _ from 'lodash';
+import * as React from 'react';
+import { toast } from 'react-toastify';
 import { INamespace, ITypeDefinition } from 'kevoree-registry-client';
 
 import * as kUtils from '../utils/kevoree';
@@ -18,8 +20,10 @@ import {
   KevoreeChannelPortModel,
   KevoreeChannelModel,
   KevoreePortModel,
+  KevoreeComponentModel,
 } from '../components/diagram/models';
 import { KevoreeLinkModel } from '../components/diagram/models/KevoreeLinkModel';
+import { RegistryStore } from '../stores';
 
 export interface KevoreeServiceListener {
   modelChanged: () => void;
@@ -27,6 +31,7 @@ export interface KevoreeServiceListener {
 
 export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLinkModel> {
   
+  private _registryStore: RegistryStore;
   private _factory: kevoree.KevoreeFactory = new kevoree.factory.DefaultKevoreeFactory();
   private _model = this._factory.createContainerRoot().withGenerated_KMF_ID(0);
   private _loader = this._factory.createJSONLoader();
@@ -37,7 +42,8 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   private _chansCount = 0;
   private _compsCount: Map<string, number> = new Map();
 
-  constructor() {
+  constructor(registryStore: RegistryStore) {
+    this._registryStore = registryStore;
     this._factory.root(this._model);
     this.initInstanceCounters();
 
@@ -48,38 +54,38 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
   }
 
   createInstance(rTdef: ITypeDefinition, containerPath: string, point: kwe.Point = { x: 100, y: 100 }) {
-    const tdef: kevoree.TypeDefinition = this.findOrCreateTypeDefinition(rTdef);
+    const tdef = this.findOrCreateTypeDefinition(rTdef);
     const container = this._model.findByPath(containerPath);
 
     if (container) {
       if (kUtils.isNode(container)) {
         if (kUtils.isComponentType(tdef)) {
-          this.createComponent(<kevoree.ComponentType> tdef, container as kevoree.Node, point);
+          return this.createComponent(tdef, container, point);
         } else if (kUtils.isChannelType(tdef)) {
-          this.createChannel(tdef as kevoree.ChannelType, this._model as kevoree.Model, point);
+          return this.createChannel(tdef, this._model, point);
         } else if (kUtils.isGroupType(tdef)) {
-          this.createGroup(tdef as kevoree.GroupType, this._model, point);
+          return this.createGroup(tdef, this._model, point);
         } else if (kUtils.isNodeType(tdef)) {
           throw new Error('Nodes must be added to model root');
         } else {
-          throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
+          throw new Error(`Unable to create instance of unknown type "${tdef!.metaClassName()}"`);
         }
       } else {
         if (kUtils.isComponentType(tdef)) {
           if (this.selectedNodes.length > 0) {
-            this.selectedNodes
-              .map((node) => this.createComponent(tdef as kevoree.ComponentType, node, point));
+            return this.selectedNodes
+              .map((node) => this.createComponent(tdef, node, point));
           } else {
             throw new Error('Components must be added in Nodes');
           }
         } else if (kUtils.isChannelType(tdef)) {
-          this.createChannel(tdef as kevoree.ChannelType, container as kevoree.Model, point);
+          return this.createChannel(tdef, container as kevoree.Model, point);
         } else if (kUtils.isGroupType(tdef)) {
-          this.createGroup(tdef as kevoree.GroupType, container as kevoree.Model, point);
+          return this.createGroup(tdef, container as kevoree.Model, point);
         } else if (kUtils.isNodeType(tdef)) {
-          this.createNode(tdef as kevoree.NodeType, container as kevoree.Model, point);
+          return this.createNode(tdef, container as kevoree.Model, point);
         } else {
-          throw new Error(`Unable to create instance of unknown type "${tdef.metaClassName()}"`);
+          throw new Error(`Unable to create instance of unknown type "${tdef!.metaClassName()}"`);
         }
       }
     } else {
@@ -87,16 +93,18 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     }
   }
 
-  createBinding(chan: kevoree.Channel, port: kevoree.Port): boolean {
+  createBinding(chan: kevoree.Channel, port: kevoree.Port) {
     const id = hash(`${chan.path()}_${port.path()}`);
     let binding = this._model.findMBindingsByID(id);
-    if (!binding) {
+    if (binding) {
+      throw new Error(`Binding already exists between ${chan.path()} <-> ${port.path()}`);
+    } else {
       binding = this._factory.createMBinding().withGenerated_KMF_ID(id);
       binding.hub = chan;
       binding.port = port;
       this._model.addMBindings(binding);
+      return binding;
     }
-    return false;
   }
 
   updateNamespaces(nss: INamespace[]) {
@@ -136,15 +144,13 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     const elem = this._model.findByPath(path);
     if (elem) {
       if (kUtils.isNode(elem)) {
-        const node = elem as kevoree.Node;
         selection = selection
-          .concat(node.components.array);
+          .concat(elem.components.array);
       } else if (kUtils.isModel(elem)) {
-        const model = elem as kevoree.Model;
         selection = selection
-          .concat(model.nodes.array)
-          .concat(model.groups.array)
-          .concat(model.hubs.array);
+          .concat(elem.nodes.array)
+          .concat(elem.groups.array)
+          .concat(elem.hubs.array);
       }
     }
     return selection.filter(kUtils.isSelected);
@@ -208,33 +214,60 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
           const source = link.getSourcePort();
           const target = link.getTargetPort();
 
-          let chanVM, portVM;
-
-          if (source instanceof KevoreeChannelPortModel) {
-            // source port is a channel port
-            chanVM = source as KevoreeChannelPortModel;
-            portVM = target as KevoreePortModel;
-          } else if (target instanceof KevoreeChannelPortModel) {
-            // target port is a channel port
-            chanVM = target as KevoreeChannelPortModel;
-            portVM = source as KevoreePortModel;
-          } else {
-            // TODO
-          }
-
-          if (chanVM) {
-            const success = this.createBinding(
-              (chanVM.parent as KevoreeChannelModel).instance,
-              (portVM as KevoreePortModel).port
-            );
-            if (!success) {
+          if (source instanceof KevoreeChannelPortModel && target instanceof KevoreePortModel) {
+            // connect channel to port
+            const created = this.createBinding((source.parent as KevoreeChannelModel).instance, target.port);
+            if (!created) {
               link.remove();
+            }
+          } else if (source instanceof KevoreePortModel && target instanceof KevoreeChannelPortModel) {
+            // connect port to channel
+            const created = this.createBinding((target.parent as KevoreeChannelModel).instance, source.port);
+            if (!created) {
+              link.remove();
+            }
+          } else if (source instanceof KevoreePortModel && target instanceof KevoreePortModel) {
+            // connect a port to a port
+            const localChanType = this._registryStore.channels
+              .find((chan) => chan.namespace! === 'kevoree' && chan.name === 'LocalChannel');
+            // tslint:disable-next-line
+            console.log('registryStore LocalChannel', localChanType);
+            if (localChanType) {
+              const comp = source.parent as KevoreeComponentModel;
+              const nodePath = comp.instance.eContainer().path();
+              const chan = this.createInstance(localChanType, nodePath) as kevoree.Channel | undefined;
+              if (chan) {
+                // this.createBinding(chan, source.port);
+                // this.createBinding(chan, target.port);
+              } else {
+                toast.error(
+                  React.createElement(
+                    'span',
+                    null,
+                    React.createElement('strong', null, 'Error: '),
+                    'unable to create an instance ',
+                    React.createElement('em', null, 'kevoree.LocalChannel')
+                  )
+                );
+              }
+            } else {
+              toast.error(
+                React.createElement(
+                  'span',
+                  null,
+                  React.createElement('strong', null, 'Error: '),
+                  'unable to find the type ',
+                  React.createElement('em', null, 'kevoree.LocalChannel')
+                )
+              );
             }
           }
         },
         entityRemoved: () => {
           event.link.removeListener(uid);
-          event.link.binding.delete();
+          if (event.link.binding) {
+            event.link.binding.delete();
+          }
         }
       });
     }
@@ -286,6 +319,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     this.initDictionaries(instance);
     this.initPorts(instance);
     container.addComponents(instance);
+    return instance;
   }
 
   private createNode(tdef: kevoree.NodeType, container: kevoree.Model, point: kwe.Point) {
@@ -295,6 +329,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     container.addNodes(instance);
+    return instance;
   }
 
   private createChannel(tdef: kevoree.ChannelType, container: kevoree.Model, point: kwe.Point) {
@@ -304,6 +339,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     container.addHubs(instance);
+    return instance;
   }
 
   private createGroup(tdef: kevoree.GroupType, container: kevoree.Model, point: kwe.Point) {
@@ -313,6 +349,7 @@ export class KevoreeService implements DiagramListener<AbstractModel, KevoreeLin
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
     container.addGroups(instance);
+    return instance;
   }
 
   private createPort(isInput: boolean, portType: kevoree.PortTypeRef, comp: kevoree.Component) {

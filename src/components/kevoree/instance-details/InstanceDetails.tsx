@@ -19,17 +19,17 @@ const InstanceDetailsHeader = ({ title }: { title: string }) => (
 
 export class InstanceDetails extends React.Component<InstanceDetailsProps> {
 
-    private _listener: kevoree.KevoreeModelListener = {
-        elementChanged: (event) => this.forceUpdate()
-    };
+    // private _listener: kevoree.KevoreeModelListener = {
+    //     elementChanged: (event) => this.forceUpdate()
+    // };
 
-    componentDidMount() {
-        this.props.instance.addModelElementListener(this._listener);
-    }
+    // componentDidMount() {
+    //     this.props.instance.addModelElementListener(this._listener);
+    // }
 
-    componentWillUnmount() {
-        this.props.instance.removeModelElementListener(this._listener);
-    }
+    // componentWillUnmount() {
+    //     this.props.instance.removeModelElementListener(this._listener);
+    // }
 
     renderBindings() {
         const { instance } = this.props;

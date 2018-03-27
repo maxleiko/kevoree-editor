@@ -1,7 +1,7 @@
 /**
  * Kevoree Model declaration file
  * 
- * This declaration file contains some liberty I took to rename
+ * This file is opinionated has I took the liberty to rename
  * some legacy (weird) names like MBinding (to Binding) or
  * Package (to Namespace).
  */
@@ -25,7 +25,7 @@ declare module 'kevoree-library' {
       getVersion(): String
   
       createComponentInstance(): Component;
-      createInstance<T, P>(): Instance<T, P>;
+      createInstance<P>(): Instance<P>;
       createPort(): Port;
       createComponentType(): ComponentType;
       createTypeDefinition(): TypeDefinition;
@@ -41,7 +41,7 @@ declare module 'kevoree-library' {
       createChannel(): Channel;
       createMBinding(): Binding;
       createPackage(): Namespace;
-      createNamedElement<T, P>(): Named<T, P>;
+      createNamedElement<P>(): Named<P>;
       createDeployUnit(): DeployUnit;
       createPortType(): PortType;
       createDictionary(): Dictionary;
@@ -76,7 +76,7 @@ declare module 'kevoree-library' {
     getVersion(): String
 
     createComponentInstance(): Component;
-    createInstance<T, P>(): Instance<T, P>;
+    createInstance<P>(): Instance<P>;
     createPort(): Port;
     createComponentType(): ComponentType;
     createTypeDefinition(): TypeDefinition;
@@ -92,7 +92,7 @@ declare module 'kevoree-library' {
     createChannel(): Channel;
     createMBinding(): Binding;
     createPackage(): Namespace;
-    createNamedElement<T, P>(): Named<T, P>;
+    createNamedElement<P>(): Named<P>;
     createDeployUnit(): DeployUnit;
     createPortType(): PortType;
     createDictionary(): Dictionary;
@@ -192,32 +192,33 @@ declare module 'kevoree-library' {
     delete(): void;
   }
   
-  export interface Named<T, P> extends Klass<P> {
+  export interface Named<P> extends Klass<P> {
     name: string;
-    withName(name: string): T;
+    withName(name: string): this;
   }
 
-  export interface Instance<T = Node | Component | Channel | Group, P = Model | Node> extends Named<T, P> {
+  export interface Instance<P = Model | Node> extends Named<P> {
     started: boolean;
     typeDefinition?: TypeDefinition;
     dictionary: Dictionary;
     fragmentDictionary: KList<FragmentDictionary>;
-    metaData: KList<Value<Instance<T, P>>>;
+    metaData: KList<Value<Instance<P>>>;
     findFragmentDictionaryByID(name: string): FragmentDictionary;
     addFragmentDictionary(dic: FragmentDictionary): void;
-    findMetaDataByID(id: string): Value<Instance<T, P>> | null;
-    addMetaData(metaData: Value<Instance<T, P>>): void;
+    findMetaDataByID(id: string): Value<Instance<P>> | null;
+    addMetaData(metaData: Value<Instance<P>>): void;
   }
   
-  export interface Component extends Instance<Component, Node> {
+  export interface Component extends Instance<Node> {
     provided: KList<Port>;
     required: KList<Port>;
+    typeDefinition?: ComponentType;
 
     addProvided(port: Port): void;
     addRequired(port: Port): void;
   }
   
-  export interface Port extends Named<Port, Component> {
+  export interface Port extends Named<Component> {
     bindings: KList<Binding>;
     portTypeRef: PortTypeRef;
   }
@@ -228,12 +229,14 @@ declare module 'kevoree-library' {
     withGenerated_KMF_ID(s: string | number): Binding;
   }
   
-  export interface Channel extends Instance<Channel, Model> {
+  export interface Channel extends Instance<Model> {
     bindings: KList<Binding>;
+    typeDefinition?: ChannelType;
   }
   
-  export interface Node extends Instance<Node, Model | Node> {
+  export interface Node extends Instance<Model | Node> {
     components: KList<Component>;
+    typeDefinition?: NodeType;
     hosts: KList<Node>;
     host: Node;
     groups: KList<Group>;
@@ -243,11 +246,12 @@ declare module 'kevoree-library' {
     addGroups(comp: Group): void;
   }
   
-  export interface Group extends Instance<Group, Model> {
+  export interface Group extends Instance<Model> {
     subNodes: KList<Node>;
+    typeDefinition?: GroupType;
   }
   
-  export interface NetworkInfo extends Named<NetworkInfo, Node> {
+  export interface NetworkInfo extends Named<Node> {
     values: KList<Value<NetworkInfo>>;
   }
   
@@ -258,9 +262,9 @@ declare module 'kevoree-library' {
     addValues(val: Value<Dictionary>): void;
   }
   
-  export interface FragmentDictionary extends Dictionary, Named<FragmentDictionary, Instance> {}
+  export interface FragmentDictionary extends Dictionary, Named<Instance> {}
   
-  export interface TypeDefinition<T = PortType | NodeType | ChannelType | GroupType | ComponentType, P = Namespace> extends Named<T, P> {
+  export interface TypeDefinition<P = Namespace> extends Named<P> {
     version: number;
     abstract: boolean;
     deployUnits: KList<DeployUnit>;
@@ -270,25 +274,25 @@ declare module 'kevoree-library' {
     findMetaDataByID(id: string): Value<TypeDefinition> | null;
   }
   
-  export interface PortTypeRef extends Named<PortTypeRef, ComponentType> {
+  export interface PortTypeRef extends Named<ComponentType> {
     optional: boolean;
     noDependency: boolean;
     ref: PortType;
   }
   
-  export interface PortType extends TypeDefinition<PortType, ComponentType> {
+  export interface PortType extends TypeDefinition {
     synchrone: boolean;
   }
   
-  export interface NodeType extends TypeDefinition<NodeType> {}
+  export interface NodeType extends TypeDefinition {}
   
-  export interface ComponentType extends TypeDefinition<ComponentType> {
+  export interface ComponentType extends TypeDefinition {
     provided: KList<PortTypeRef>;
     required: KList<PortTypeRef>;
   }
   
-  export interface ChannelType extends TypeDefinition<ChannelType> {}
-  export interface GroupType extends TypeDefinition<GroupType> {}
+  export interface ChannelType extends TypeDefinition {}
+  export interface GroupType extends TypeDefinition {}
   
   export interface DeployUnit {
     version: string;
@@ -306,7 +310,7 @@ declare module 'kevoree-library' {
     url: string;
   }
   
-  export interface DictionaryAttribute extends Named<DictionaryAttribute, DictionaryType> {
+  export interface DictionaryAttribute extends Named<DictionaryType> {
     optional: boolean;
     state: boolean;
     datatype: DataType;
@@ -314,11 +318,11 @@ declare module 'kevoree-library' {
     defaultValue: string;
   }
   
-  export interface Value<P> extends Named<Value<P>, P> {
+  export interface Value<P> extends Named<P> {
     value: string;
   }
 
-  export interface Namespace extends Named<Namespace, Model | Namespace> {
+  export interface Namespace extends Named<Model | Namespace> {
     packages: KList<Namespace>;
     typeDefinitions: KList<TypeDefinition>;
     deployUnits: KList<DeployUnit>;

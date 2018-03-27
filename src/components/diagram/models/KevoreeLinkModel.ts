@@ -5,15 +5,17 @@ import { KevoreeChannelPortModel } from './KevoreeChannelPortModel';
 
 export class KevoreeLinkModel extends DefaultLinkModel {
 
-    binding: kevoree.Binding;
+    binding: kevoree.Binding | null;
 
     constructor() {
         super('kevoree-link');
-        const factory = new kevoree.factory.DefaultKevoreeFactory();
-        this.binding = factory.createMBinding();
     }
 
     getSourcePort(): KevoreePortModel | KevoreeChannelPortModel {
         return super.getSourcePort() as KevoreePortModel | KevoreeChannelPortModel;
+    }
+
+    getTargetPort(): KevoreePortModel | KevoreeChannelPortModel {
+        return super.getTargetPort() as KevoreePortModel | KevoreeChannelPortModel;
     }
 }

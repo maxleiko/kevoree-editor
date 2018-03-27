@@ -3710,6 +3710,11 @@ kevoree-registry-client@^3.0.1:
     node-fetch "^1.6.3"
     tiny-conf "^1.1.0"
 
+kevoree-ts-model@/home/leiko/dev/kevoree/kevoree-ts-model:
+  version "1.0.0"
+  dependencies:
+    mobx "^4.1.0"
+
 killable@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/killable/-/killable-1.0.0.tgz#da8b84bd47de5395878f95d64d02f2449fe05e6b"
@@ -4146,6 +4151,10 @@ mobx-react@^4.4.1:
 mobx@^3.5.1:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-3.6.2.tgz#fb9f5ff5090539a1ad54e75dc4c098b602693320"
+
+mobx@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-4.1.0.tgz#e4a9679cdafbe215b20e32ef93a7031845b3f1af"
 
 mousetrap@^1.6.1:
   version "1.6.1"
@@ -4681,7 +4690,7 @@ pathfinding@^0.4.18:
   dependencies:
     heap "0.2.5"
 
-paths-js@^0.4.5:
+paths-js@^0.4.7:
   version "0.4.7"
   resolved "https://registry.yarnpkg.com/paths-js/-/paths-js-0.4.7.tgz#2e1d4e4a5a8e57e15c16bd29051d3f8be237e194"
 
@@ -6095,14 +6104,14 @@ stdout-stream@^1.4.0:
   dependencies:
     readable-stream "^2.0.1"
 
-storm-react-diagrams@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/storm-react-diagrams/-/storm-react-diagrams-5.0.0.tgz#edf55195e3028bd93344c2ca2733685793c99624"
+storm-react-diagrams@maxleiko/react-diagrams#dist:
+  version "5.1.0"
+  resolved "https://codeload.github.com/maxleiko/react-diagrams/tar.gz/f55f41b6f519afe72cb4fac3cf8bfce998f9cf50"
   dependencies:
     closest "^0.0.1"
     lodash "^4.17.5"
     pathfinding "^0.4.18"
-    paths-js "^0.4.5"
+    paths-js "^0.4.7"
     react "^16.2.0"
 
 stream-browserify@^2.0.1:

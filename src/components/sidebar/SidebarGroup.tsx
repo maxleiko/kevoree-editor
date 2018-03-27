@@ -50,10 +50,6 @@ export class SidebarGroup extends React.Component<SidebarGroupProps> {
       return <span className="SidebarGroup-empty">Empty</span>;
     }
     
-    // if (filteredTdefs.length === 0) {
-    //   return <span className="SidebarGroup-empty">No result</span>;
-    // }
-
     return tdefs.map((tdef) => (
       <SidebarItem
         key={`${tdef.namespace!}.${tdef.name}/${tdef.version}`}

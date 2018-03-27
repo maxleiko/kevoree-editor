@@ -4,9 +4,9 @@ export interface AdaptationEngine<T> {
 
     /**
      * Creates or removes the appropriate view-model instances according to the kevoree event
-     * @param event kevoree model event
+     * @param event kevoree.ModelEvent
      */
-    adapt(event: kevoree.ModelEvent): void;
+    adapt(event: kevoree.ModelEvent): boolean;
 
     /**
      * Creates the appropriate view-model instances by reading the current state
