@@ -1,14 +1,14 @@
-import * as kevoree from 'kevoree-library';
+import { Channel } from 'kevoree-ts-model';
 
 import { AbstractModel } from './AbstractModel';
 import { KevoreeChannelPortModel } from './KevoreeChannelPortModel';
 
-export class KevoreeChannelModel extends AbstractModel<kevoree.Channel> {
+export class KevoreeChannelModel extends AbstractModel<Channel> {
 
   inputs: KevoreeChannelPortModel;
   outputs: KevoreeChannelPortModel;
 
-  constructor(instance: kevoree.Channel) {
+  constructor(instance: Channel) {
     super('kevoree-channel', instance);
     this.inputs = new KevoreeChannelPortModel(true);
     this.outputs = new KevoreeChannelPortModel(false);

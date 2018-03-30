@@ -1,12 +1,10 @@
 import * as React from 'react';
 import { DiagramWidget, BaseAction, MoveItemsAction } from 'storm-react-diagrams';
 import { observer, inject } from 'mobx-react';
-import { ITypeDefinition } from 'kevoree-registry-client';
 import { toast } from 'react-toastify';
 
 import { AbstractModel } from './models/AbstractModel';
-import { KevoreeService } from '../../services/KevoreeService';
-import { DiagramStore } from '../../stores/DiagramStore';
+import { KevoreeStore } from '../../stores';
 import { Hoverlay } from '../hoverlay';
 import * as kUtils from '../../utils/kevoree';
 import { DND_ITEM } from '../../utils/constants';
@@ -16,20 +14,21 @@ import { SelectionPanel } from '../selection-panel';
 import './Diagram.css';
 
 export interface DiagramProps {
-  diagramStore?: DiagramStore;
-  kevoreeService?: KevoreeService;
+  kevoreeStore?: KevoreeStore;
 }
 
-@inject('diagramStore', 'selectionPanelStore', 'kevoreeService')
+@inject('kevoreeStore', 'selectionPanelStore')
 @observer
 export class Diagram extends React.Component<DiagramProps> {
 
   onDrop(event: React.DragEvent<HTMLDivElement>) {
     try {
-      const point = this.props.diagramStore!.engine.getRelativeMousePoint(event);
-      const tdef: ITypeDefinition = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-      this.props.kevoreeService!.createInstance(tdef, this.props.diagramStore!.path, point);
+      const point = this.props.kevoreeStore!.engine.getRelativeMousePoint(event);
+      const tdef = JSON.parse(event.dataTransfer.getData(DND_ITEM));
+      this.props.kevoreeStore!.createInstance(tdef, point);
     } catch (err) {
+      // tslint:disable-next-line
+      console.error(err.stack);
       toast.error(err.message);
     }
   }
@@ -65,7 +64,7 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   generateOverlay() {
-    const store = this.props.diagramStore!;
+    const store = this.props.kevoreeStore!;
     const smartRouting = `Smart routing: ${store.smartRouting ? 'on' : 'off'}`;
 
     return (
@@ -80,7 +79,7 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   render() {
-    const { engine, smartRouting } = this.props.diagramStore!;
+    const { engine, smartRouting } = this.props.kevoreeStore!;
 
     return (
       <div

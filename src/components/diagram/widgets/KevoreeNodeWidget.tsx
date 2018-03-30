@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { DiagramEngine } from 'storm-react-diagrams';
-import * as kevoree from 'kevoree-library';
 import * as cx from 'classnames';
 import { inject, observer } from 'mobx-react';
 
@@ -20,15 +19,11 @@ interface KevoreeNodeWidgetState {
   canDrop: boolean;
 }
 
-@inject('kevoreeService', 'diagramStore')
+@inject('diagramStore')
 @observer
 export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, KevoreeNodeWidgetState> {
 
   private _elem: HTMLDivElement | null;
-
-  private _listener: kevoree.KevoreeModelListener = {
-    elementChanged: (event) => this.forceUpdate()
-  };
 
   constructor(props: KevoreeNodeWidgetProps) {
     super(props);
@@ -36,7 +31,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   }
 
   openNodeView() {
-    this.props.diagramStore!.changePath(this.props.node.instance!.path());
+    this.props.diagramStore!.changePath(this.props.node.instance.path);
   }
 
   onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
@@ -50,12 +45,6 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
       this.props.node.width = this._elem.getBoundingClientRect().width;
       this.props.node.height = this._elem.getBoundingClientRect().height;
     }
-
-    this.props.node.instance!.addModelTreeListener(this._listener);
-  }
-
-  componentWillUnmount() {
-    this.props.node.instance!.removeModelTreeListener(this._listener);
   }
 
   render() {
@@ -72,8 +61,8 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
         <InstanceHeader className="header" instance={instance} hoverable={false} />
         <div className="body">
           <ul className="components">
-            {this.props.node.instance!.components.array.map((comp) => (
-              <li key={comp.name}>{comp.name}: {comp.typeDefinition ? comp.typeDefinition.name : '???'}</li>
+            {this.props.node.instance!.components.map((comp) => (
+              <li key={comp.name!}>{comp.name}: {comp.tdef ? comp.tdef.name : '???'}</li>
             ))}
           </ul>
         </div>

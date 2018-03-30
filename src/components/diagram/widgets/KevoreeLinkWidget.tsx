@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { observer } from 'mobx-react';
 import {
     DiagramEngine,
     Toolkit,
@@ -27,6 +28,7 @@ export interface KevoreeLinkState {
   selected: boolean;
 }
 
+@observer
 export class KevoreeLinkWidget extends BaseWidget<KevoreeLinkProps, KevoreeLinkState> {
   public static defaultProps: Partial<KevoreeLinkProps> = {
     color: 'black',

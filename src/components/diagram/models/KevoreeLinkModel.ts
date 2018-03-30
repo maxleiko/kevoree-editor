@@ -1,11 +1,11 @@
 import { DefaultLinkModel } from 'storm-react-diagrams';
-import * as kevoree from 'kevoree-library';
+import { Binding } from 'kevoree-ts-model';
 import { KevoreePortModel } from './KevoreePortModel';
 import { KevoreeChannelPortModel } from './KevoreeChannelPortModel';
 
 export class KevoreeLinkModel extends DefaultLinkModel {
 
-    binding: kevoree.Binding | null;
+    binding: Binding | null;
 
     constructor() {
         super('kevoree-link');

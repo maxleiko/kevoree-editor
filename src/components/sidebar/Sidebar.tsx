@@ -2,8 +2,7 @@ import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import { toast } from 'react-toastify';
 
-import { RegistryStore } from '../../stores/RegistryStore';
-import { KevoreeService } from '../../services/KevoreeService';
+import { RegistryStore } from '../../stores';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarGroup } from './SidebarGroup';
 import { CustomScrollbar } from '../scrollbars';
@@ -12,10 +11,9 @@ import './Sidebar.scss';
 
 interface SidebarProps {
   registryStore?: RegistryStore;
-  kevoreeService?: KevoreeService;
 }
 
-@inject('registryStore', 'kevoreeService')
+@inject('registryStore')
 @observer
 export class Sidebar extends React.Component<SidebarProps> {
 

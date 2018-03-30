@@ -2,8 +2,7 @@ import * as React from 'react';
 import { inject, observer } from 'mobx-react';
 import { toast } from 'react-toastify';
 
-import { DiagramStore } from '../../stores/DiagramStore';
-import { KevoreeService } from '../../services/KevoreeService';
+import { KevoreeStore, DiagramStore } from '../../stores';
 import { SidebarItem } from './SidebarItem';
 import { Collapsible } from '../collapsible';
 
@@ -14,16 +13,16 @@ export interface SidebarGroupProps {
   name: string;
   tdefs: ITypeDefinition[];
   diagramStore?: DiagramStore;
-  kevoreeService?: KevoreeService;
+  kevoreeStore?: KevoreeStore;
 }
 
-@inject('kevoreeService', 'diagramStore')
+@inject('kevoreeStore', 'diagramStore')
 @observer
 export class SidebarGroup extends React.Component<SidebarGroupProps> {
 
   onCreateInstance(tdef: ITypeDefinition) {
     try {
-      this.props.kevoreeService!.createInstance(tdef, this.props.diagramStore!.path);
+      this.props.kevoreeStore!.createInstance(tdef);
     } catch (err) {
       toast.error(err.message);
     }

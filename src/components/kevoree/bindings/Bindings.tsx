@@ -1,7 +1,7 @@
 import * as React from 'react';
-import * as kevoree from 'kevoree-library';
+import * as kevoree from 'kevoree-ts-model';
 
-import { Binding } from '.';
+import { Binding } from './Binding';
 
 export interface BindingsProps {
   bindings: kevoree.Binding[];
@@ -18,7 +18,7 @@ export class Bindings extends React.Component<BindingsProps> {
     return (
       <div>
         {bindings.map((binding) => (
-          <Binding key={binding.path()} binding={binding} />
+          <Binding key={binding.path} binding={binding} />
         ))}
       </div>
     );

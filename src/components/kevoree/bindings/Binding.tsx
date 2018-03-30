@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as kevoree from 'kevoree-library';
+import * as kevoree from 'kevoree-ts-model';
 
 export interface BindingProps {
   binding: kevoree.Binding;
@@ -7,17 +7,17 @@ export interface BindingProps {
 
 export class Binding extends React.Component<BindingProps> {
   render() {
-    const { hub, port } = this.props.binding;
+    const { channel, port } = this.props.binding;
 
     return (
       <div>
         <div>
           <strong>Chan: </strong>
-          <span>{hub ? hub.path() : 'null'}</span>
+          <span>{channel ? channel.path : 'null'}</span>
         </div>
         <div>
           <strong>Port: </strong>
-          <span>{port ? port.path() : 'null'}</span>
+          <span>{port ? port.path : 'null'}</span>
         </div>
       </div>
     );

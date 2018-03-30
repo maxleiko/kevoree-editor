@@ -1,15 +1,14 @@
 
 import * as React from 'react';
 import { AbstractNodeFactory, DiagramEngine } from 'storm-react-diagrams';
-import * as kevoree from 'kevoree-library';
 
 import { KevoreeChannelModel } from '../models/KevoreeChannelModel';
 import { KevoreeChannelWidget } from '../widgets/KevoreeChannelWidget';
-import { KevoreeService } from '../../../services';
+import { KevoreeStore } from '../../../stores';
 
 export class KevoreeChannelFactory extends AbstractNodeFactory {
 
-  constructor(private _kService: KevoreeService) {
+  constructor(private _kStore: KevoreeStore) {
     super('kevoree-channel');
   }
 
@@ -18,10 +17,10 @@ export class KevoreeChannelFactory extends AbstractNodeFactory {
   }
 
   getNewInstance(initConf?: any) {
-    const chan = this._kService.model.findByPath<kevoree.Channel>(initConf.path);
+    const chan = this._kStore.model.getChannel(initConf.name);
     if (chan) {
       return new KevoreeChannelModel(chan);
     }
-    throw new Error(`Unable to find instance "${initConf.path}" in current model`);
+    throw new Error(`Unable to find channel instance "${initConf.name}" in stored model`);
   }
 }

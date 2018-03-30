@@ -1,8 +1,7 @@
 import { observable, action, computed } from 'mobx';
 import { DiagramModel, DiagramEngine, DefaultLabelFactory } from 'storm-react-diagrams';
-import * as kevoree from 'kevoree-library';
+import * as kevoree from 'kevoree-ts-model';
 
-import { KevoreeService, KevoreeServiceListener } from '../services';
 import { distributeElements } from '../utils/dagreify';
 import {
   KevoreeNodeFactory,
@@ -20,16 +19,14 @@ import {
   KevoreeGroupModel,
   KevoreeLinkModel,
 } from '../components/diagram/models';
-import { isNode, isModel } from '../utils/kevoree';
+// import { isNode, isModel } from '../utils/kevoree';
 import { DIAGRAM_DEFAULT_ZOOM } from '../utils/constants';
-import { AdaptationEngine, NodeAdaptationEngine, ModelAdaptationEngine } from '../adaptations';
+import { KevoreeStore } from './KevoreeStore';
 
-export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeModelListener {
+export class DiagramStore {
 
-  private _kService: KevoreeService;
-  private _kListenerUid: string;
-  private _modelAdaptEngine: AdaptationEngine<kevoree.Model> = new ModelAdaptationEngine(this);
-  private _nodeAdaptEngine: AdaptationEngine<kevoree.Node> = new NodeAdaptationEngine(this);
+  private _kStore: KevoreeStore;
+  // private _kListenerUid: string;
   
   @observable private _path: string = '/';
   @observable private _previousPath: string | null = null;
@@ -37,14 +34,14 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   @observable private _model: DiagramModel = new DiagramModel();
   @observable private _smartRouting = false;
 
-  constructor(_kService: KevoreeService) {
-    this._kService = _kService;
+  constructor(kStore: KevoreeStore) {
+    this._kStore = kStore;
 
     // register custom factories
-    this._engine.registerNodeFactory(new KevoreeComponentFactory(this._kService));
-    this._engine.registerNodeFactory(new KevoreeNodeFactory(this._kService));
-    this._engine.registerNodeFactory(new KevoreeChannelFactory(this._kService));
-    this._engine.registerNodeFactory(new KevoreeGroupFactory(this._kService));
+    this._engine.registerNodeFactory(new KevoreeComponentFactory(this._kStore));
+    this._engine.registerNodeFactory(new KevoreeNodeFactory(this._kStore));
+    this._engine.registerNodeFactory(new KevoreeChannelFactory(this._kStore));
+    this._engine.registerNodeFactory(new KevoreeGroupFactory(this._kStore));
     this._engine.registerPortFactory(new KevoreePortFactory());
     this._engine.registerPortFactory(new KevoreeChannelPortFactory());
     this._engine.registerLinkFactory(new KevoreeLinkFactory());
@@ -52,9 +49,6 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
 
     // set model
     this._engine.setDiagramModel(this._model);
-
-    // listen to this._kService model changing (ie. when ref to kevoree.Model changes)
-    this._kService.addListener(this);
 
     // init
     this.changePath(this._path);
@@ -87,14 +81,14 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
 
   @action addBinding(binding: kevoree.Binding) {
     const vm = new KevoreeLinkModel();
-    if (binding.port && binding.hub) {
-      const compVM = this._model.getNode(binding.port.eContainer().path()) as KevoreeComponentModel;
-      const portVM = compVM.getPortFromID(binding.port.path());
+    if (binding.port && binding.channel) {
+      const compVM = this._model.getNode(binding.port.parent!.path) as KevoreeComponentModel;
+      const portVM = compVM.getPortFromID(binding.port.path);
       if (portVM) {
         vm.setSourcePort(portVM);
-        const chanVM = this._model.getNode(binding.hub.path()) as KevoreeChannelModel;
+        const chanVM = this._model.getNode(binding.channel.path) as KevoreeChannelModel;
         if (chanVM) {
-          const chanPortVM = binding.port.getRefInParent() === 'provided'
+          const chanPortVM = binding.port.refInParent === 'inputs'
             ? chanVM.getInputs()
             : chanVM.getOutputs();
           vm.setTargetPort(chanPortVM);
@@ -106,7 +100,7 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   }
 
   @action changePath(path: string) {
-    const elem = this._kService.model.findByPath(path);
+    const elem = this._kStore.model.getByPath(path);
     if (elem) {
       this.removeListeners();
       this._previousPath = this._path;
@@ -120,7 +114,7 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
       this.initModel(prevZoomLevel);
       this._engine.setDiagramModel(this._model);
       this.registerListeners();
-      this.updateDiagram(elem);
+      // this.updateDiagram(elem);
       this._engine.repaintCanvas();
     } else {
       throw new Error(`Unable to find "${path}" in the Kevoree model`);
@@ -157,31 +151,6 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
     this._engine.repaintCanvas();
   }
 
-  @action elementChanged(event: kevoree.ModelEvent) {
-    const elem = this._kService.model.findByPath(this._path);
-    if (elem) {
-      let update = false;
-      if (isNode(elem)) {
-        update = this._nodeAdaptEngine.adapt(event);
-        if (process.env.NODE_ENV !== 'production' && update) {
-          // tslint:disable-next-line
-          console.log('=== NodeAdaptationEngine ===', event);
-        }
-      } else if (isModel(elem)) {
-        update = this._modelAdaptEngine.adapt(event);
-        if (process.env.NODE_ENV !== 'production' && update) {
-          // tslint:disable-next-line
-          console.log('=== ModelAdaptationEngine ===', event);
-        }
-      } else {
-        throw new Error(`TODO add elementChanged behavior for type ${elem.path()} in DiagramStore`);
-      }
-      if (update) {
-        this._engine.repaintCanvas();
-      }
-    }
-  }
-
   @action modelChanged() {
     this.changePath('/');
     this._previousPath = null;
@@ -198,33 +167,23 @@ export class DiagramStore implements KevoreeServiceListener, kevoree.KevoreeMode
   }
 
   private registerDiagramModelListener() {
-    this._kListenerUid = this._model.addListener(this._kService);
+    // this._kListenerUid = this._model.addListener(this._kStore);
   }
 
   private removeDiagramModelListener() {
-    this._model.removeListener(this._kListenerUid);
+    // this._model.removeListener(this._kListenerUid);
   }
 
   private registerKevoreeModelListener() {
-    this._kService.model.addModelTreeListener(this);
+    // this._kStore.model.addModelTreeListener(this);
   }
 
   private removeKevoreeModelListener() {
-    this._kService.model.removeModelTreeListener(this);
+    // this._kStore.model.removeModelTreeListener(this);
   }
 
   private initModel(zoomLevel: number = DIAGRAM_DEFAULT_ZOOM) {
     this._model.setZoomLevel(zoomLevel);
-  }
-
-  @action private updateDiagram(elem: kevoree.Klass<any>) {
-    if (isNode(elem)) {
-      this._nodeAdaptEngine.createInstances(elem as kevoree.Node);
-    } else if (isModel(elem)) {
-      this._modelAdaptEngine.createInstances(elem as kevoree.Model);
-    } else {
-      throw new Error(`TODO add updateDiagram behavior for type ${elem.path()} in DiagramStore`);
-    }
   }
 
   @computed get path() {

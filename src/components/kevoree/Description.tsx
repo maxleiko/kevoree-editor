@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as kevoree from 'kevoree-library';
+import * as kevoree from 'kevoree-ts-model';
 
 import { getDescription } from '../../utils/kevoree';
 
@@ -8,8 +8,8 @@ export interface DescriptionProps {
 }
 
 export const Description = ({ instance }: DescriptionProps) => {
-  if (instance.typeDefinition) {
-    const desc = getDescription(instance.typeDefinition);
+  if (instance.tdef) {
+    const desc = getDescription(instance.tdef);
 
     if (!desc) {
       return <em className="text-muted">no description</em>;

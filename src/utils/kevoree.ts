@@ -9,6 +9,7 @@ import {
   KEV_DESCRIPTION,
 } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
+import { Instance, Value, TypeDefinition } from 'kevoree-ts-model';
 
 export function isComponentType(tdef: kevoree.TypeDefinition): tdef is kevoree.ComponentType {
   return tdef.metaClassName().startsWith('org.kevoree.ComponentType');
@@ -83,16 +84,16 @@ export function toBoolean(val: any): boolean {
   return val === 'true';
 }
 
-export function isSelected(instance: kevoree.Instance): boolean {
-  const sel = instance.findMetaDataByID(KWE_SELECTED);
+export function isSelected(instance: Instance): boolean {
+  const sel = instance.metas.get(KWE_SELECTED);
   if (sel) {
     return toBoolean(sel.value);
   }
   return false;
 }
 
-export function getPosition(instance: kevoree.Instance) {
-  let position = instance.findMetaDataByID(KWE_POSITION);
+export function getPosition(instance: Instance) {
+  let position = instance.metas.get(KWE_POSITION);
   if (!position) {
     // if instance has no position yet, then create default to [100,100]
     position = setPosition(instance, { x: 100, y: 100 });
@@ -100,53 +101,29 @@ export function getPosition(instance: kevoree.Instance) {
   return JSON.parse(position.value);
 }
 
-export function getDescription(tdef: kevoree.TypeDefinition) {
-  const desc = tdef.findMetaDataByID(KEV_DESCRIPTION);
+export function getDescription(tdef: TypeDefinition) {
+  const desc = tdef.metas.get(KEV_DESCRIPTION);
   if (desc) {
     return desc.value;
   }
   return null;
 }
 
-export function setPosition(instance: kevoree.Instance, point: kwe.Point): kevoree.Value<kevoree.Instance> {
-  let position = instance.findMetaDataByID(KWE_POSITION);
+export function setPosition(instance: Instance, point: kwe.Point): Value<Instance> {
+  let position = instance.metas.get(KWE_POSITION);
   if (!position) {
-    const factory = new kevoree.factory.DefaultKevoreeFactory();
-    position = factory.createValue<kevoree.Instance>().withName(KWE_POSITION);
-    instance.addMetaData(position);
+    position = new Value<Instance>().withName(KWE_POSITION);
+    instance.addMeta(position);
   }
   position.value = JSON.stringify(point);
   return position;
 }
 
-export function setSelected(instance: kevoree.Instance, value: boolean): void {
-  let selected = instance.findMetaDataByID(KWE_SELECTED);
+export function setSelected(instance: Instance, value: boolean): void {
+  let selected = instance.metas.get(KWE_SELECTED);
   if (!selected) {
-    const factory = new kevoree.factory.DefaultKevoreeFactory();
-    selected = factory.createValue<kevoree.Instance>().withName(KWE_SELECTED);
-    instance.addMetaData(selected);
+    selected = new Value<Instance>().withName(KWE_SELECTED);
+    instance.addMeta(selected);
   }
   selected.value = value + '';
-}
-
-export function isNameValid(instance: kevoree.Instance, name: string): boolean {
-  if (isNode(instance)) {
-    const model = instance.eContainer() as kevoree.Model;
-    return model.nodes.array
-      .filter((n) => n.path() !== instance.path())
-      .find((n) => n.name === name) === undefined;
-  } else if (isComponent(instance)) {
-    return instance.eContainer().components.array
-      .filter((c) => c.path() !== instance.path())
-      .find((c) => c.name === name) === undefined;
-  } else if (isChannel(instance)) {
-    return instance.eContainer().hubs.array
-      .filter((c) => c.path() !== instance.path())
-      .find((c) => c.name === name) === undefined;
-  } else if (isGroup(instance)) {
-    return instance.eContainer().groups.array
-      .filter((g) => g.path() !== instance.path())
-      .find((g) => g.name === name) === undefined;
-  }
-  return false;
 }

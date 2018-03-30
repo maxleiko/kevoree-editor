@@ -1,10 +1,10 @@
-import * as kevoree from 'kevoree-library';
+import { Group } from 'kevoree-ts-model';
 
 import { AbstractModel } from './AbstractModel';
 
-export class KevoreeGroupModel extends AbstractModel<kevoree.Group> {
+export class KevoreeGroupModel extends AbstractModel<Group> {
 
-  constructor(instance: kevoree.Group) {
+  constructor(instance: Group) {
     super('kevoree-group', instance);
   }
 }

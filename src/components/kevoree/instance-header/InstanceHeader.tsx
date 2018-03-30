@@ -1,111 +1,106 @@
 import * as React from 'react';
 import * as cx from 'classnames';
-import * as kevoree from 'kevoree-library';
+import { Instance, Model, Node, Group, Channel, Component } from 'kevoree-ts-model';
 import { toast } from 'react-toastify';
 
 import { Editable } from '../../editable';
 import { str2rgb } from '../../../utils/colors';
-import { isModel } from '../../../utils/kevoree';
-import { getType, isNameValid } from '../../../utils/kevoree';
+import { isNameValid } from '../../../utils/validators';
 
 import './InstanceHeader.scss';
 
 export interface InstanceHeaderProps {
-    instance: kevoree.Instance | kevoree.Model;
-    alpha?: number;
-    rgb?: kwe.RGB;
-    hoverable?: boolean;
-    editable?: boolean;
+  instance: Instance | Model;
+  alpha?: number;
+  rgb?: kwe.RGB;
+  hoverable?: boolean;
+  editable?: boolean;
 }
 
 type Props = InstanceHeaderProps & React.HTMLAttributes<HTMLDivElement>;
 
+function getType(instance: Instance) {
+  if (instance instanceof Node) {
+    return 'node';
+  } else if (instance instanceof Group) {
+    return 'group';
+  } else if (instance instanceof Channel) {
+    return 'channel';
+  } else if (instance instanceof Component) {
+    return 'component';
+  }
+  return;
+}
+
 export class InstanceHeader extends React.Component<Props> {
+  renderAsModel(model: Model) {
+    const { className } = this.props;
 
-    // private _listener: kevoree.KevoreeModelListener = {
-    //     elementChanged: (event) => this.forceUpdate()
-    // };
+    return (
+      <div className={cx('InstanceHeader', className)}>
+        <span className="name">/</span>
+        <span className="type">Model</span>
+      </div>
+    );
+  }
 
-    // componentDidMount() {
-    //     this.props.instance.addModelElementListener(this._listener);
-    // }
+  renderName(instance: Instance) {
+    const { editable = true } = this.props;
 
-    // componentWillUnmount() {
-    //     this.props.instance.removeModelElementListener(this._listener);
-    // }
-
-    renderAsModel(model: kevoree.Model) {
-        const { className } = this.props;
-
-        return (
-            <div className={cx('InstanceHeader', className)}>
-                <span className="name">/</span>
-                <span className="type">Model</span>
-            </div>
-        );
-    }
-
-    renderName(instance: kevoree.Instance) {
-        const { editable = true } = this.props;
-
-        if (editable) {
-            return (
-                <Editable
-                    className="name"
-                    value={instance.name}
-                    onCommit={(name) => instance.name = name}
-                    validate={(name) => {
-                        const valid = isNameValid(instance, name);
-                        if (!valid) {
-                            toast.warn(<span>Instance name <strong>{name}</strong> must be unique</span>);
-                        }
-                        return valid;
-                    }}
-                />
-            );
-        } else {
-            return <span className="name">{instance.name}</span>;
-        }
-    }
-
-    renderAsInstance(instance: kevoree.Instance) {
-        const { rgb, className, alpha = 0.8, hoverable = true, editable = true } = this.props;
-
-        if (instance.typeDefinition) {
-            let { r, g, b } = str2rgb(instance.typeDefinition.name);
-            if (typeof rgb !== 'undefined') {
-                r = rgb!.r;
-                g = rgb!.g;
-                b = rgb!.b;
+    if (editable) {
+      return (
+        <Editable
+          className="name"
+          value={instance.name!}
+          onCommit={(name) => (instance.name = name)}
+          validate={(name) => {
+            const valid = isNameValid(instance, name);
+            if (!valid) {
+              toast.warn(
+                <span>
+                  Instance name <strong>{name}</strong> must be unique
+                </span>
+              );
             }
-            const classNames = cx(
-                'InstanceHeader',
-                getType(instance.typeDefinition),
-                { hoverable, editable },
-                className
-            );
-    
-            return (
-                <div
-                    className={classNames}
-                    style={{ backgroundColor: `rgba(${r}, ${g}, ${b}, ${alpha})` }}
-                >
-                    {this.renderName(instance)}
-                    <span className="type">
-                        {instance.typeDefinition.name}/{instance.typeDefinition.version}
-                    </span>
-                </div>
-            );
-        }
+            return valid;
+          }}
+        />
+      );
+    } else {
+      return <span className="name">{instance.name}</span>;
+    }
+  }
 
-        return null;
+  renderAsInstance(instance: Instance) {
+    const { rgb, className, alpha = 0.8, hoverable = true, editable = true } = this.props;
+
+    if (instance.tdef) {
+      let { r, g, b } = str2rgb(instance.tdef.name!);
+      if (typeof rgb !== 'undefined') {
+        r = rgb!.r;
+        g = rgb!.g;
+        b = rgb!.b;
+      }
+      const classNames = cx('InstanceHeader', getType(instance), { hoverable, editable }, className);
+
+      return (
+        <div className={classNames} style={{ backgroundColor: `rgba(${r}, ${g}, ${b}, ${alpha})` }}>
+          {this.renderName(instance)}
+          <span className="type">
+            {instance.tdef!.name}/{instance.tdef!.version}
+          </span>
+        </div>
+      );
     }
 
-    render() {
-        const { instance } = this.props;
+    return null;
+  }
 
-        return isModel(instance)
-            ? this.renderAsModel(instance)
-            : this.renderAsInstance(instance);
-    }
+  render() {
+    const { instance } = this.props;
+
+    return instance instanceof Model
+      ? this.renderAsModel(instance)
+      : this.renderAsInstance(instance);
+  }
 }

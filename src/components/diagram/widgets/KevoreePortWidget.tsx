@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { observer } from 'mobx-react';
 import { PortWidget, PortModel } from 'storm-react-diagrams';
 
 import './KevoreePortWidget.scss';
@@ -7,6 +8,7 @@ export interface KevoreePortWidgetProps {
   model: { isInput: boolean; } & PortModel;
 }
 
+@observer
 export class KevoreePortWidget extends React.Component<KevoreePortWidgetProps> {
 
   render() {

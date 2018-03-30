@@ -4,8 +4,8 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { DiagramStore, ModalStore } from './stores';
-import { FileService, KevoreeService } from './services';
+import { DiagramStore, ModalStore, KevoreeStore } from './stores';
+import { FileService } from './services';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
@@ -15,12 +15,12 @@ import './App.css';
 
 interface AppProps {
   modalStore?: ModalStore;
+  kevoreeStore?: KevoreeStore;
   diagramStore?: DiagramStore;
   fileService?: FileService;
-  kevoreeService?: KevoreeService;
 }
 
-@inject('modalStore', 'diagramStore', 'fileService', 'kevoreeService')
+@inject('modalStore', 'diagramStore', 'kevoreeStore', 'fileService')
 @observer
 export default class App extends React.Component<AppProps> {
 
@@ -51,14 +51,14 @@ export default class App extends React.Component<AppProps> {
                     <p className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
                   </div>
                 ),
-                onConfirm: () => this.props.kevoreeService!.deserialize(file.data)
+                onConfirm: () => this.props.kevoreeStore!.deserialize(file.data)
               });
             },
             (err) => toast.error(`Unable to load file ${err.filename}`));
     },
     save: (event: any) => {
       event.preventDefault();
-      const model = this.props.kevoreeService!.serialize();
+      const model = this.props.kevoreeStore!.serialize();
       this.props.fileService!.save(model);
     },
     previousView: () => this.props.diagramStore!.previousView(),

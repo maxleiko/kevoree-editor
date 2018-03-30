@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as kevoree from 'kevoree-library';
+import { observer } from 'mobx-react';
 import { DiagramEngine } from 'storm-react-diagrams';
 import { KevoreeComponentModel } from '../models/KevoreeComponentModel';
 
@@ -14,12 +14,10 @@ export interface KevoreeComponentWidgetProps {
   diagramEngine: DiagramEngine;
 }
 
+@observer
 export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidgetProps> {
 
   private _elem: HTMLDivElement | null;
-  private _listener: kevoree.KevoreeModelListener = {
-    elementChanged: (event) => this.forceUpdate()
-  };
 
   constructor(props: KevoreeComponentWidgetProps) {
     super(props);
@@ -31,12 +29,6 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
       this.props.node.width = this._elem.getBoundingClientRect().width;
       this.props.node.height = this._elem.getBoundingClientRect().height;
     }
-
-    this.props.node.instance!.addModelTreeListener(this._listener);
-  }
-
-  componentWillUnmount() {
-    this.props.node.instance!.removeModelTreeListener(this._listener);
   }
 
   generatePort(port: KevoreePortModel) {

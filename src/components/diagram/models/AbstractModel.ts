@@ -1,9 +1,11 @@
-import * as kevoree from 'kevoree-library';
+import { Node, Group, Channel, Component } from 'kevoree-ts-model';
 import { NodeModel, DiagramEngine } from 'storm-react-diagrams';
 import { str2rgb } from '../../../utils/colors';
 import * as kUtils from '../../../utils/kevoree';
 
-export abstract class AbstractModel<T extends kevoree.Instance = kevoree.Instance> extends NodeModel {
+type Instances = Node | Group | Channel | Component;
+
+export abstract class AbstractModel<T extends Instances = Instances> extends NodeModel {
 
   instance: T;
   color: kwe.RGB;
@@ -12,9 +14,9 @@ export abstract class AbstractModel<T extends kevoree.Instance = kevoree.Instanc
   private _height: number;
 
   protected constructor(nodeType: string, instance: T) {
-    super(nodeType, instance.path());
+    super(nodeType, instance.path);
     this.instance = instance;
-    this.color = str2rgb(instance.typeDefinition!.name);
+    this.color = str2rgb(instance.tdef!.name!);
     const { x, y } = kUtils.getPosition(instance);
     this.x = x;
     this.y = y;
@@ -29,7 +31,7 @@ export abstract class AbstractModel<T extends kevoree.Instance = kevoree.Instanc
   serialize() {
     return {
       ...super.serialize(),
-      instance: this.instance!.path(),
+      instance: this.instance.path,
       width: this.width,
       height: this.height,
       color: this.color,

@@ -1,10 +1,10 @@
-import * as kevoree from 'kevoree-library';
+import { Node } from 'kevoree-ts-model';
 
 import { AbstractModel } from './AbstractModel';
 
-export class KevoreeNodeModel extends AbstractModel<kevoree.Node> {
+export class KevoreeNodeModel extends AbstractModel<Node> {
 
-  constructor(instance: kevoree.Node) {
+  constructor(instance: Node) {
     super('kevoree-node', instance);
   }
 }

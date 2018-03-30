@@ -3,52 +3,24 @@ import { inject, observer } from 'mobx-react';
 import * as cx from 'classnames';
 import Resizable from 're-resizable';
 
-import { SelectionPanelStore, DiagramStore } from '../../stores';
-import { KevoreeService } from '../../services/KevoreeService';
-import { SelectionListener } from '../../listeners';
+import { SelectionPanelStore, KevoreeStore } from '../../stores';
 import { InstanceDetails } from '../kevoree';
 import { CustomScrollbar } from '../scrollbars';
 
 import './SelectionPanel.scss';
-import { KevoreeServiceListener } from '../../services';
 
 export interface SelectionPanelProps {
-  diagramStore?: DiagramStore;
+  kevoreeStore?: KevoreeStore;
   selectionPanelStore?: SelectionPanelStore;
-  kevoreeService?: KevoreeService;
 }
 
-@inject('kevoreeService', 'diagramStore', 'selectionPanelStore')
+@inject('kevoreeStore', 'selectionPanelStore')
 @observer
-export class SelectionPanel extends React.Component<SelectionPanelProps> implements KevoreeServiceListener {
-
-  // only forces update when selection changes
-  // => prevents the whole component tree to re-render for every changes in the model
-  private _listener = new SelectionListener((event) => {
-    // tslint:disable-next-line
-    console.log('selection.panel', event);
-    this.forceUpdate();
-  });
-
-  modelChanged() {
-    this.forceUpdate();
-    this.props.kevoreeService!.model.addModelTreeListener(this._listener);
-  }
-
-  componentDidMount() {
-    this.props.kevoreeService!.addListener(this);
-    this.props.kevoreeService!.model.addModelTreeListener(this._listener);
-  }
-
-  componentWillUnmount() {
-    this.props.kevoreeService!.removeListener(this);
-    this.props.kevoreeService!.model.removeModelTreeListener(this._listener);
-  }
+export class SelectionPanel extends React.Component<SelectionPanelProps> {
 
   render() {
-    const kService = this.props.kevoreeService!;
+    const { selection } = this.props.kevoreeStore!;
     const { width, minWidth, setWidth } = this.props.selectionPanelStore!;
-    const selection = kService.getSelection(this.props.diagramStore!.path);
 
     return (
       <Resizable
@@ -61,7 +33,7 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> impleme
         <CustomScrollbar>
           <div className="content">
             {selection.map((instance) => 
-              <InstanceDetails key={instance.path()} instance={instance} />
+              <InstanceDetails key={instance.path} instance={instance} />
             )}
           </div>
         </CustomScrollbar>

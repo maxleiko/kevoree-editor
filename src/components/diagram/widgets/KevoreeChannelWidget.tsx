@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { observer } from 'mobx-react';
 import { DiagramEngine } from 'storm-react-diagrams';
 
 import { KevoreeChannelModel } from '../models/KevoreeChannelModel';
@@ -15,6 +16,7 @@ export interface KevoreeChannelWidgetProps {
 
 interface KevoreeChannelWidgetState {}
 
+@observer
 export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetProps, KevoreeChannelWidgetState> {
 
   private _elem: HTMLDivElement | null;
