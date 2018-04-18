@@ -1,10 +1,10 @@
 import * as React from 'react';
-import * as kevoree from 'kevoree-ts-model';
+import { Instance } from 'kevoree-ts-model';
 
 import { getDescription } from '../../utils/kevoree';
 
 export interface DescriptionProps {
-  instance: kevoree.Instance;
+  instance: Instance;
 }
 
 export const Description = ({ instance }: DescriptionProps) => {

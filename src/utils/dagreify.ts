@@ -12,10 +12,10 @@ export function distributeElements(model: DiagramModel) {
   const edges = mapEdges(model);
 
   // add elements to dagre graph
-  nodes.forEach((node) => {
+  nodes.forEach(node => {
     graph.setNode(node.id, node.metadata);
   });
-  edges.forEach((edge) => {
+  edges.forEach(edge => {
     if (edge.from && edge.to) {
       graph.setEdge(edge.from, edge.to);
     }
@@ -25,22 +25,21 @@ export function distributeElements(model: DiagramModel) {
   dagre.layout(graph);
 
   // update model
-  graph.nodes()
-    .forEach((id) => {
-      const { x, y } = graph.node(id);
-      let mNode;
-      mNode = model.getNode(id);
-      if (mNode) {
-        // mNode is an AbstractModel
-        mNode.setPosition(x, y);
-        return;
-      }
-    });
+  graph.nodes().forEach(id => {
+    const { x, y } = graph.node(id);
+    let mNode;
+    mNode = model.getNode(id);
+    if (mNode) {
+      // mNode is an AbstractModel
+      mNode.setPosition(x, y);
+      return;
+    }
+  });
 }
 
 function mapElements(model: DiagramModel) {
   // dagre compatible format
-  return Array.from(model.nodes.values()).map((node) => ({
+  return model.nodes.map(node => ({
     id: node.id,
     metadata: {
       id: node.id,
@@ -53,11 +52,22 @@ function mapElements(model: DiagramModel) {
 function mapEdges(model: DiagramModel) {
   // returns links which connects nodes
   // we check that they are both "from" and "to" nodes in the model because sometimes links can be detached
-  const nodes = Array.from(model.nodes.values());
-  return Array.from(model.links.values())
-    .map((link) => ({
-      from: link.sourcePort ? (link.sourcePort.parent ? link.sourcePort.parent.id : null) : null,
-      to: link.targetPort ? (link.targetPort.parent ? link.targetPort.parent.id : null) : null
+  return model.links
+    .map(link => ({
+      from: link.sourcePort
+        ? link.sourcePort.parent
+          ? link.sourcePort.parent.id
+          : null
+        : null,
+      to: link.targetPort
+        ? link.targetPort.parent
+          ? link.targetPort.parent.id
+          : null
+        : null
     }))
-    .filter((item) => nodes.find((node) => node.id === item.from) && nodes.find((node) => node.id === item.to));
+    .filter(
+      item =>
+        model.nodes.find(node => node.id === item.from) &&
+        model.nodes.find(node => node.id === item.to)
+    );
 }

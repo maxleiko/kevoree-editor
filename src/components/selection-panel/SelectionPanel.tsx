@@ -22,6 +22,7 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> {
     const { selection } = this.props.kevoreeStore!;
     const { width, minWidth, setWidth } = this.props.selectionPanelStore!;
 
+    // TODO optimize this component in order to split "width" and "height" re-renders from the full selection re-render
     return (
       <Resizable
         className={cx('SelectionPanel', { 'hide': selection.length === 0 })}
@@ -32,9 +33,7 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> {
       >
         <CustomScrollbar>
           <div className="content">
-            {selection.map((instance) => 
-              <InstanceDetails key={instance.path} instance={instance} />
-            )}
+            {selection.map((instance) => <InstanceDetails key={instance.path} instance={instance} />)}
           </div>
         </CustomScrollbar>
       </Resizable>

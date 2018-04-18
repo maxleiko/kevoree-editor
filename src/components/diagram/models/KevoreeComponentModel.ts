@@ -14,11 +14,11 @@ export class KevoreeComponentModel extends AbstractModel<Component, KevoreePortM
 
   @computed
   get inputs() {
-    return Array.from(this.ports.values()).filter((p) => p.in);
+    return this.ports.filter((p) => p.in);
   }
 
   @computed
   get outputs() {
-    return Array.from(this.ports.values()).filter((p) => !p.in);
+    return this.ports.filter((p) => !p.in);
   }
 }

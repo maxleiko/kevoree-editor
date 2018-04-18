@@ -14,11 +14,11 @@ export class KevoreeChannelModel extends AbstractModel<Channel, KevoreeChannelPo
 
   @computed
   get input(): KevoreeChannelPortModel {
-    return this.ports.get(KevoreeChannelPortModel.INPUTS)!;
+    return this.getPort(KevoreeChannelPortModel.OUTPUTS)!;
   }
 
   @computed
   get output(): KevoreeChannelPortModel {
-    return this.ports.get(KevoreeChannelPortModel.OUTPUTS)!;
+    return this.getPort(KevoreeChannelPortModel.INPUTS)!;
   }
 }

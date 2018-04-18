@@ -16,14 +16,12 @@ import {
   Group,
   PortType,
   JSONKevoreeLoader,
-  Binding
 } from 'kevoree-ts-model';
 import {
   DiagramEngine,
   DefaultLabelFactory,
-  DiagramModel,
   DefaultPortFactory,
-  DefaultLinkFactory,
+  DefaultLinkFactory
 } from '@leiko/react-diagrams';
 import { ITypeDefinition, INamespace } from 'kevoree-registry-client';
 
@@ -35,12 +33,7 @@ import {
   KevoreeGroupFactory,
   KevoreeChannelPortFactory
 } from '../components/diagram/factories';
-import {
-  KevoreeNodeModel,
-  KevoreeComponentModel,
-  KevoreeChannelModel,
-  KevoreeGroupModel
-} from '../components/diagram/models';
+import { KevoreeDiagramModel } from '../components/diagram/models';
 import * as kUtils from '../utils/kevoree';
 
 export class KevoreeStore {
@@ -48,7 +41,6 @@ export class KevoreeStore {
   @observable private _previousPath: string | null = null;
   @observable private _engine = new DiagramEngine();
   @observable private _model = new Model();
-  // @observable private _diagramModel = new DiagramModel();
 
   constructor() {
     // register custom factories
@@ -61,14 +53,15 @@ export class KevoreeStore {
     this._engine.registerLinkFactory(new DefaultLinkFactory());
     this._engine.registerLabelFactory(new DefaultLabelFactory());
 
-    // set model
-    this._engine.model = new DiagramModel();
-
     this.changePath('/');
     this._previousPath = null;
 
     if (process.env.NODE_ENV !== 'production') {
       autorun(r => {
+        // tslint:disable-next-line
+        console.log(
+          '[[AUTORUN]] Kevoree model and Diagram model are available in window'
+        );
         // tslint:disable-next-line
         window['model'] = this._model;
         // tslint:disable-next-line
@@ -81,70 +74,19 @@ export class KevoreeStore {
   changePath(path: string) {
     const elem = this._model.getByPath(path);
     if (elem) {
-      this._previousPath = this._currentPath;
-      this._currentPath = path;
-      const prevZoomLevel = this._engine.model.zoom;
-      const model = new DiagramModel();
-      model.zoom = prevZoomLevel;
-      this.engine.model = model;
-      // this.updateDiagram(elem);
+      if (elem instanceof Node || elem instanceof Model) {
+        this._previousPath = this._currentPath;
+        this._currentPath = path;
+        const prevZoomLevel = this._engine.model.zoom;
+        const model = new KevoreeDiagramModel(elem);
+        model.zoom = prevZoomLevel;
+        this._engine.model = model;
+      } else {
+        throw new Error(`Change path can only be made to Model or Nodes (not "${path}")`);
+      }
     } else {
       throw new Error(`Unable to find "${path}" in the Kevoree model`);
     }
-  }
-
-  @action
-  addNode(node: Node) {
-    const vm = new KevoreeNodeModel(node);
-    this._engine.model.addNode(vm);
-    return vm;
-  }
-
-  @action
-  addComponent(comp: Component) {
-    const vm = new KevoreeComponentModel(comp);
-    this._engine.model.addNode(vm);
-    return vm;
-  }
-
-  @action
-  addChannel(chan: Channel) {
-    const vm = new KevoreeChannelModel(chan);
-    this._engine.model.addNode(vm);
-    return vm;
-  }
-
-  @action
-  addGroup(group: Group) {
-    const vm = new KevoreeGroupModel(group);
-    this._engine.model.addNode(vm);
-    return vm;
-  }
-
-  @action
-  addBinding(binding: Binding) {
-    const vm = this._engine.getLinkFactory('srd-default-link').getNewInstance();
-    if (binding.port && binding.channel) {
-      const compVM = this._engine.model.getNode(
-        binding.port.parent!.path
-      ) as KevoreeComponentModel;
-      const portVM = compVM.getPortFromID(binding.port.path);
-      if (portVM) {
-        vm.sourcePort = portVM;
-        const chanVM = this._engine.model.getNode(
-          binding.channel.path
-        ) as KevoreeChannelModel;
-        if (chanVM) {
-          const chanPortVM =
-            binding.port.refInParent === 'inputs'
-              ? chanVM.input
-              : chanVM.output;
-          vm.targetPort = chanPortVM;
-          this._engine.model.addLink(vm);
-        }
-      }
-    }
-    return vm;
   }
 
   @action
@@ -163,18 +105,19 @@ export class KevoreeStore {
     point: kwe.Point = { x: 100, y: 100 }
   ) {
     const tdef = this.findOrCreateTypeDefinition(rTdef);
+    const dModel = this._engine.model as KevoreeDiagramModel;
     if (this.currentElem instanceof Node) {
       if (tdef instanceof ComponentType) {
         const comp = this.createComponent(tdef, this.currentElem, point);
-        this.addComponent(comp);
+        dModel.addKevoreeComponent(comp);
         return comp;
       } else if (tdef instanceof ChannelType) {
         const chan = this.createChannel(tdef, this._model, point);
-        this.addChannel(chan);
+        dModel.addKevoreeChannel(chan);
         return chan;
       } else if (tdef instanceof GroupType) {
         const group = this.createGroup(tdef, this._model, point);
-        this.addGroup(group);
+        dModel.addKevoreeGroup(group);
         return group;
       } else if (tdef instanceof NodeType) {
         throw new Error('Nodes must be added to model root');
@@ -195,15 +138,15 @@ export class KevoreeStore {
         }
       } else if (tdef instanceof ChannelType) {
         const chan = this.createChannel(tdef, this.currentElem as Model, point);
-        this.addChannel(chan);
+        dModel.addKevoreeChannel(chan);
         return chan;
       } else if (tdef instanceof GroupType) {
         const group = this.createGroup(tdef, this.currentElem as Model, point);
-        this.addGroup(group);
+        dModel.addKevoreeGroup(group);
         return group;
       } else if (tdef instanceof NodeType) {
         const node = this.createNode(tdef, this.currentElem as Model, point);
-        this.addNode(node);
+        dModel.addKevoreeNode(node);
         return node;
       } else {
         const typeName = `${rTdef.namespace!}.${rTdef.name}/${rTdef.version}`;
@@ -450,7 +393,18 @@ export class KevoreeStore {
 
     if (this.currentElem) {
       if (this.currentElem instanceof Node) {
-        selection = selection.concat(this.currentElem.components);
+        const node = this.currentElem;
+        selection = selection
+          .concat(node.components)
+          .concat(
+            node.parent!.bindings.filter(
+              b =>
+                b.port &&
+                b.channel &&
+                b.port.parent &&
+                node.components.find(c => c.path === b.port!.parent!.path)
+            ).map((b) => b.channel!)
+          );
       } else if (this.currentElem instanceof Model) {
         selection = selection
           .concat(this.currentElem.nodes)
