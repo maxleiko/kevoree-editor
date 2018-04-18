@@ -1,5 +1,5 @@
 import { Node, Group, Channel, Component } from 'kevoree-ts-model';
-import { NodeModel, DiagramEngine, PortModel } from 'storm-react-diagrams';
+import { NodeModel, DiagramEngine, PortModel } from '@leiko/react-diagrams';
 import { str2rgb } from '../../../utils/colors';
 import * as kUtils from '../../../utils/kevoree';
 

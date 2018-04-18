@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AbstractPortFactory, DiagramEngine, DefaultPortWidget, DefaultLinkFactory } from 'storm-react-diagrams';
+import { AbstractPortFactory, DiagramEngine, DefaultPortWidget, DefaultLinkFactory } from '@leiko/react-diagrams';
 
 import { KevoreeChannelPortModel } from '../models/KevoreeChannelPortModel';
 

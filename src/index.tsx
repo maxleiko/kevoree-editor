@@ -4,7 +4,7 @@ import * as TinyConf from 'tiny-conf';
 import { Provider } from 'mobx-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'storm-react-diagrams/dist/style.min.css';
+import '@leiko/react-diagrams/dist/style.min.css';
 import './assets/font-awesome/css/font-awesome.min.css';
 
 import { services, stores } from './kernel';

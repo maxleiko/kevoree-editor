@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine } from 'storm-react-diagrams';
+import { DiagramEngine } from '@leiko/react-diagrams';
 
 import { KevoreeGroupModel } from '../models/KevoreeGroupModel';
 import { InstanceHeader } from '../../kevoree';

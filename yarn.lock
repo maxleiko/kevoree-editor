@@ -2,6 +2,21 @@
 # yarn lockfile v1
 
 
+"@leiko/react-diagrams@0.0.2-alpha":
+  version "0.0.2-alpha"
+  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.2-alpha.tgz#969b289309c6065083efaf205615cab47e2624ce"
+  dependencies:
+    "@types/classnames" "^2.2.3"
+    classnames "^2.2.5"
+    closest "^0.0.1"
+    lodash "^4.17.5"
+    mobx "^4.1.1"
+    mobx-react "^5.0.0"
+    mobx-utils "^4.0.0"
+    pathfinding "^0.4.18"
+    paths-js "^0.4.7"
+    react "16.3.1"
+
 "@types/classnames@^2.2.3":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.2.3.tgz#3f0ff6873da793870e20a260cada55982f38a9e5"
@@ -6117,21 +6132,6 @@ stdout-stream@^1.4.0:
   resolved "https://registry.yarnpkg.com/stdout-stream/-/stdout-stream-1.4.0.tgz#a2c7c8587e54d9427ea9edb3ac3f2cd522df378b"
   dependencies:
     readable-stream "^2.0.1"
-
-storm-react-diagrams@maxleiko/react-diagrams#dist:
-  version "5.1.1"
-  resolved "https://codeload.github.com/maxleiko/react-diagrams/tar.gz/b95a807d5266e023b81844a32f6bca34698ef71e"
-  dependencies:
-    "@types/classnames" "^2.2.3"
-    classnames "^2.2.5"
-    closest "^0.0.1"
-    lodash "^4.17.5"
-    mobx "^4.1.1"
-    mobx-react "^5.0.0"
-    mobx-utils "^4.0.0"
-    pathfinding "^0.4.18"
-    paths-js "^0.4.7"
-    react "16.3.1"
 
 stream-browserify@^2.0.1:
   version "2.0.1"

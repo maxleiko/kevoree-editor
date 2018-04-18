@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { AbstractNodeFactory, DiagramEngine } from 'storm-react-diagrams';
+import { AbstractNodeFactory, DiagramEngine } from '@leiko/react-diagrams';
 
 import { KevoreeChannelModel } from '../models/KevoreeChannelModel';
 import { KevoreeChannelWidget } from '../widgets/KevoreeChannelWidget';

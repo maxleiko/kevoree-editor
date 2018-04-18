@@ -24,7 +24,7 @@ import {
   DiagramModel,
   DefaultPortFactory,
   DefaultLinkFactory,
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 import { ITypeDefinition, INamespace } from 'kevoree-registry-client';
 
 import { distributeElements } from '../utils/dagreify';

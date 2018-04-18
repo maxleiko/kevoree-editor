@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AbstractNodeFactory, DiagramEngine } from 'storm-react-diagrams';
+import { AbstractNodeFactory, DiagramEngine } from '@leiko/react-diagrams';
 
 import { KevoreeGroupModel } from '../models/KevoreeGroupModel';
 import { KevoreeGroupWidget } from '../widgets/KevoreeGroupWidget';

@@ -1,3 +1,11 @@
+.srd-node {
+  &.selected {
+    .kevoree-node {
+      border-color:rgb(0,192,255);
+    }
+  }
+}
+
 .kevoree-node {
   color: #eee;
   border: 2px solid black;

@@ -1,6 +1,6 @@
 import * as dagre from 'dagre';
 
-import { DiagramModel } from 'storm-react-diagrams';
+import { DiagramModel } from '@leiko/react-diagrams';
 
 export function distributeElements(model: DiagramModel) {
   const graph = new dagre.graphlib.Graph();

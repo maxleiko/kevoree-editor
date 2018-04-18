@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DiagramEngine } from 'storm-react-diagrams';
+import { DiagramEngine } from '@leiko/react-diagrams';
 import * as cx from 'classnames';
 import { inject, observer } from 'mobx-react';
 

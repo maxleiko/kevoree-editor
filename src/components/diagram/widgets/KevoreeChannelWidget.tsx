@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine, DefaultPortWidget } from 'storm-react-diagrams';
+import { DiagramEngine, DefaultPortWidget } from '@leiko/react-diagrams';
 
 import { KevoreeChannelModel } from '../models/KevoreeChannelModel';
 import { InstanceHeader } from '../../kevoree';

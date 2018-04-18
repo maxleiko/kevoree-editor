@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DiagramWidget, BaseAction, MoveItemsAction } from 'storm-react-diagrams';
+import { DiagramWidget, BaseAction, MoveItemsAction } from '@leiko/react-diagrams';
 import { observer, inject } from 'mobx-react';
 import { toast } from 'react-toastify';
 

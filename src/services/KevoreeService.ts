@@ -14,7 +14,7 @@
 //   OffsetEvent,
 //   ZoomEvent,
 //   GridEvent 
-// } from 'storm-react-diagrams';
+// } from '@leiko/react-diagrams';
 // import {
 //   AbstractModel,
 //   KevoreeChannelPortModel,

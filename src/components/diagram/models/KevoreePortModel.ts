@@ -1,5 +1,5 @@
 import { Port } from 'kevoree-ts-model';
-import { DefaultPortModel } from 'storm-react-diagrams';
+import { DefaultPortModel } from '@leiko/react-diagrams';
 
 export class KevoreePortModel extends DefaultPortModel {
 

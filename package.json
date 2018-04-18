@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@leiko/react-diagrams": "0.0.2-alpha",
     "autoprefixer": "7.1.6",
     "bootstrap": "^4.0.0",
     "case-sensitive-paths-webpack-plugin": "2.1.1",
@@ -42,7 +43,6 @@
     "react-toastify": "^3.3.3",
     "reactstrap": "^5.0.0-beta",
     "source-map-loader": "^0.2.1",
-    "storm-react-diagrams": "maxleiko/react-diagrams#dist",
     "style-loader": "0.19.0",
     "sw-precache-webpack-plugin": "0.11.4",
     "ts-jest": "^20.0.7",
