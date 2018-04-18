@@ -18,7 +18,13 @@ import {
   JSONKevoreeLoader,
   Binding
 } from 'kevoree-ts-model';
-import { DiagramEngine, DefaultLabelFactory } from 'storm-react-diagrams';
+import {
+  DiagramEngine,
+  DefaultLabelFactory,
+  DiagramModel,
+  DefaultPortFactory,
+  DefaultLinkFactory,
+} from 'storm-react-diagrams';
 import { ITypeDefinition, INamespace } from 'kevoree-registry-client';
 
 import { distributeElements } from '../utils/dagreify';
@@ -27,52 +33,46 @@ import {
   KevoreeComponentFactory,
   KevoreeChannelFactory,
   KevoreeGroupFactory,
-  KevoreePortFactory,
-  KevoreeChannelPortFactory,
-  KevoreeLinkFactory,
+  KevoreeChannelPortFactory
 } from '../components/diagram/factories';
 import {
   KevoreeNodeModel,
   KevoreeComponentModel,
   KevoreeChannelModel,
-  KevoreeGroupModel,
-  KevoreeLinkModel,
-  KevoreeDiagramModel,
+  KevoreeGroupModel
 } from '../components/diagram/models';
 import * as kUtils from '../utils/kevoree';
 
 export class KevoreeStore {
-  engine: DiagramEngine = new DiagramEngine();
-
   @observable private _currentPath: string = '/';
   @observable private _previousPath: string | null = null;
-  @observable private _smartRouting = false;
-  @observable private _model: Model = new Model();
-  @observable private _diagramModel = new KevoreeDiagramModel();
+  @observable private _engine = new DiagramEngine();
+  @observable private _model = new Model();
+  // @observable private _diagramModel = new DiagramModel();
 
   constructor() {
     // register custom factories
-    this.engine.registerNodeFactory(new KevoreeComponentFactory(this));
-    this.engine.registerNodeFactory(new KevoreeNodeFactory(this));
-    this.engine.registerNodeFactory(new KevoreeChannelFactory(this));
-    this.engine.registerNodeFactory(new KevoreeGroupFactory(this));
-    this.engine.registerPortFactory(new KevoreePortFactory());
-    this.engine.registerPortFactory(new KevoreeChannelPortFactory());
-    this.engine.registerLinkFactory(new KevoreeLinkFactory());
-    this.engine.registerLabelFactory(new DefaultLabelFactory());
+    this._engine.registerNodeFactory(new KevoreeComponentFactory(this));
+    this._engine.registerNodeFactory(new KevoreeNodeFactory(this));
+    this._engine.registerNodeFactory(new KevoreeChannelFactory(this));
+    this._engine.registerNodeFactory(new KevoreeGroupFactory(this));
+    this._engine.registerPortFactory(new DefaultPortFactory());
+    this._engine.registerPortFactory(new KevoreeChannelPortFactory());
+    this._engine.registerLinkFactory(new DefaultLinkFactory());
+    this._engine.registerLabelFactory(new DefaultLabelFactory());
 
     // set model
-    this.engine.setDiagramModel(this._diagramModel);
+    this._engine.model = new DiagramModel();
 
     this.changePath('/');
     this._previousPath = null;
 
     if (process.env.NODE_ENV !== 'production') {
-      autorun((r) => {
+      autorun(r => {
         // tslint:disable-next-line
         window['model'] = this._model;
         // tslint:disable-next-line
-        window['diagram'] = this._diagramModel;
+        window['diagram'] = this._engine.model;
       });
     }
   }
@@ -83,55 +83,64 @@ export class KevoreeStore {
     if (elem) {
       this._previousPath = this._currentPath;
       this._currentPath = path;
-      const prevZoomLevel = this._diagramModel.getZoomLevel();
-      this._diagramModel = new KevoreeDiagramModel();
-      this._diagramModel.setZoomLevel(prevZoomLevel);
-      this.engine.setDiagramModel(this._diagramModel);
+      const prevZoomLevel = this._engine.model.zoom;
+      const model = new DiagramModel();
+      model.zoom = prevZoomLevel;
+      this.engine.model = model;
       // this.updateDiagram(elem);
-      this.engine.repaintCanvas();
     } else {
       throw new Error(`Unable to find "${path}" in the Kevoree model`);
     }
   }
 
-  @action addNode(node: Node) {
+  @action
+  addNode(node: Node) {
     const vm = new KevoreeNodeModel(node);
-    this._diagramModel.addNode(vm);
+    this._engine.model.addNode(vm);
     return vm;
   }
 
-  @action addComponent(comp: Component) {
+  @action
+  addComponent(comp: Component) {
     const vm = new KevoreeComponentModel(comp);
-    this._diagramModel.addNode(vm);
+    this._engine.model.addNode(vm);
     return vm;
   }
 
-  @action addChannel(chan: Channel) {
+  @action
+  addChannel(chan: Channel) {
     const vm = new KevoreeChannelModel(chan);
-    this._diagramModel.addNode(vm);
+    this._engine.model.addNode(vm);
     return vm;
   }
 
-  @action addGroup(group: Group) {
+  @action
+  addGroup(group: Group) {
     const vm = new KevoreeGroupModel(group);
-    this._diagramModel.addNode(vm);
+    this._engine.model.addNode(vm);
     return vm;
   }
 
-  @action addBinding(binding: Binding) {
-    const vm = new KevoreeLinkModel();
+  @action
+  addBinding(binding: Binding) {
+    const vm = this._engine.getLinkFactory('srd-default-link').getNewInstance();
     if (binding.port && binding.channel) {
-      const compVM = this._diagramModel.getNode(binding.port.parent!.path) as KevoreeComponentModel;
+      const compVM = this._engine.model.getNode(
+        binding.port.parent!.path
+      ) as KevoreeComponentModel;
       const portVM = compVM.getPortFromID(binding.port.path);
       if (portVM) {
-        vm.setSourcePort(portVM);
-        const chanVM = this._diagramModel.getNode(binding.channel.path) as KevoreeChannelModel;
+        vm.sourcePort = portVM;
+        const chanVM = this._engine.model.getNode(
+          binding.channel.path
+        ) as KevoreeChannelModel;
         if (chanVM) {
-          const chanPortVM = binding.port.refInParent === 'inputs'
-            ? chanVM.getInputs()
-            : chanVM.getOutputs();
-          vm.setTargetPort(chanPortVM);
-          this._diagramModel.addLink(vm);
+          const chanPortVM =
+            binding.port.refInParent === 'inputs'
+              ? chanVM.input
+              : chanVM.output;
+          vm.targetPort = chanPortVM;
+          this._engine.model.addLink(vm);
         }
       }
     }
@@ -158,49 +167,49 @@ export class KevoreeStore {
       if (tdef instanceof ComponentType) {
         const comp = this.createComponent(tdef, this.currentElem, point);
         this.addComponent(comp);
-        this.engine.repaintCanvas();
         return comp;
       } else if (tdef instanceof ChannelType) {
         const chan = this.createChannel(tdef, this._model, point);
         this.addChannel(chan);
-        this.engine.repaintCanvas();
         return chan;
       } else if (tdef instanceof GroupType) {
         const group = this.createGroup(tdef, this._model, point);
         this.addGroup(group);
-        this.engine.repaintCanvas();
         return group;
       } else if (tdef instanceof NodeType) {
         throw new Error('Nodes must be added to model root');
       } else {
         const typeName = `${rTdef.namespace!}.${rTdef.name}/${rTdef.version}`;
-        throw new Error(`Unable to create instance of unknown type "${typeName}"`);
+        throw new Error(
+          `Unable to create instance of unknown type "${typeName}"`
+        );
       }
     } else {
       if (tdef instanceof ComponentType) {
         if (this.selectedNodes.length > 0) {
-          return this.selectedNodes.map((node) => this.createComponent(tdef, node, point));
+          return this.selectedNodes.map(node =>
+            this.createComponent(tdef, node, point)
+          );
         } else {
           throw new Error('Components must be added in Nodes');
         }
       } else if (tdef instanceof ChannelType) {
         const chan = this.createChannel(tdef, this.currentElem as Model, point);
         this.addChannel(chan);
-        this.engine.repaintCanvas();
         return chan;
       } else if (tdef instanceof GroupType) {
         const group = this.createGroup(tdef, this.currentElem as Model, point);
         this.addGroup(group);
-        this.engine.repaintCanvas();
         return group;
       } else if (tdef instanceof NodeType) {
         const node = this.createNode(tdef, this.currentElem as Model, point);
         this.addNode(node);
-        this.engine.repaintCanvas();
         return node;
       } else {
         const typeName = `${rTdef.namespace!}.${rTdef.name}/${rTdef.version}`;
-        throw new Error(`Unable to create instance of unknown type "${typeName}"`);
+        throw new Error(
+          `Unable to create instance of unknown type "${typeName}"`
+        );
       }
     }
   }
@@ -208,9 +217,9 @@ export class KevoreeStore {
   @action
   updateNamespaces(nss: INamespace[]) {
     nss
-      .filter((ns) => this._model.getNamespace(ns.name) === null)
-      .map((ns) => new Namespace().withName(ns.name))
-      .forEach((ns) => {
+      .filter(ns => this._model.getNamespace(ns.name) === null)
+      .map(ns => new Namespace().withName(ns.name))
+      .forEach(ns => {
         // tslint:disable-next-line
         console.log('Adding namespace', ns.toJSON());
         this._model.addNamespace(ns);
@@ -228,49 +237,58 @@ export class KevoreeStore {
     if (ns) {
       const loader = new JSONKevoreeLoader();
       rTdefs
-      .map((tdef) => loader.parseKMF<TypeDefinition>(tdef.model))
-      .forEach((tdef) => ns.addTdef(tdef));
+        .map(tdef => loader.parseKMF<TypeDefinition>(tdef.model))
+        .forEach(tdef => ns.addTdef(tdef));
     }
     throw new Error(`Unable to find namespace "${namespace}" in model`);
   }
 
-  @action previousView() {
+  @action.bound
+  previousView() {
     if (this._previousPath) {
       this.changePath(this._previousPath);
       this._previousPath = null;
     }
   }
 
-  @action toggleSmartRouting() {
-    this._smartRouting = !this._smartRouting;
+  @action.bound
+  toggleSmartRouting() {
+    this._engine.model.smartRouting = !this._engine.model.smartRouting;
   }
 
-  @action zoomIn() {
-    this._diagramModel.setZoomLevel(this._diagramModel.getZoomLevel() + 10);
-    this.engine.repaintCanvas();
+  @action.bound
+  zoomIn() {
+    this._engine.model.zoom = this._engine.model.zoom + 10;
   }
 
-  @action zoomOut() {
-    this._diagramModel.setZoomLevel(this._diagramModel.getZoomLevel() - 10);
-    this.engine.repaintCanvas();
+  @action.bound
+  zoomOut() {
+    this._engine.model.zoom = this._engine.model.zoom - 10;
   }
 
-  @action zoomToFit() {
-    this.engine.zoomToFit();
+  @action.bound
+  fitContent() {
+    this.engine.fitContent();
   }
 
-  @action autoLayout() {
-    distributeElements(this._diagramModel);
-    this.engine.repaintCanvas();
+  @action.bound
+  autoLayout() {
+    distributeElements(this._engine.model);
   }
 
-  @action modelChanged() {
+  @action
+  modelChanged() {
     this.changePath('/');
     this._previousPath = null;
   }
 
   @action
-  private findOrCreateTypeDefinition({ namespace, name, version, model }: ITypeDefinition): TypeDefinition {
+  private findOrCreateTypeDefinition({
+    namespace,
+    name,
+    version,
+    model
+  }: ITypeDefinition): TypeDefinition {
     let ns = this._model.getNamespace(namespace!);
     if (!ns) {
       ns = new Namespace().withName(namespace!);
@@ -285,7 +303,11 @@ export class KevoreeStore {
     return tdef;
   }
 
-  private createComponent(tdef: ComponentType, container: Node, point: kwe.Point) {
+  private createComponent(
+    tdef: ComponentType,
+    container: Node,
+    point: kwe.Point
+  ) {
     const instance = new Component();
     instance.name = `comp${container.components.length}`;
     instance.tdef = tdef;
@@ -336,7 +358,7 @@ export class KevoreeStore {
   }
 
   private initDictionaries(instance: Instance) {
-    instance.tdef!.dictionary.forEach((paramType) => {
+    instance.tdef!.dictionary.forEach(paramType => {
       let val: Value<Instance> | undefined;
       if (!paramType.fragmentDependant) {
         // attribute is not fragment dependant
@@ -386,10 +408,19 @@ export class KevoreeStore {
 
   private initPorts(comp: Component) {
     if (comp.tdef) {
-      comp.tdef.inputs.forEach((portType) => this.createPort(true, portType, comp));
-      comp.tdef.outputs.forEach((portType) => this.createPort(false, portType, comp));
+      comp.tdef.inputs.forEach(portType =>
+        this.createPort(true, portType, comp)
+      );
+      comp.tdef.outputs.forEach(portType =>
+        this.createPort(false, portType, comp)
+      );
     }
     // TODO handle case where tdef is null?
+  }
+
+  @computed
+  get engine() {
+    return this._engine;
   }
 
   @computed
@@ -435,10 +466,5 @@ export class KevoreeStore {
     return this.selection.filter(function isNode(elem: Instance): elem is Node {
       return elem instanceof Node;
     });
-  }
-
-  @computed
-  get smartRouting() {
-    return this._smartRouting;
   }
 }

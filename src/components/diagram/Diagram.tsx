@@ -65,13 +65,13 @@ export class Diagram extends React.Component<DiagramProps> {
 
   generateOverlay() {
     const store = this.props.kevoreeStore!;
-    const smartRouting = `Smart routing: ${store.smartRouting ? 'on' : 'off'}`;
+    const smartRouting = `Smart routing: ${store.engine.model.smartRouting ? 'on' : 'off'}`;
 
     return (
       <DiagramOverlay>
         <OverlayIcon name="Zoom in" onClick={() => store.zoomIn()} icon="fa fa-2x fa-search-plus" />
         <OverlayIcon name="Zoom out" onClick={() => store.zoomOut()} icon="fa fa-2x fa-search-minus" />
-        <OverlayIcon name="Zoom to fit" onClick={() => store.zoomToFit()} icon="fa fa-2x fa-search" />
+        <OverlayIcon name="Zoom to fit" onClick={() => store.fitContent()} icon="fa fa-2x fa-search" />
         <OverlayIcon name="Auto layout" onClick={() => store.autoLayout()} icon="fa fa-2x fa-th" />
         <OverlayIcon name={smartRouting} onClick={() => store.toggleSmartRouting()} icon="fa fa-2x fa-sitemap" />
       </DiagramOverlay>
@@ -79,7 +79,7 @@ export class Diagram extends React.Component<DiagramProps> {
   }
 
   render() {
-    const { engine, smartRouting } = this.props.kevoreeStore!;
+    const { engine } = this.props.kevoreeStore!;
 
     return (
       <div
@@ -90,11 +90,7 @@ export class Diagram extends React.Component<DiagramProps> {
       >
         <Hoverlay overlay={this.generateOverlay()}>
           <DiagramWidget
-            diagramEngine={engine}
-            inverseZoom={true}
-            allowLooseLinks={false}
-            deleteKeys={[46]}
-            smartRouting={smartRouting}
+            engine={engine}
             actionStartedFiring={(action) => this.onActionStarted(action)}
             actionStoppedFiring={(action) => this.onActionStopped(action)}
           />

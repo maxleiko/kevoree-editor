@@ -3710,7 +3710,7 @@ kevoree-registry-client@^3.0.1:
     node-fetch "^1.6.3"
     tiny-conf "^1.1.0"
 
-kevoree-ts-model@/home/leiko/dev/kevoree/kevoree-ts-model:
+"kevoree-ts-model@file:../kevoree-ts-model":
   version "1.0.0"
   dependencies:
     mobx "^4.1.0"
@@ -4156,6 +4156,10 @@ mobx-utils@^4.0.0:
 mobx@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-4.1.0.tgz#e4a9679cdafbe215b20e32ef93a7031845b3f1af"
+
+mobx@^4.1.1, mobx@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-4.2.0.tgz#ee0b0a4f3da2f4776225046ab208ac329a4841d4"
 
 mousetrap@^1.6.1:
   version "1.6.1"
@@ -5320,6 +5324,15 @@ react-transition-group@^2.2.1:
     prop-types "^15.5.8"
     warning "^3.0.0"
 
+react@16.3.1:
+  version "16.3.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.3.1.tgz#4a2da433d471251c69b6033ada30e2ed1202cfd8"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
+
 react@^16.2.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.2.0.tgz#a31bd2dab89bff65d42134fa187f24d054c273ba"
@@ -6106,14 +6119,19 @@ stdout-stream@^1.4.0:
     readable-stream "^2.0.1"
 
 storm-react-diagrams@maxleiko/react-diagrams#dist:
-  version "5.1.0"
-  resolved "https://codeload.github.com/maxleiko/react-diagrams/tar.gz/f55f41b6f519afe72cb4fac3cf8bfce998f9cf50"
+  version "5.1.1"
+  resolved "https://codeload.github.com/maxleiko/react-diagrams/tar.gz/b95a807d5266e023b81844a32f6bca34698ef71e"
   dependencies:
+    "@types/classnames" "^2.2.3"
+    classnames "^2.2.5"
     closest "^0.0.1"
     lodash "^4.17.5"
+    mobx "^4.1.1"
+    mobx-react "^5.0.0"
+    mobx-utils "^4.0.0"
     pathfinding "^0.4.18"
     paths-js "^0.4.7"
-    react "^16.2.0"
+    react "16.3.1"
 
 stream-browserify@^2.0.1:
   version "2.0.1"

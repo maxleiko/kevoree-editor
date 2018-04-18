@@ -3,23 +3,23 @@ import { DiagramEngine } from 'storm-react-diagrams';
 import * as cx from 'classnames';
 import { inject, observer } from 'mobx-react';
 
-import { DiagramStore } from '../../../stores/DiagramStore';
 import { KevoreeNodeModel } from '../models/KevoreeNodeModel';
 import { InstanceHeader } from '../../kevoree';
+import { KevoreeStore } from '../../../stores';
 
 import './KevoreeNodeWidget.scss';
 
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
-  diagramEngine: DiagramEngine;
-  diagramStore?: DiagramStore;
+  engine: DiagramEngine;
+  kevoreeStore?: KevoreeStore;
 }
 
 interface KevoreeNodeWidgetState {
   canDrop: boolean;
 }
 
-@inject('diagramStore')
+@inject('kevoreeStore')
 @observer
 export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, KevoreeNodeWidgetState> {
 
@@ -31,7 +31,7 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
   }
 
   openNodeView() {
-    this.props.diagramStore!.changePath(this.props.node.instance.path);
+    this.props.kevoreeStore!.changePath(this.props.node.instance.path);
   }
 
   onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {

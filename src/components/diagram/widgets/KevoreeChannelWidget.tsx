@@ -1,40 +1,40 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine } from 'storm-react-diagrams';
+import { DiagramEngine, DefaultPortWidget } from 'storm-react-diagrams';
 
 import { KevoreeChannelModel } from '../models/KevoreeChannelModel';
 import { InstanceHeader } from '../../kevoree';
 
 import './KevoreeChannelWidget.scss';
 import { KevoreeChannelPortModel } from '../models/KevoreeChannelPortModel';
-import { KevoreePortWidget } from './KevoreePortWidget';
 
 export interface KevoreeChannelWidgetProps {
   node: KevoreeChannelModel;
-  diagramEngine: DiagramEngine;
+  engine: DiagramEngine;
 }
 
-interface KevoreeChannelWidgetState {}
+interface PortProps {
+  className: 'in' | 'out';
+  engine: DiagramEngine;
+  port: KevoreeChannelPortModel;
+}
+
+const Port = observer(({ className, engine, port }: PortProps) => (
+  <div className={className}>
+    <DefaultPortWidget engine={engine} port={port} />
+  </div>
+));
 
 @observer
-export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetProps, KevoreeChannelWidgetState> {
+export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetProps> {
 
   private _elem: HTMLDivElement | null;
-
-  constructor(props: KevoreeChannelWidgetProps) {
-    super(props);
-    this.state = {};
-  }
 
   componentDidMount() {
     if (this._elem) {
       this.props.node.width = this._elem.getBoundingClientRect().width;
       this.props.node.height = this._elem.getBoundingClientRect().height;
     }
-  }
-
-  generatePort(port: KevoreeChannelPortModel) {
-    return <KevoreePortWidget key={port.id} model={port} />;
   }
 
   render() {
@@ -48,8 +48,8 @@ export class KevoreeChannelWidget extends React.Component<KevoreeChannelWidgetPr
       >
         <InstanceHeader instance={this.props.node.instance} hoverable={false} />
         <div className="ports">
-          <div className="in">{this.generatePort(this.props.node.getInputs())}</div>
-          <div className="out">{this.generatePort(this.props.node.getOutputs())}</div>
+          <Port className="in" engine={this.props.engine} port={this.props.node.input} />
+          <Port className="out" engine={this.props.engine} port={this.props.node.output} />
         </div>
       </div>
     );

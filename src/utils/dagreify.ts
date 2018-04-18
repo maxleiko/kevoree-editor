@@ -1,5 +1,4 @@
 import * as dagre from 'dagre';
-import * as _ from 'lodash';
 
 import { DiagramModel } from 'storm-react-diagrams';
 
@@ -41,7 +40,7 @@ export function distributeElements(model: DiagramModel) {
 
 function mapElements(model: DiagramModel) {
   // dagre compatible format
-  return _.map(model.nodes, (node) => ({
+  return Array.from(model.nodes.values()).map((node) => ({
     id: node.id,
     metadata: {
       id: node.id,
@@ -54,16 +53,11 @@ function mapElements(model: DiagramModel) {
 function mapEdges(model: DiagramModel) {
   // returns links which connects nodes
   // we check that they are both "from" and "to" nodes in the model because sometimes links can be detached
-  return _.map(model.links, (link) => {
-    return ({
-      from: link.getSourcePort().getParent().getID(),
-      to: link.getTargetPort().getParent().getID(),
-    });
-  })
-    .filter((item) => {
-      return (
-        _.find(model.nodes, (node) => node.id === item.from) &&
-        _.find(model.nodes, (node) => node.id === item.to)
-      );
-    });
+  const nodes = Array.from(model.nodes.values());
+  return Array.from(model.links.values())
+    .map((link) => ({
+      from: link.sourcePort ? (link.sourcePort.parent ? link.sourcePort.parent.id : null) : null,
+      to: link.targetPort ? (link.targetPort.parent ? link.targetPort.parent.id : null) : null
+    }))
+    .filter((item) => nodes.find((node) => node.id === item.from) && nodes.find((node) => node.id === item.to));
 }

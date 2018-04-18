@@ -11,8 +11,8 @@ export class KevoreeNodeFactory extends AbstractNodeFactory {
     super('kevoree-node');
   }
 
-  generateReactWidget(diagramEngine: DiagramEngine, node: KevoreeNodeModel): JSX.Element {
-    return React.createElement(KevoreeNodeWidget, { node, diagramEngine });
+  generateReactWidget(engine: DiagramEngine, node: KevoreeNodeModel): JSX.Element {
+    return React.createElement(KevoreeNodeWidget, { node, engine });
   }
 
   getNewInstance(initConf?: any) {

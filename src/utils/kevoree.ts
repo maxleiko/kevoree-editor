@@ -85,7 +85,7 @@ export function toBoolean(val: any): boolean {
 }
 
 export function isSelected(instance: Instance): boolean {
-  const sel = instance.metas.get(KWE_SELECTED);
+  const sel = instance.getMeta(KWE_SELECTED);
   if (sel) {
     return toBoolean(sel.value);
   }
@@ -93,16 +93,16 @@ export function isSelected(instance: Instance): boolean {
 }
 
 export function getPosition(instance: Instance) {
-  let position = instance.metas.get(KWE_POSITION);
+  let position = instance.getMeta(KWE_POSITION);
   if (!position) {
     // if instance has no position yet, then create default to [100,100]
     position = setPosition(instance, { x: 100, y: 100 });
   }
-  return JSON.parse(position.value);
+  return JSON.parse(position.value!);
 }
 
 export function getDescription(tdef: TypeDefinition) {
-  const desc = tdef.metas.get(KEV_DESCRIPTION);
+  const desc = tdef.getMeta(KEV_DESCRIPTION);
   if (desc) {
     return desc.value;
   }
@@ -110,7 +110,7 @@ export function getDescription(tdef: TypeDefinition) {
 }
 
 export function setPosition(instance: Instance, point: kwe.Point): Value<Instance> {
-  let position = instance.metas.get(KWE_POSITION);
+  let position = instance.getMeta(KWE_POSITION);
   if (!position) {
     position = new Value<Instance>().withName(KWE_POSITION);
     instance.addMeta(position);
@@ -120,7 +120,7 @@ export function setPosition(instance: Instance, point: kwe.Point): Value<Instanc
 }
 
 export function setSelected(instance: Instance, value: boolean): void {
-  let selected = instance.metas.get(KWE_SELECTED);
+  let selected = instance.getMeta(KWE_SELECTED);
   if (!selected) {
     selected = new Value<Instance>().withName(KWE_SELECTED);
     instance.addMeta(selected);

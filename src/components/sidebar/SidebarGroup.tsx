@@ -2,7 +2,7 @@ import * as React from 'react';
 import { inject, observer } from 'mobx-react';
 import { toast } from 'react-toastify';
 
-import { KevoreeStore, DiagramStore } from '../../stores';
+import { KevoreeStore } from '../../stores';
 import { SidebarItem } from './SidebarItem';
 import { Collapsible } from '../collapsible';
 
@@ -12,11 +12,10 @@ import { ITypeDefinition } from 'kevoree-registry-client';
 export interface SidebarGroupProps {
   name: string;
   tdefs: ITypeDefinition[];
-  diagramStore?: DiagramStore;
   kevoreeStore?: KevoreeStore;
 }
 
-@inject('kevoreeStore', 'diagramStore')
+@inject('kevoreeStore')
 @observer
 export class SidebarGroup extends React.Component<SidebarGroupProps> {
 

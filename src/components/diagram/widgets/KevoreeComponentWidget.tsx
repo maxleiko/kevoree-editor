@@ -1,18 +1,28 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine } from 'storm-react-diagrams';
+import { DiagramEngine, DefaultPortWidget, DefaultPortModel } from 'storm-react-diagrams';
 import { KevoreeComponentModel } from '../models/KevoreeComponentModel';
 
 import { InstanceHeader } from '../../kevoree';
 
 import './KevoreeComponentWidget.scss';
-import { KevoreePortModel } from '../models/KevoreePortModel';
-import { KevoreePortWidget } from '../widgets/KevoreePortWidget';
 
 export interface KevoreeComponentWidgetProps {
   node: KevoreeComponentModel;
-  diagramEngine: DiagramEngine;
+  engine: DiagramEngine;
 }
+
+interface PortProps {
+  className: 'in' | 'out';
+  engine: DiagramEngine;
+  ports: DefaultPortModel[];
+}
+
+const Ports = observer(({ className, engine, ports }: PortProps) => (
+  <div className={className}>
+    {ports.map((port) => <DefaultPortWidget key={port.id} engine={engine} port={port} />)}
+  </div>
+));
 
 @observer
 export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidgetProps> {
@@ -29,10 +39,6 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
       this.props.node.width = this._elem.getBoundingClientRect().width;
       this.props.node.height = this._elem.getBoundingClientRect().height;
     }
-  }
-
-  generatePort(port: KevoreePortModel) {
-    return <KevoreePortWidget model={port} key={port.id} />;
   }
 
   render() {
@@ -53,8 +59,8 @@ export class KevoreeComponentWidget extends React.Component<KevoreeComponentWidg
           hoverable={false}
         />
         <div className="ports">
-          <div className="in">{this.props.node.getInputs().map((port) => this.generatePort(port))}</div>
-          <div className="out">{this.props.node.getOutputs().map((port) => this.generatePort(port))}</div>
+          <Ports className="in" engine={this.props.engine} ports={this.props.node.inputs} />
+          <Ports className="out" engine={this.props.engine} ports={this.props.node.outputs} />
         </div>
       </div>
     );

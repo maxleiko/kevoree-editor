@@ -4,7 +4,7 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { DiagramStore, ModalStore, KevoreeStore } from './stores';
+import { ModalStore, KevoreeStore } from './stores';
 import { FileService } from './services';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
@@ -16,11 +16,10 @@ import './App.css';
 interface AppProps {
   modalStore?: ModalStore;
   kevoreeStore?: KevoreeStore;
-  diagramStore?: DiagramStore;
   fileService?: FileService;
 }
 
-@inject('modalStore', 'diagramStore', 'kevoreeStore', 'fileService')
+@inject('modalStore', 'kevoreeStore', 'fileService')
 @observer
 export default class App extends React.Component<AppProps> {
 
@@ -61,7 +60,7 @@ export default class App extends React.Component<AppProps> {
       const model = this.props.kevoreeStore!.serialize();
       this.props.fileService!.save(model);
     },
-    previousView: () => this.props.diagramStore!.previousView(),
+    previousView: () => this.props.kevoreeStore!.previousView(),
   };
 
   componentDidMount() {

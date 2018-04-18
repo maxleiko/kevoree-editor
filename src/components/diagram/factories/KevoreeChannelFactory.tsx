@@ -12,8 +12,8 @@ export class KevoreeChannelFactory extends AbstractNodeFactory {
     super('kevoree-channel');
   }
 
-  generateReactWidget(diagramEngine: DiagramEngine, node: KevoreeChannelModel): JSX.Element {
-    return React.createElement(KevoreeChannelWidget, { node, diagramEngine });
+  generateReactWidget(engine: DiagramEngine, node: KevoreeChannelModel): JSX.Element {
+    return <KevoreeChannelWidget engine={engine} node={node} />;
   }
 
   getNewInstance(initConf?: any) {

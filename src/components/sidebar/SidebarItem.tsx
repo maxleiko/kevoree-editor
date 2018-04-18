@@ -1,5 +1,7 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observer } from 'mobx-react';
+
 import { ITypeDefinition } from 'kevoree-registry-client';
 import { inferType } from '../../utils/kevoree';
 import { str2rgb } from '../../utils/colors';
@@ -12,7 +14,7 @@ export interface SidebarItemProps {
   onDblClick: () => void;
 }
 
-export const SidebarItem = ({ tdef, onDblClick = () => {/*noop*/}}: SidebarItemProps) => {
+export const SidebarItem = observer(({ tdef, onDblClick = () => {/*noop*/}}: SidebarItemProps) => {
   const { r, g, b } = str2rgb(tdef.name);
   
   return (
@@ -26,4 +28,4 @@ export const SidebarItem = ({ tdef, onDblClick = () => {/*noop*/}}: SidebarItemP
       <span className="type">{tdef.name}</span>
     </div>
   );
-};
+});

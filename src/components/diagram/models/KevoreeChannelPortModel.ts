@@ -1,21 +1,12 @@
-import { PortModel } from 'storm-react-diagrams';
+import { DefaultPortModel } from 'storm-react-diagrams';
 
-import { KevoreeLinkModel } from './KevoreeLinkModel';
-
-export class KevoreeChannelPortModel extends PortModel {
+export class KevoreeChannelPortModel extends DefaultPortModel {
 
   static INPUTS = 'inputs';
   static OUTPUTS = 'outputs';
 
-  readonly isInput: boolean;
-
   constructor(isInput: boolean) {
     const name = isInput ? KevoreeChannelPortModel.OUTPUTS : KevoreeChannelPortModel.INPUTS;
-    super(name, 'kevoree-channel-port', name);
-    this.isInput = isInput;
-  }
-
-  createLinkModel() {
-    return new KevoreeLinkModel();
+    super(isInput, name);
   }
 }
