@@ -18,13 +18,25 @@ export class OverlayIcon extends React.Component<OverlayIconProps, OverlayIconSt
   constructor(props: OverlayIconProps) {
     super(props);
     this.state = { showTooltip: false };
+    this.onClick = this.onClick.bind(this);
+    this.onDblClick = this.onDblClick.bind(this);
+  }
+
+  onClick(event: React.MouseEvent<HTMLButtonElement>) {
+    this.props.onClick(event);
+  }
+
+  onDblClick(event: React.MouseEvent<HTMLButtonElement>) {
+    // prevent OverlayIcons to trigger underlaying double click events
+    event.stopPropagation();
   }
 
   render() {
     return (
       <button
         className="OverlayIcon"
-        onClick={(event) => this.props.onClick(event)}
+        onClick={this.onClick}
+        onDoubleClick={this.onDblClick}
         onMouseEnter={() => this.setState({ showTooltip: true })}
         onFocus={() => this.setState({ showTooltip: true })}
         onBlur={() => this.setState({ showTooltip: false })}

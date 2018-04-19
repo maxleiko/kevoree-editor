@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { observable, computed, action, autorun } from 'mobx';
 import {
   Model,
@@ -412,7 +413,7 @@ export class KevoreeStore {
           .concat(this.currentElem.channels);
       }
     }
-    return selection.filter(kUtils.isSelected);
+    return _.uniqBy(selection.filter(kUtils.isSelected), (elem) => elem.path);
   }
 
   @computed

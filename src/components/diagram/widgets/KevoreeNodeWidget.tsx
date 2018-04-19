@@ -8,6 +8,8 @@ import { InstanceHeader } from '../../kevoree';
 import { KevoreeStore } from '../../../stores';
 
 import './KevoreeNodeWidget.scss';
+// import { KevoreeComponentWidget } from './KevoreeComponentWidget';
+// import { KevoreeComponentModel } from '../models/KevoreeComponentModel';
 
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
@@ -18,6 +20,19 @@ export interface KevoreeNodeWidgetProps {
 interface KevoreeNodeWidgetState {
   canDrop: boolean;
 }
+
+// interface ComponentsProps {
+//   components: KevoreeComponentModel[];
+//   engine: DiagramEngine;
+// }
+
+// const Components = observer(({ components, engine }: ComponentsProps) => {
+//   return (
+//     <>
+//       {components.map((comp) => <KevoreeComponentWidget key={comp.id} engine={engine} node={comp} />)}
+//     </>
+//   );
+// });
 
 @inject('kevoreeStore')
 @observer
