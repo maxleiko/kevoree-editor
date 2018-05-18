@@ -253,7 +253,7 @@ export class KevoreeStore {
     point: kwe.Point
   ) {
     const instance = new Component();
-    instance.name = `comp${container.components.length}`;
+    instance.name = this.genCompName(container);
     instance.tdef = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -264,7 +264,7 @@ export class KevoreeStore {
 
   private createNode(tdef: NodeType, container: Model, point: kwe.Point) {
     const instance = new Node();
-    instance.name = `node${this._model.nodes.length}`;
+    instance.name = this.genNodeName(container);
     instance.tdef = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -274,7 +274,7 @@ export class KevoreeStore {
 
   private createChannel(tdef: ChannelType, container: Model, point: kwe.Point) {
     const instance = new Channel();
-    instance.name = `chan${this._model.channels.length}`;
+    instance.name = this.genChanName(container);
     instance.tdef = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -284,7 +284,7 @@ export class KevoreeStore {
 
   private createGroup(tdef: GroupType, container: Model, point: kwe.Point) {
     const instance = new Group();
-    instance.name = `group${this._model.groups.length}`;
+    instance.name = this.genGroupName(container);
     instance.tdef = tdef;
     kUtils.setPosition(instance, point);
     this.initDictionaries(instance);
@@ -360,6 +360,42 @@ export class KevoreeStore {
       );
     }
     // TODO handle case where tdef is null?
+  }
+
+  private genCompName(node: Node): string {
+    let count = 0;
+    let name = `comp${count}`;
+    while (node.getComponent(name)) {
+      name = `comp${++count}`;
+    }
+    return name;
+  }
+
+  private genNodeName(model: Model): string {
+    let count = 0;
+    let name = `node${count}`;
+    while (model.getNode(name)) {
+      name = `node${++count}`;
+    }
+    return name;
+  }
+
+  private genChanName(model: Model): string {
+    let count = 0;
+    let name = `chan${count}`;
+    while (model.getChannel(name)) {
+      name = `chan${++count}`;
+    }
+    return name;
+  }
+
+  private genGroupName(model: Model): string {
+    let count = 0;
+    let name = `group${count}`;
+    while (model.getGroup(name)) {
+      name = `groupnode${++count}`;
+    }
+    return name;
   }
 
   @computed

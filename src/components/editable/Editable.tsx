@@ -1,5 +1,7 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observable, action } from 'mobx';
+import { observer } from 'mobx-react';
 
 import './Editable.css';
 
@@ -11,25 +13,20 @@ export interface EditableProps {
   validate?: (val: string) => boolean;
 }
 
-interface EditableState {
-  editing: boolean;
-  invalid: boolean;
-}
-
-export class Editable extends React.Component<EditableProps, EditableState> {
+@observer
+export class Editable extends React.Component<EditableProps> {
 
   private _elem: HTMLInputElement;
+  @observable private _editing: boolean = false;
+  @observable private _invalid: boolean = false;
 
-  constructor(props: EditableProps) {
-    super(props);
-    this.state = { editing: false, invalid: false };
-  }
-
+  @action
   startEditing(event: React.MouseEvent<HTMLSpanElement>) {
     event.stopPropagation();
-    this.setState({ editing: true });
+    this._editing = true;
   }
 
+  @action
   finishEditing() {
     let valid = true;
     if (this.props.validate) {
@@ -37,14 +34,17 @@ export class Editable extends React.Component<EditableProps, EditableState> {
     }
     if (valid) { 
       this.props.onCommit(this._elem.value);
-      this.setState({ editing: false, invalid: false });
+      this._editing = false;
+      this._invalid = false;
     } else {
-      this.setState({ invalid: true });
+      this._invalid = true;
     }
   }
 
+  @action
   cancelEditing() {
-    this.setState({ editing: false, invalid: false });
+    this._editing = false;
+    this._invalid = false;
   }
 
   onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -59,12 +59,8 @@ export class Editable extends React.Component<EditableProps, EditableState> {
     }
   }
 
-  stopPropagation(event: React.MouseEvent<any>) {
-    event.stopPropagation();
-  }
-
   componentDidUpdate() {
-    if (this.state.editing) {
+    if (this._editing) {
       if (this._elem) {
         this._elem.focus();
         if (this._elem.setSelectionRange) {
@@ -79,8 +75,7 @@ export class Editable extends React.Component<EditableProps, EditableState> {
       <span
         className={cx('Editable-span', this.props.className)}
         onClick={(event) => this.startEditing(event)}
-        // onTouchStart={(event) => this.startEditing(event)}
-        onDoubleClick={(event) => this.stopPropagation(event)}
+        onDoubleClick={(event) => event.stopPropagation()}
       >
         {this.props.value}
       </span>
@@ -88,7 +83,7 @@ export class Editable extends React.Component<EditableProps, EditableState> {
   }
 
   renderEditable() {
-    const style = this.state.invalid
+    const style = this._invalid
       ? { backgroundColor: 'rgba(255, 0, 0, 0.2)' }
       : { backgroundColor: 'inherit' };
 
@@ -99,9 +94,9 @@ export class Editable extends React.Component<EditableProps, EditableState> {
         type="text"
         defaultValue={this.props.value}
         onKeyDown={(event) => this.onKeyDown(event)}
-        onMouseDown={(event) => this.stopPropagation(event)}
-        onClick={(event) => this.stopPropagation(event)}
-        onDoubleClick={(event) => this.stopPropagation(event)}
+        onMouseDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+        onDoubleClick={(event) => event.stopPropagation()}
         onBlur={() => this.cancelEditing()}
         style={style}
       />
@@ -109,6 +104,6 @@ export class Editable extends React.Component<EditableProps, EditableState> {
   }
 
   render() {
-    return this.state.editing ? this.renderEditable() : this.renderStatic();
+    return this._editing ? this.renderEditable() : this.renderStatic();
   }
 }

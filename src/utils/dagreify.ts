@@ -28,7 +28,7 @@ export function distributeElements(model: DiagramModel) {
   graph.nodes().forEach(id => {
     const { x, y } = graph.node(id);
     let mNode;
-    mNode = model.getNode(id);
+    mNode = model.nodesMap.get(id);
     if (mNode) {
       // mNode is an AbstractModel
       mNode.setPosition(x, y);

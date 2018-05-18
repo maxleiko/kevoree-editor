@@ -1,6 +1,6 @@
 import { reaction, IReactionDisposer } from 'mobx';
 import { Node, Group, Channel, Component, DefaultKevoreeFactory } from 'kevoree-ts-model';
-import { NodeModel, DiagramEngine, PortModel } from '@leiko/react-diagrams';
+import { ANodeModel, DiagramEngine, PortModel } from '@leiko/react-diagrams';
 
 import { str2rgb } from '../../../utils/colors';
 import * as kUtils from '../../../utils/kevoree';
@@ -11,7 +11,7 @@ type Instance = Node | Group | Channel | Component;
 export abstract class AbstractModel<
   T extends Instance = Instance,
   P extends PortModel = PortModel
-> extends NodeModel<P> {
+> extends ANodeModel<P> {
 
   instance: T;
   color: kwe.RGB;
@@ -22,8 +22,7 @@ export abstract class AbstractModel<
     this.instance = instance;
     this.color = str2rgb(instance.tdef!.name!);
     const { x, y } = kUtils.getPosition(instance);
-    this.x = x;
-    this.y = y;
+    this.setPosition(x, y);
     this.selected = kUtils.isSelected(instance);
 
     this.addReaction(

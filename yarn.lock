@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@leiko/react-diagrams@0.0.6-alpha":
-  version "0.0.6-alpha"
-  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.6-alpha.tgz#5310ec2d368ad096589089ddf1d58870b2c3ba48"
+"@leiko/react-diagrams@0.0.10-alpha":
+  version "0.0.10-alpha"
+  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.10-alpha.tgz#704c18798fc42a8ef3dbea89d18b8fe05452fd72"
   dependencies:
     "@types/classnames" "^2.2.3"
     classnames "^2.2.5"
@@ -3729,7 +3729,6 @@ kevoree-registry-client@^3.0.1:
   version "1.0.0"
   dependencies:
     mobx "^4.1.0"
-    mobx-utils "^4.0.0"
 
 killable@^1.0.0:
   version "1.0.0"

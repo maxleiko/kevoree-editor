@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { action, observable } from 'mobx';
 import { DiagramWidget, DiagramModel } from '@leiko/react-diagrams';
 import { observer, inject } from 'mobx-react';
 import { toast } from 'react-toastify';
@@ -8,9 +9,10 @@ import { Hoverlay } from '../hoverlay';
 import { DND_ITEM } from '../../utils/constants';
 import { DiagramOverlay, OverlayIcon } from '../diagram-overlay';
 import { SelectionPanel } from '../selection-panel';
+import { ContextMenu, ContextMenuItem } from '../context-menu';
+import { KevoreeDiagramModel } from './models';
 
 import './Diagram.css';
-import { action } from 'mobx';
 
 export interface DiagramProps {
   kevoreeStore?: KevoreeStore;
@@ -19,15 +21,35 @@ export interface DiagramProps {
 const DiagramDetails = observer(({ model }: { model: DiagramModel }) => {
   const { zoom, offsetX, offsetY } = model;
   return (
-    <span className="Diagram-details">
-      {`(${Math.floor(offsetX)}, ${Math.floor(offsetY)}) x${Math.floor(zoom)}`}
-    </span>
+    <span className="Diagram-details">{`(${Math.floor(offsetX)}, ${Math.floor(offsetY)}) x${Math.floor(zoom)}`}</span>
   );
 });
 
 @inject('kevoreeStore', 'selectionPanelStore')
 @observer
 export class Diagram extends React.Component<DiagramProps> {
+  @observable private _contextMenu: ContextMenuItem[] = [
+    {
+      icon: 'fa-eye',
+      name: 'Show channels',
+      action: () => {
+        const { engine, currentElem } = this.props.kevoreeStore!;
+        const diagramModel = engine.model as KevoreeDiagramModel;
+        diagramModel.asRoot(currentElem).channels.forEach((c) => diagramModel.addKevoreeChannel(c));
+      }
+    },
+    {
+      icon: 'fa-eye-slash',
+      name: 'Hide channels',
+      action: () => {
+        const { engine, currentElem } = this.props.kevoreeStore!;
+        const diagramModel = engine.model as KevoreeDiagramModel;
+        diagramModel.asRoot(currentElem).channels.forEach((c) => {
+          diagramModel.removeNode(c.path);
+        });
+      }
+    }
+  ];
 
   onDrop(event: React.DragEvent<HTMLDivElement>) {
     try {
@@ -64,6 +86,15 @@ export class Diagram extends React.Component<DiagramProps> {
     );
   }
 
+  componentWillUpdate(nextProps: DiagramProps) {
+    // if (nextProps.kevoreeStore!.currentElem instanceof Node) {
+    //   const node = nextProps.kevoreeStore!.currentElem as Node;
+
+    // } else {
+    //   (this._contextMenu as IObservableArray).clear();
+    // }
+  }
+
   render() {
     const engine = this.props.kevoreeStore!.engine;
 
@@ -79,6 +110,7 @@ export class Diagram extends React.Component<DiagramProps> {
         </Hoverlay>
         <DiagramDetails model={engine.model} />
         <SelectionPanel />
+        <ContextMenu contextClass="Diagram" items={this._contextMenu} />
       </div>
     );
   }
