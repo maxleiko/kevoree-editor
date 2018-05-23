@@ -73,7 +73,7 @@ export class Diagram extends React.Component<DiagramProps> {
 
   generateOverlay() {
     const store = this.props.kevoreeStore!;
-    const smartRouting = `Smart routing: ${store.engine.model.smartRouting ? 'on' : 'off'}`;
+    // const smartRouting = `Smart routing: ${store.engine.model.smartRouting ? 'on' : 'off'}`;
 
     return (
       <DiagramOverlay>
@@ -81,18 +81,9 @@ export class Diagram extends React.Component<DiagramProps> {
         <OverlayIcon name="Zoom out" onClick={store.zoomOut} icon="fa fa-2x fa-search-minus" />
         <OverlayIcon name="Zoom to fit" onClick={store.fitContent} icon="fa fa-2x fa-search" />
         <OverlayIcon name="Auto layout" onClick={store.autoLayout} icon="fa fa-2x fa-th" />
-        <OverlayIcon name={smartRouting} onClick={store.toggleSmartRouting} icon="fa fa-2x fa-sitemap" />
+        {/* <OverlayIcon name={smartRouting} onClick={store.toggleSmartRouting} icon="fa fa-2x fa-sitemap" /> */}
       </DiagramOverlay>
     );
-  }
-
-  componentWillUpdate(nextProps: DiagramProps) {
-    // if (nextProps.kevoreeStore!.currentElem instanceof Node) {
-    //   const node = nextProps.kevoreeStore!.currentElem as Node;
-
-    // } else {
-    //   (this._contextMenu as IObservableArray).clear();
-    // }
   }
 
   render() {

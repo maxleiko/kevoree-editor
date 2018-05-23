@@ -66,7 +66,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
       >
         <ul className="items">
           {this.props.items.map((item) => (
-            <li key={item.name} className="item">
+            <li key={item.name} className={cx('item')}>
               <a className="link" onMouseDown={item.action} >
                 <i className={cx('icon', 'fa', item.icon)} />
                 <span className="name">{item.name}</span>

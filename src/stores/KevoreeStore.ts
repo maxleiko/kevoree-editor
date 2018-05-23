@@ -98,6 +98,7 @@ export class KevoreeStore {
   @action
   deserialize(dataStr: string): void {
     this._model = new JSONKevoreeLoader().parse(dataStr);
+    this.modelChanged();
   }
 
   @action

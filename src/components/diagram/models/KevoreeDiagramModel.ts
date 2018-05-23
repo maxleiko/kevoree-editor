@@ -1,4 +1,4 @@
-import { action, observe, observable, computed } from 'mobx';
+import { action, observe } from 'mobx';
 import { DefaultLinkModel, ADiagramModel } from '@leiko/react-diagrams';
 import { Model, Node, Group, Component, Channel, Binding, Port, Element } from 'kevoree-ts-model';
 import { KevoreeChannelModel } from './KevoreeChannelModel';
@@ -10,7 +10,6 @@ import { KevoreePortModel } from './KevoreePortModel';
 import { ChildElement } from 'kevoree-ts-model/dist/impl/ChildElement';
 
 export class KevoreeDiagramModel extends ADiagramModel {
-  @observable private _showChannels: boolean = false;
 
   constructor(elem: Node | Model) {
     super();
@@ -72,25 +71,12 @@ export class KevoreeDiagramModel extends ADiagramModel {
         port.bindings.forEach((b) => this.addKevoreeBinding(b));
       });
     });
-
-    if (this._showChannels) {
-      node.parent!.bindings.forEach((b) => this.addKevoreeBinding(b));
-    }
   }
 
   initFromModel(model: Model) {
     model.nodes.forEach((node) => this.addKevoreeNode(node));
     model.groups.forEach((group) => this.addKevoreeGroup(group));
     model.channels.forEach((chan) => this.addKevoreeChannel(chan));
-  }
-
-  @computed
-  get showChannels(): boolean {
-    return this._showChannels;
-  }
-
-  set showChannels(showChannels: boolean) {
-    this._showChannels = showChannels;
   }
 
   @action

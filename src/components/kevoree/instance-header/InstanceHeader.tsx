@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as cx from 'classnames';
 import { Instance, Model, Node, Group, Channel, Component } from 'kevoree-ts-model';
 import { toast } from 'react-toastify';
+import { observer } from 'mobx-react';
 
 import { Editable } from '../../editable';
 import { str2rgb } from '../../../utils/colors';
@@ -32,6 +33,7 @@ function getType(instance: Instance) {
   return;
 }
 
+@observer
 export class InstanceHeader extends React.Component<Props> {
   renderAsModel(model: Model) {
     const { className } = this.props;

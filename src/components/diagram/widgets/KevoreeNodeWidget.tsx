@@ -8,8 +8,6 @@ import { InstanceHeader } from '../../kevoree';
 import { KevoreeStore } from '../../../stores';
 
 import './KevoreeNodeWidget.scss';
-// import { KevoreeComponentWidget } from './KevoreeComponentWidget';
-// import { KevoreeComponentModel } from '../models/KevoreeComponentModel';
 
 export interface KevoreeNodeWidgetProps {
   node: KevoreeNodeModel;
@@ -20,19 +18,6 @@ export interface KevoreeNodeWidgetProps {
 interface KevoreeNodeWidgetState {
   canDrop: boolean;
 }
-
-// interface ComponentsProps {
-//   components: KevoreeComponentModel[];
-//   engine: DiagramEngine;
-// }
-
-// const Components = observer(({ components, engine }: ComponentsProps) => {
-//   return (
-//     <>
-//       {components.map((comp) => <KevoreeComponentWidget key={comp.id} engine={engine} node={comp} />)}
-//     </>
-//   );
-// });
 
 @inject('kevoreeStore')
 @observer
@@ -64,6 +49,9 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
 
   render() {
     const instance = this.props.node.instance!;
+    const comps = instance.components.length > 10
+      ? instance.components.slice(0, 9)
+      : instance.components;
 
     return (
       <div
@@ -76,9 +64,12 @@ export class KevoreeNodeWidget extends React.Component<KevoreeNodeWidgetProps, K
         <InstanceHeader className="header" instance={instance} hoverable={false} />
         <div className="body">
           <ul className="components">
-            {this.props.node.instance!.components.map((comp) => (
+            {comps.map((comp) => (
               <li key={comp.name!}>{comp.name}: {comp.tdef ? comp.tdef.name : '???'}</li>
             ))}
+            {instance.components.length > comps.length && (
+              <em>...and {instance.components.length - comps.length} more</em>
+            )}
           </ul>
         </div>
       </div>
