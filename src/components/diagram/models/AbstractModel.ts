@@ -46,6 +46,13 @@ export abstract class AbstractModel<
         meta.value = JSON.stringify(position);
       })
     );
+
+    // automatically delete Kevoree instance when UI node is deleted
+    this.addReaction(
+      reaction(() => instance.deleting, (deleting) => {
+        this.delete();
+      })
+    );
   }
 
   toJSON() {

@@ -82,6 +82,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
     const contextEl = clickInsideElement(e, this.props.contextClass);
     if (contextEl) {
       e.preventDefault();
+      e.stopPropagation();
       this.open();
       this.position(e, contextEl);
     } else {
@@ -90,9 +91,10 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
   }
 
   private _mousedownHandler = (e: MouseEvent) => {
-    const button = e.which || e.button;
-    if (button === 1) {
+    if (e.button !== 2 && this._active) {
       this.close();
+      e.preventDefault();
+      e.stopPropagation();
     }
   }
 

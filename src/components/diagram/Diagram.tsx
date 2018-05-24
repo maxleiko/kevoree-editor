@@ -48,6 +48,15 @@ export class Diagram extends React.Component<DiagramProps> {
           diagramModel.removeNode(c.path);
         });
       }
+    },
+    {
+      icon: 'fa-trash',
+      name: 'Delete selection',
+      action: action(() => {
+        // tslint:disable-next-line
+        console.log('Delete selection', this.props.kevoreeStore!.selection);
+        this.props.kevoreeStore!.selection.forEach((i) => i.delete());
+      })
     }
   ];
 

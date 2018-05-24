@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@leiko/react-diagrams@0.0.14-alpha":
-  version "0.0.14-alpha"
-  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.14-alpha.tgz#202e7401efa3a2a99ca6b22b251c28fc11a12a65"
+"@leiko/react-diagrams@0.0.15-alpha":
+  version "0.0.15-alpha"
+  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.15-alpha.tgz#34276b34f60dc8e001c85f131f521176c2d1e2d1"
   dependencies:
     "@types/classnames" "^2.2.3"
     classnames "^2.2.5"
