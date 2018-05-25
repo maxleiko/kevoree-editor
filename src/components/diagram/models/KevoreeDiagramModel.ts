@@ -8,6 +8,7 @@ import { KevoreeNodeModel } from './KevoreeNodeModel';
 import { KevoreeChannelPortModel } from './KevoreeChannelPortModel';
 import { KevoreePortModel } from './KevoreePortModel';
 import { ChildElement } from 'kevoree-ts-model/dist/impl/ChildElement';
+import { KevoreeLinkModel } from './KevoreeLinkModel';
 
 export class KevoreeDiagramModel extends ADiagramModel {
 
@@ -53,6 +54,8 @@ export class KevoreeDiagramModel extends ADiagramModel {
                 this.asRoot(elem).addBinding(binding);
               }
             } else if (targetPort instanceof KevoreePortModel) {
+              const link = change.newValue as KevoreeLinkModel;
+              link.addLabel('localChan');
               // port 2 port: in Kevoree, binding can't be created between ports directly => create a channel
               // const source = this.asRoot(elem).getByPath(sourcePort.port.path) as Port | null;
               // const target = this.asRoot(elem).getByPath(targetPort.port.path) as Port | null;

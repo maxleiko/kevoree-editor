@@ -6,3 +6,4 @@ export * from './KevoreeGroupModel';
 export * from './KevoreePortModel';
 export * from './KevoreeChannelPortModel';
 export * from './KevoreeDiagramModel';
+export * from './KevoreeNodePortModel';

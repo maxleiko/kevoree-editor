@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@leiko/react-diagrams": "0.0.15-alpha",
+    "@leiko/react-diagrams": "0.0.16-alpha",
     "autoprefixer": "7.1.6",
     "bootstrap": "^4.0.0",
     "case-sensitive-paths-webpack-plugin": "2.1.1",

@@ -20,6 +20,8 @@ export class SelectionPanel extends React.Component<SelectionPanelProps> {
 
   render() {
     const { selection } = this.props.kevoreeStore!;
+    // tslint:disable-next-line
+    console.log('SELECTION', selection);
     const { width, minWidth, setWidth } = this.props.selectionPanelStore!;
 
     // TODO optimize this component in order to split "width" and "height" re-renders from the full selection re-render
