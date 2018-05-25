@@ -1,5 +1,5 @@
 import { action, observe } from 'mobx';
-import { DefaultLinkModel, ADiagramModel } from '@leiko/react-diagrams';
+import { ADiagramModel, LinkModel } from '@leiko/react-diagrams';
 import { Model, Node, Group, Component, Channel, Binding, Port, Element } from 'kevoree-ts-model';
 import { KevoreeChannelModel } from './KevoreeChannelModel';
 import { KevoreeComponentModel } from './KevoreeComponentModel';
@@ -11,7 +11,6 @@ import { ChildElement } from 'kevoree-ts-model/dist/impl/ChildElement';
 import { KevoreeLinkModel } from './KevoreeLinkModel';
 
 export class KevoreeDiagramModel extends ADiagramModel {
-
   constructor(elem: Node | Model) {
     super();
     // configs
@@ -112,22 +111,26 @@ export class KevoreeDiagramModel extends ADiagramModel {
 
   @action
   addKevoreeBinding(binding: Binding) {
-    const vm = new DefaultLinkModel();
+    // tslint:disable-next-line
+    console.log('addKevoreeBinding', binding.toJSON());
+    let vm: LinkModel | null = null;
     if (binding.port && binding.channel) {
+      // tslint:disable-next-line
+      console.log(' aight binding seems gud so far');
       let compVM = this.nodesMap.get(binding.port.parent!.path) as KevoreeComponentModel | undefined;
       if (!compVM) {
         compVM = this.addKevoreeComponent(binding.port.parent!);
       }
-      const portVM = compVM.portsMap.get(binding.port.name!);
+      const portVM = compVM.portsMap.get(binding.port.path);
       if (portVM) {
-        vm.sourcePort = portVM;
         let chanVM = this.nodesMap.get(binding.channel.path) as KevoreeChannelModel | undefined;
         if (!chanVM) {
           chanVM = this.addKevoreeChannel(binding.channel);
         }
         if (chanVM) {
           const chanPortVM = binding.port.refInParent === 'inputs' ? chanVM.input : chanVM.output;
-          vm.targetPort = chanPortVM;
+          vm = portVM.link(chanPortVM);
+          // add link to model
           this.addLink(vm);
         }
       }

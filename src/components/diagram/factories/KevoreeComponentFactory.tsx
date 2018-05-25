@@ -12,7 +12,7 @@ export class KevoreeComponentFactory extends AbstractNodeFactory {
   }
 
   generateReactWidget(engine: DiagramEngine, node: KevoreeComponentModel): JSX.Element {
-    return React.createElement(KevoreeComponentWidget, { node, engine });
+    return <KevoreeComponentWidget engine={engine} node={node} />;
   }
 
   getNewInstance(initConf?: any) {

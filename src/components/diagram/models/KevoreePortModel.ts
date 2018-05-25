@@ -1,6 +1,8 @@
+import { action } from 'mobx';
 import { Port } from 'kevoree-ts-model';
 import { DefaultPortModel, PortModel } from '@leiko/react-diagrams';
 import { KevoreeChannelPortModel } from './KevoreeChannelPortModel';
+import { KevoreeLinkModel } from './KevoreeLinkModel';
 
 export class KevoreePortModel extends DefaultPortModel {
 
@@ -9,6 +11,7 @@ export class KevoreePortModel extends DefaultPortModel {
   constructor(isInput: boolean, port: Port) {
     super(isInput, port.name!);
     this.port = port;
+    this.id = port.path;
   }
 
   canLinkToPort(p: PortModel): boolean {
@@ -23,5 +26,12 @@ export class KevoreePortModel extends DefaultPortModel {
       return true;
     }
     return super.canLinkToPort(p);
+  }
+
+  @action
+  link(port: PortModel): KevoreeLinkModel {
+    const link = new KevoreeLinkModel();
+    link.connect(this, port);
+    return link;
   }
 }

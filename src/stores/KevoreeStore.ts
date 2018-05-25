@@ -21,8 +21,6 @@ import {
 import {
   DiagramEngine,
   DefaultLabelFactory,
-  DefaultPortFactory,
-  DefaultLinkFactory
 } from '@leiko/react-diagrams';
 import { ITypeDefinition, INamespace } from 'kevoree-registry-client';
 
@@ -32,10 +30,12 @@ import {
   KevoreeComponentFactory,
   KevoreeChannelFactory,
   KevoreeGroupFactory,
-  KevoreeChannelPortFactory
+  KevoreeChannelPortFactory,
+  KevoreeLinkFactory,
 } from '../components/diagram/factories';
 import { KevoreeDiagramModel } from '../components/diagram/models';
 import * as kUtils from '../utils/kevoree';
+import { KevoreePortFactory } from '../components/diagram/factories/KevoreePortFactory';
 
 export class KevoreeStore {
   @observable private _currentPath: string = '/';
@@ -49,9 +49,10 @@ export class KevoreeStore {
     this._engine.registerNodeFactory(new KevoreeNodeFactory(this));
     this._engine.registerNodeFactory(new KevoreeChannelFactory(this));
     this._engine.registerNodeFactory(new KevoreeGroupFactory(this));
-    this._engine.registerPortFactory(new DefaultPortFactory());
     this._engine.registerPortFactory(new KevoreeChannelPortFactory());
-    this._engine.registerLinkFactory(new DefaultLinkFactory());
+    this._engine.registerLinkFactory(new KevoreeLinkFactory());
+    this._engine.registerPortFactory(new KevoreePortFactory());
+    // default factories
     this._engine.registerLabelFactory(new DefaultLabelFactory());
 
     this.changePath('/');
