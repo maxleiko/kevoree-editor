@@ -5,8 +5,8 @@ import { ModalStore } from '../../stores';
 
 export interface DefaultModalProps {
   id?: string;
-  header: React.ReactElement<any> | string;
-  body: React.ReactElement<any> | string;
+  header: React.ReactNode;
+  body: React.ReactNode;
   className?: any;
   modalStore?: ModalStore;
 }

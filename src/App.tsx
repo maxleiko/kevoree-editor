@@ -28,7 +28,7 @@ export default class App extends React.Component<AppProps> {
     redo: ['ctrl+y', 'command+y'],
     open: ['ctrl+o', 'command+o'],
     save: ['ctrl+s', 'command+s'],
-    previousView:  ['esc', 'backspace'],
+    previousView:  ['backspace'],
   };
 
   private hkActions = {
@@ -38,21 +38,7 @@ export default class App extends React.Component<AppProps> {
       event.preventDefault();
       this.props.fileService!.load()
           .then(
-            (file) => {
-              this.props.modalStore!.confirm({
-                header: 'Load model',
-                body: (
-                  <div>
-                    <p>Are you sure you want to load the model from:</p>
-                    <ul>
-                      <li><strong>{file.name}</strong></li>
-                    </ul>
-                    <p className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
-                  </div>
-                ),
-                onConfirm: () => this.props.kevoreeStore!.deserialize(file.data)
-              });
-            },
+            (file) => this.askBeforeLoad(file.name, file.data),
             (err) => toast.error(`Unable to load file ${err.filename}`));
     },
     save: (event: any) => {
@@ -62,6 +48,18 @@ export default class App extends React.Component<AppProps> {
     },
     previousView: () => this.props.kevoreeStore!.previousView(),
   };
+
+  askBeforeLoad(filename: string, data: string) {
+    this.props.modalStore!.confirm({
+      header: 'Load model',
+      body: [
+        <p key="0">Are you sure you want to load the model from:</p>,
+        <ul key="1"><li><strong>{filename}</strong></li></ul>,
+        <p key="2" className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
+      ],
+      onConfirm: () => this.props.kevoreeStore!.deserialize(data)
+    });
+  }
 
   componentDidMount() {
     _.forEach(this.hkMap, (value, key) => Mousetrap.bind(value, this.hkActions[key]));
@@ -77,7 +75,7 @@ export default class App extends React.Component<AppProps> {
         <Topbar />
         <div className="App-content">
           <Sidebar />
-          <Diagram />
+          <Diagram onFileDrop={(file) => this.askBeforeLoad(file.name, file.data)} />
         </div>
         <ToastContainer
           className="Toastify"

@@ -61,9 +61,7 @@ export class KevoreeStore {
     if (process.env.NODE_ENV !== 'production') {
       autorun(r => {
         // tslint:disable-next-line
-        console.log(
-          '[[AUTORUN]] Kevoree model and Diagram model are available in window'
-        );
+        console.log('[[UPDATE]] Kevoree "model" and UI "diagram" are available in window object');
         // tslint:disable-next-line
         window['model'] = this._model;
         // tslint:disable-next-line
@@ -99,6 +97,15 @@ export class KevoreeStore {
   @action
   deserialize(dataStr: string): void {
     this._model = new JSONKevoreeLoader().parse(dataStr);
+    this._model.groups.forEach((g) => this.initDictionaries(g));
+    this._model.channels.forEach((c) => this.initDictionaries(c));
+    this._model.nodes.forEach((n) => {
+      this.initDictionaries(n);
+      n.components.forEach((c) => {
+        this.initDictionaries(c);
+        this.initPorts(c);
+      });
+    });
     this.modelChanged();
   }
 
@@ -354,12 +361,13 @@ export class KevoreeStore {
 
   private initPorts(comp: Component) {
     if (comp.tdef) {
-      comp.tdef.inputs.forEach(portType =>
-        this.createPort(true, portType, comp)
-      );
-      comp.tdef.outputs.forEach(portType =>
-        this.createPort(false, portType, comp)
-      );
+      // create port only if necessary
+      comp.tdef.inputs
+        .filter((portType) => comp.getInput(portType.name!) === undefined)
+        .forEach((portType) => this.createPort(true, portType, comp));
+      comp.tdef.outputs
+        .filter((portType) => comp.getOutput(portType.name!) === undefined)
+        .forEach((portType) => this.createPort(false, portType, comp));
     }
     // TODO handle case where tdef is null?
   }

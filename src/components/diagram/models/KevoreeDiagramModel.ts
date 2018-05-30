@@ -53,9 +53,9 @@ export class KevoreeDiagramModel extends ADiagramModel {
                 this.asRoot(elem).addBinding(binding);
               }
             } else if (targetPort instanceof KevoreePortModel) {
+              // port 2 port: in Kevoree, binding can't be created between ports directly => create a channel
               const link = change.newValue as KevoreeLinkModel;
               link.addLabel('localChan');
-              // port 2 port: in Kevoree, binding can't be created between ports directly => create a channel
               // const source = this.asRoot(elem).getByPath(sourcePort.port.path) as Port | null;
               // const target = this.asRoot(elem).getByPath(targetPort.port.path) as Port | null;
             }
@@ -111,12 +111,8 @@ export class KevoreeDiagramModel extends ADiagramModel {
 
   @action
   addKevoreeBinding(binding: Binding) {
-    // tslint:disable-next-line
-    console.log('addKevoreeBinding', binding.toJSON());
     let vm: LinkModel | null = null;
     if (binding.port && binding.channel) {
-      // tslint:disable-next-line
-      console.log(' aight binding seems gud so far');
       let compVM = this.nodesMap.get(binding.port.parent!.path) as KevoreeComponentModel | undefined;
       if (!compVM) {
         compVM = this.addKevoreeComponent(binding.port.parent!);

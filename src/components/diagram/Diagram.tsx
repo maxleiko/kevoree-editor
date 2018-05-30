@@ -16,6 +16,12 @@ import './Diagram.css';
 
 export interface DiagramProps {
   kevoreeStore?: KevoreeStore;
+  onFileDrop: (file: File) => void;
+}
+
+export interface File {
+  name: string;
+  data: string;
 }
 
 const DiagramDetails = observer(({ model }: { model: DiagramModel }) => {
@@ -61,15 +67,44 @@ export class Diagram extends React.Component<DiagramProps> {
   ];
 
   onDrop(event: React.DragEvent<HTMLDivElement>) {
-    try {
-      const point = this.props.kevoreeStore!.engine.getRelativeMousePoint(event);
-      const tdef = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-      this.props.kevoreeStore!.createInstance(tdef, point);
-    } catch (err) {
+    event.stopPropagation();
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy'; // explicitly show this is a copy.
+
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      // user might have dropped a Kevore model to load
       // tslint:disable-next-line
-      console.error(err.stack);
-      toast.error(err.message);
+      console.log('onDrop', files);
+      const file = files.item(0);
+      if (file) {
+        // load file as Kevoree model
+        const fr = new FileReader();
+        fr.readAsText(file);
+        fr.onload = (e) => this.props.onFileDrop({ name: file.name, data: (e.target as any).result });
+        fr.onerror = (err) => {
+          // tslint:disable-next-line
+          console.error(err);
+          toast.error(err);
+        };
+      }
+    } else {
+      // user might have dropped a typeDef
+      try {
+        const point = this.props.kevoreeStore!.engine.getRelativeMousePoint(event);
+        const tdef = JSON.parse(event.dataTransfer.getData(DND_ITEM));
+        this.props.kevoreeStore!.createInstance(tdef, point);
+      } catch (err) {
+        // tslint:disable-next-line
+        console.error(err.stack);
+        toast.error(err.message);
+      }
     }
+  }
+
+  onDragOver(event: React.DragEvent<HTMLDivElement>) {
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   @action.bound
@@ -103,7 +138,7 @@ export class Diagram extends React.Component<DiagramProps> {
         className="Diagram"
         onDoubleClick={this.onDblClick}
         onDrop={(event) => this.onDrop(event)}
-        onDragOver={(event) => event.preventDefault()}
+        onDragOver={(event) => this.onDragOver(event)}
       >
         <Hoverlay overlay={this.generateOverlay()}>
           <DiagramWidget engine={engine} />
