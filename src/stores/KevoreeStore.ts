@@ -33,7 +33,7 @@ import {
   KevoreeChannelPortFactory,
   KevoreeLinkFactory,
 } from '../components/diagram/factories';
-import { KevoreeDiagramModel } from '../components/diagram/models';
+import { KevoreeDiagramModel, KevoreeNodeModel } from '../components/diagram/models';
 import * as kUtils from '../utils/kevoree';
 import { KevoreePortFactory } from '../components/diagram/factories/KevoreePortFactory';
 
@@ -112,7 +112,8 @@ export class KevoreeStore {
   @action
   createInstance(
     rTdef: ITypeDefinition,
-    point: kwe.Point = { x: 100, y: 100 }
+    point: kwe.Point = { x: 100, y: 100 },
+    event?: MouseEvent
   ) {
     const tdef = this.findOrCreateTypeDefinition(rTdef);
     const dModel = this._engine.model as KevoreeDiagramModel;
@@ -139,13 +140,18 @@ export class KevoreeStore {
       }
     } else {
       if (tdef instanceof ComponentType) {
-        if (this.selectedNodes.length > 0) {
-          return this.selectedNodes.map(node =>
-            this.createComponent(tdef, node, point)
-          );
-        } else {
+        if (event) {
+          // if "event" is set: it's a drop event
+          const { model } = this._engine.getModelAtPosition(event);
+          if (model && model instanceof KevoreeNodeModel) {
+            return this.createComponent(tdef, model.instance, point);
+          }
           throw new Error('Components must be added in Nodes');
         }
+        if (this.selectedNodes.length > 0) {
+          return this.selectedNodes.map((node) => this.createComponent(tdef, node, point));
+        }
+        throw new Error('Components must be added in Nodes');
       } else if (tdef instanceof ChannelType) {
         const chan = this.createChannel(tdef, this.currentElem as Model, point);
         dModel.addKevoreeChannel(chan);

@@ -50,7 +50,7 @@ export default class App extends React.Component<AppProps> {
   askBeforeLoad(filename: string, data: string, toastId: number = -1) {
     const confirmToast = (
       <div>
-        <h4>Load model:</h4>
+        <h5>Load model:</h5>
         <ul>
           <li><strong>{filename}</strong></li>
         </ul>
@@ -67,7 +67,7 @@ export default class App extends React.Component<AppProps> {
     if (toastId !== -1) {
       toast.update(toastId, { render: confirmToast });
     } else {
-      toast.info(confirmToast, { autoClose: false });
+      toast.info(confirmToast, { autoClose: false, closeOnClick: false });
     }
   }
 

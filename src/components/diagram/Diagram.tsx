@@ -94,8 +94,12 @@ export class Diagram extends React.Component<DiagramProps> {
       // user might have dropped a typeDef
       try {
         const point = this.props.kevoreeStore!.engine.getRelativeMousePoint(event);
-        const tdef = JSON.parse(event.dataTransfer.getData(DND_ITEM));
-        this.props.kevoreeStore!.createInstance(tdef, point);
+        const tdefData = event.dataTransfer.getData(DND_ITEM);
+        if (tdefData) {
+          this.props.kevoreeStore!.createInstance(JSON.parse(tdefData), point, event as any);
+        } else {
+          toast.warn('You can only drop TypeDefinition or Kevoree model');
+        }
       } catch (err) {
         // tslint:disable-next-line
         console.error(err.stack);
@@ -110,7 +114,7 @@ export class Diagram extends React.Component<DiagramProps> {
     event.preventDefault();
     if (event.dataTransfer.types.find((t) => t.indexOf('Files') !== -1)) {
       if (this._dropToast === -1) {
-        this._dropToast = toast.info('Drop to load as Kevoree model', { autoClose: false });
+        this._dropToast = toast.info('Drop to load as Kevoree model', { autoClose: false, closeOnClick: false });
       }
     }
   }

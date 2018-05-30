@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@leiko/react-diagrams@0.0.16-alpha":
-  version "0.0.16-alpha"
-  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.16-alpha.tgz#577c8b75ee0a7e25f5e36e2b333c41be92b6a7f4"
+"@leiko/react-diagrams@0.0.17-alpha":
+  version "0.0.17-alpha"
+  resolved "https://registry.yarnpkg.com/@leiko/react-diagrams/-/react-diagrams-0.0.17-alpha.tgz#c225c46f4da0da8af757a459f26985594c862746"
   dependencies:
     "@types/classnames" "^2.2.3"
     classnames "^2.2.5"
@@ -3725,7 +3725,7 @@ kevoree-registry-client@^3.0.1:
     node-fetch "^1.6.3"
     tiny-conf "^1.1.0"
 
-kevoree-ts-model@/home/leiko/dev/kevoree/kevoree-ts-model:
+"kevoree-ts-model@file:../kevoree-ts-model":
   version "1.0.0"
   dependencies:
     mobx "^4.1.0"
