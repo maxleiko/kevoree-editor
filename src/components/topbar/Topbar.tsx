@@ -2,7 +2,7 @@ import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import { Model, Instance } from 'kevoree-ts-model';
 
-import { ModalStore, KevoreeStore } from '../../stores';
+import { KevoreeStore } from '../../stores';
 import { FileService } from '../../services';
 import { InstanceHeader } from '../kevoree';
 
@@ -11,12 +11,11 @@ const logo = require('../../assets/kevoree.png');
 import './Topbar.scss';
 
 export interface TopbarProps {
-  modalStore?: ModalStore;
   fileService?: FileService;
   kevoreeStore?: KevoreeStore;
 }
 
-@inject('modalStore', 'kevoreeStore', 'fileService')
+@inject('kevoreeStore', 'fileService')
 @observer
 export class Topbar extends React.Component<TopbarProps> {
 

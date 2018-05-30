@@ -4,22 +4,20 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { ModalStore, KevoreeStore } from './stores';
+import { KevoreeStore } from './stores';
 import { FileService } from './services';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
-import { ModalContainer } from './components/modal';
 
 import './App.css';
 
 interface AppProps {
-  modalStore?: ModalStore;
   kevoreeStore?: KevoreeStore;
   fileService?: FileService;
 }
 
-@inject('modalStore', 'kevoreeStore', 'fileService')
+@inject('kevoreeStore', 'fileService')
 @observer
 export default class App extends React.Component<AppProps> {
 
@@ -49,16 +47,28 @@ export default class App extends React.Component<AppProps> {
     previousView: () => this.props.kevoreeStore!.previousView(),
   };
 
-  askBeforeLoad(filename: string, data: string) {
-    this.props.modalStore!.confirm({
-      header: 'Load model',
-      body: [
-        <p key="0">Are you sure you want to load the model from:</p>,
-        <ul key="1"><li><strong>{filename}</strong></li></ul>,
-        <p key="2" className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
-      ],
-      onConfirm: () => this.props.kevoreeStore!.deserialize(data)
-    });
+  askBeforeLoad(filename: string, data: string, toastId: number = -1) {
+    const confirmToast = (
+      <div>
+        <h4>Load model:</h4>
+        <ul>
+          <li><strong>{filename}</strong></li>
+        </ul>
+        <p className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
+        <button
+          className="btn btn-sm btn-success pull-right"
+          onClick={() => this.props.kevoreeStore!.deserialize(data)}
+        >
+          Confirm
+        </button>
+      </div>
+    );
+
+    if (toastId !== -1) {
+      toast.update(toastId, { render: confirmToast });
+    } else {
+      toast.info(confirmToast, { autoClose: false });
+    }
   }
 
   componentDidMount() {
@@ -75,13 +85,12 @@ export default class App extends React.Component<AppProps> {
         <Topbar />
         <div className="App-content">
           <Sidebar />
-          <Diagram onFileDrop={(file) => this.askBeforeLoad(file.name, file.data)} />
+          <Diagram onFileDrop={(data) => this.askBeforeLoad(data.name, data.data, data.toastId)} />
         </div>
         <ToastContainer
           className="Toastify"
           position={toast.POSITION.TOP_RIGHT}
         />
-        <ModalContainer />
       </div>
     );
   }

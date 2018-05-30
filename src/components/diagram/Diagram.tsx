@@ -16,12 +16,13 @@ import './Diagram.css';
 
 export interface DiagramProps {
   kevoreeStore?: KevoreeStore;
-  onFileDrop: (file: File) => void;
+  onFileDrop: (file: OnDropData) => void;
 }
 
-export interface File {
+export interface OnDropData {
   name: string;
   data: string;
+  toastId: number;
 }
 
 const DiagramDetails = observer(({ model }: { model: DiagramModel }) => {
@@ -58,14 +59,13 @@ export class Diagram extends React.Component<DiagramProps> {
     {
       icon: 'fa-trash',
       name: 'Delete selection',
-      action: action(() => {
-        // tslint:disable-next-line
-        console.log('Delete selection', this.props.kevoreeStore!.selection);
-        this.props.kevoreeStore!.selection.forEach((i) => i.delete());
-      })
+      action: action(() => this.props.kevoreeStore!.selection.forEach((i) => i.delete()))
     }
   ];
 
+  private _dropToast: number = -1;
+
+  @action.bound
   onDrop(event: React.DragEvent<HTMLDivElement>) {
     event.stopPropagation();
     event.preventDefault();
@@ -74,18 +74,20 @@ export class Diagram extends React.Component<DiagramProps> {
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
       // user might have dropped a Kevore model to load
-      // tslint:disable-next-line
-      console.log('onDrop', files);
       const file = files.item(0);
       if (file) {
         // load file as Kevoree model
         const fr = new FileReader();
         fr.readAsText(file);
-        fr.onload = (e) => this.props.onFileDrop({ name: file.name, data: (e.target as any).result });
+        fr.onload = (e) => {
+          this.props.onFileDrop({ name: file.name, data: (e.target as any).result, toastId: this._dropToast });
+          this._dropToast = -1;
+        };
         fr.onerror = (err) => {
           // tslint:disable-next-line
           console.error(err);
           toast.error(err);
+          this._dropToast = -1;
         };
       }
     } else {
@@ -102,9 +104,21 @@ export class Diagram extends React.Component<DiagramProps> {
     }
   }
 
+  @action.bound
   onDragOver(event: React.DragEvent<HTMLDivElement>) {
     event.stopPropagation();
     event.preventDefault();
+    if (event.dataTransfer.types.find((t) => t.indexOf('Files') !== -1)) {
+      if (this._dropToast === -1) {
+        this._dropToast = toast.info('Drop to load as Kevoree model', { autoClose: false });
+      }
+    }
+  }
+
+  @action.bound
+  onDragLeave() {
+    toast.dismiss(this._dropToast);
+    this._dropToast = -1;
   }
 
   @action.bound
@@ -137,8 +151,9 @@ export class Diagram extends React.Component<DiagramProps> {
       <div
         className="Diagram"
         onDoubleClick={this.onDblClick}
-        onDrop={(event) => this.onDrop(event)}
-        onDragOver={(event) => this.onDragOver(event)}
+        onDrop={this.onDrop}
+        onDragOver={this.onDragOver}
+        onDragLeave={this.onDragLeave}
       >
         <Hoverlay overlay={this.generateOverlay()}>
           <DiagramWidget engine={engine} />

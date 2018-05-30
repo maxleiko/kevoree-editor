@@ -4,6 +4,14 @@
   flex-grow: 1;
 }
 
+.Diagram .drop-to-load {
+  position: relative;
+  opacity: 0.4;
+  width: 100%;
+  height: 100%;
+  border: 2px solid yellow;
+}
+
 .Diagram-details {
   display: inline-block;
   position: absolute;
