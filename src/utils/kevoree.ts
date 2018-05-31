@@ -9,7 +9,7 @@ import {
   KEV_DESCRIPTION,
 } from './constants';
 import { ITypeDefinition } from 'kevoree-registry-client';
-import { Instance, Value, TypeDefinition } from 'kevoree-ts-model';
+import { Value, TypeDefinition, Element } from 'kevoree-ts-model';
 
 export function isComponentType(tdef: kevoree.TypeDefinition): tdef is kevoree.ComponentType {
   return tdef.metaClassName().startsWith('org.kevoree.ComponentType');
@@ -84,19 +84,19 @@ export function toBoolean(val: any): boolean {
   return val === 'true';
 }
 
-export function isSelected(instance: Instance): boolean {
-  const sel = instance.getMeta(KWE_SELECTED);
+export function isSelected(elem: Element): boolean {
+  const sel = elem.getMeta(KWE_SELECTED);
   if (sel) {
     return toBoolean(sel.value);
   }
   return false;
 }
 
-export function getPosition(instance: Instance) {
-  let position = instance.getMeta(KWE_POSITION);
+export function getPosition(elem: Element) {
+  let position = elem.getMeta(KWE_POSITION);
   if (!position) {
     // if instance has no position yet, then create default to [100,100]
-    position = setPosition(instance, { x: 100, y: 100 });
+    position = setPosition(elem, { x: 100, y: 100 });
   }
   return JSON.parse(position.value!);
 }
@@ -109,21 +109,21 @@ export function getDescription(tdef: TypeDefinition) {
   return null;
 }
 
-export function setPosition(instance: Instance, point: kwe.Point): Value<Instance> {
-  let position = instance.getMeta(KWE_POSITION);
+export function setPosition(elem: Element, point: kwe.Point): Value<Element> {
+  let position = elem.getMeta(KWE_POSITION);
   if (!position) {
-    position = new Value<Instance>().withName(KWE_POSITION);
-    instance.addMeta(position);
+    position = new Value<Element>().withName(KWE_POSITION);
+    elem.addMeta(position);
   }
   position.value = JSON.stringify(point);
   return position;
 }
 
-export function setSelected(instance: Instance, value: boolean): void {
-  let selected = instance.getMeta(KWE_SELECTED);
+export function setSelected(elem: Element, value: boolean): void {
+  let selected = elem.getMeta(KWE_SELECTED);
   if (!selected) {
-    selected = new Value<Instance>().withName(KWE_SELECTED);
-    instance.addMeta(selected);
+    selected = new Value<Element>().withName(KWE_SELECTED);
+    elem.addMeta(selected);
   }
   selected.value = value + '';
 }

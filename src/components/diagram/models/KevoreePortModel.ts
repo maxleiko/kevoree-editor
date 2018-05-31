@@ -16,11 +16,6 @@ export class KevoreePortModel extends DefaultPortModel {
 
   canLinkToPort(p: PortModel): boolean {
     if (p instanceof KevoreePortModel) {
-      // chose a Channel to connect them
-      // tslint:disable-next-line
-      console.log('===== CHOOSE A CHANNEL =====');
-      // tslint:disable-next-line
-      console.log('to link', this, 'to', p);
       return true;
     } else if (p instanceof KevoreeChannelPortModel) {
       return true;

@@ -1,5 +1,5 @@
 import { action, observe } from 'mobx';
-import { ADiagramModel, LinkModel } from '@leiko/react-diagrams';
+import { ADiagramModel } from '@leiko/react-diagrams';
 import { Model, Node, Group, Component, Channel, Binding, Port, Element } from 'kevoree-ts-model';
 import { KevoreeChannelModel } from './KevoreeChannelModel';
 import { KevoreeComponentModel } from './KevoreeComponentModel';
@@ -26,6 +26,7 @@ export class KevoreeDiagramModel extends ADiagramModel {
     // register listeners for dynamic binding creation
     observe(this.linksMap, (change) => {
       if (change.type === 'add') {
+        const link = change.newValue as KevoreeLinkModel;
         const sourcePort = change.newValue.sourcePort as KevoreePortModel | KevoreeChannelPortModel;
         observe(change.newValue, 'targetPort', (c) => {
           const targetPort = c.newValue as KevoreePortModel | KevoreeChannelPortModel;
@@ -39,6 +40,7 @@ export class KevoreeDiagramModel extends ADiagramModel {
               const port = this.asRoot(elem).getByPath(targetPort.port.path) as Port | null;
               if (chan && port) {
                 const binding = new Binding().withChannelAndPort(chan, port);
+                link.binding = binding;
                 this.asRoot(elem).addBinding(binding);
               }
             }
@@ -50,12 +52,13 @@ export class KevoreeDiagramModel extends ADiagramModel {
               const port = this.asRoot(elem).getByPath(sourcePort.port.path) as Port | null;
               if (chan && port) {
                 const binding = new Binding().withChannelAndPort(chan, port);
+                link.binding = binding;
                 this.asRoot(elem).addBinding(binding);
               }
             } else if (targetPort instanceof KevoreePortModel) {
               // port 2 port: in Kevoree, binding can't be created between ports directly => create a channel
-              const link = change.newValue as KevoreeLinkModel;
-              link.addLabel('localChan');
+              const linkVM = change.newValue as KevoreeLinkModel;
+              linkVM.addLabel('localChan');
               // const source = this.asRoot(elem).getByPath(sourcePort.port.path) as Port | null;
               // const target = this.asRoot(elem).getByPath(targetPort.port.path) as Port | null;
             }
@@ -111,7 +114,7 @@ export class KevoreeDiagramModel extends ADiagramModel {
 
   @action
   addKevoreeBinding(binding: Binding) {
-    let vm: LinkModel | null = null;
+    let vm: KevoreeLinkModel | null = null;
     if (binding.port && binding.channel) {
       let compVM = this.nodesMap.get(binding.port.parent!.path) as KevoreeComponentModel | undefined;
       if (!compVM) {
@@ -126,6 +129,7 @@ export class KevoreeDiagramModel extends ADiagramModel {
         if (chanVM) {
           const chanPortVM = binding.port.refInParent === 'inputs' ? chanVM.output : chanVM.input;
           vm = portVM.link(chanPortVM);
+          vm.binding = binding;
           // add link to model
           this.addLink(vm);
         }

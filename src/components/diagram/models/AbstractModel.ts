@@ -78,7 +78,7 @@ export abstract class AbstractModel<
     this._reactionDisposers.forEach((disposer) => disposer());
   }
 
-  addReaction(disposer: IReactionDisposer) {
+  protected addReaction(disposer: IReactionDisposer) {
     this._reactionDisposers.push(disposer);
   }
 }

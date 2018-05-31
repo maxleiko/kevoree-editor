@@ -17,6 +17,8 @@ import {
   Group,
   PortType,
   JSONKevoreeLoader,
+  Element,
+  Binding,
 } from 'kevoree-ts-model';
 import {
   DiagramEngine,
@@ -442,7 +444,7 @@ export class KevoreeStore {
 
   @computed
   get selection() {
-    let selection: Instance[] = [];
+    let selection: Element[] = [];
 
     if (this.currentElem) {
       if (this.currentElem instanceof Node) {
@@ -451,12 +453,12 @@ export class KevoreeStore {
           .concat(node.components)
           .concat(
             node.parent!.bindings.filter(
-              b =>
+              (b) =>
                 b.port &&
                 b.channel &&
                 b.port.parent &&
-                node.components.find(c => c.path === b.port!.parent!.path)
-            ).map((b) => b.channel!)
+                node.components.find((c) => c.path === b.port!.parent!.path)
+            )
           );
       } else if (this.currentElem instanceof Model) {
         selection = selection
@@ -472,6 +474,20 @@ export class KevoreeStore {
   get selectedNodes() {
     return this.selection.filter(function isNode(elem: Instance): elem is Node {
       return elem instanceof Node;
+    });
+  }
+
+  @computed
+  get selectedInstances() {
+    return this.selection.filter(function isInstance(elem: Element): elem is Instance {
+      return elem instanceof Instance;
+    });
+  }
+
+  @computed
+  get selectedBindings() {
+    return this.selection.filter(function isBinding(elem: Element): elem is Binding {
+      return elem instanceof Binding;
     });
   }
 }

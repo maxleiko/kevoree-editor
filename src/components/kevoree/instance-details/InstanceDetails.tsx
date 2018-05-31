@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { Instance, Component } from 'kevoree-ts-model';
-import * as _ from 'lodash';
+import { Instance } from 'kevoree-ts-model';
 
 import { Collapsible } from '../../collapsible';
 import { InstanceHeader, Params, Description } from '..';
 
 import './InstanceDetails.scss';
-import { Bindings } from '../bindings';
 
 export interface InstanceDetailsProps {
   instance: Instance;
@@ -17,24 +15,6 @@ const InstanceDetailsHeader = ({ title }: { title: string }) => (
 );
 
 export class InstanceDetails extends React.Component<InstanceDetailsProps> {
-
-  renderBindings() {
-    const { instance } = this.props;
-    // only render bindings for components
-    if (instance instanceof Component) {
-      const comp = instance as Component;
-      const bindings = _.flatMap(comp.inputs.concat(comp.outputs).map((port) => port.bindings));
-      return (
-        <Collapsible
-          className="InstanceDetails-group"
-          header={<InstanceDetailsHeader title="Bindings" />}
-          content={<Bindings bindings={bindings} />}
-          withIcons={true}
-        />
-      );
-    }
-    return null;
-  }
 
   renderContent() {
     const { instance } = this.props;
@@ -53,7 +33,6 @@ export class InstanceDetails extends React.Component<InstanceDetailsProps> {
             content={<Params params={instance.params} dictionary={instance.tdef.dictionary} />}
             withIcons={true}
           />
-          {this.renderBindings()}
         </div>
       );
     }
