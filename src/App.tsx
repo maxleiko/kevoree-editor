@@ -57,7 +57,10 @@ export default class App extends React.Component<AppProps> {
         <p className="alert alert-warning">Any unsaved work in the current model will be lost.</p>
         <button
           className="btn btn-sm btn-success pull-right"
-          onClick={() => this.props.kevoreeStore!.deserialize(data)}
+          onClick={() => {
+            this.props.kevoreeStore!.deserialize(data);
+            toast.dismiss(toastId);
+          }}
         >
           Confirm
         </button>
@@ -67,7 +70,7 @@ export default class App extends React.Component<AppProps> {
     if (toastId !== -1) {
       toast.update(toastId, { render: confirmToast });
     } else {
-      toast.info(confirmToast, { autoClose: false, closeOnClick: false });
+      toastId = toast.info(confirmToast, { autoClose: false, closeOnClick: false });
     }
   }
 
