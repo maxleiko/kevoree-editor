@@ -124,7 +124,7 @@ export class KevoreeDiagramModel extends ADiagramModel {
           chanVM = this.addKevoreeChannel(binding.channel);
         }
         if (chanVM) {
-          const chanPortVM = binding.port.refInParent === 'inputs' ? chanVM.input : chanVM.output;
+          const chanPortVM = binding.port.refInParent === 'inputs' ? chanVM.output : chanVM.input;
           vm = portVM.link(chanPortVM);
           // add link to model
           this.addLink(vm);
