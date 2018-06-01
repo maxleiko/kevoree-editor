@@ -1,0 +1,31 @@
+.ViewSelector {
+  flex-grow: 1;
+  display: flex;
+  flex-flow: column;
+
+  .ViewSelector-container {
+    display: flex;
+    flex-grow: 1;
+  }
+
+  .ViewSelector-selector {
+    z-index: 2;
+    border-top: 1px solid #000;
+    padding: 4px 8px;
+    background-color: #333;
+
+    .btn {
+      font-weight: bold;
+      border-width: 2px;
+      border-radius: 0;
+      margin-right: 8px;
+      font-size: 12px;
+      padding: 0 5px;
+
+      &.active {
+        color: #000;
+        background-color: #eee;
+      }
+    }
+  }
+}

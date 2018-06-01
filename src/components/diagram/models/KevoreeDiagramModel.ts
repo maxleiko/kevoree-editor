@@ -1,5 +1,5 @@
 import { action, observe } from 'mobx';
-import { ADiagramModel } from '@leiko/react-diagrams';
+import { ADiagramModel, DefaultPointModel, DiagramEngine } from '@leiko/react-diagrams';
 import { Model, Node, Group, Component, Channel, Binding, Port, Element } from 'kevoree-ts-model';
 import { KevoreeChannelModel } from './KevoreeChannelModel';
 import { KevoreeComponentModel } from './KevoreeComponentModel';
@@ -9,10 +9,15 @@ import { KevoreeChannelPortModel } from './KevoreeChannelPortModel';
 import { KevoreePortModel } from './KevoreePortModel';
 import { ChildElement } from 'kevoree-ts-model/dist/impl/ChildElement';
 import { KevoreeLinkModel } from './KevoreeLinkModel';
+import { KWE_BINDING_POINTS } from '../../../utils/constants';
 
 export class KevoreeDiagramModel extends ADiagramModel {
-  constructor(elem: Node | Model) {
+
+  private _engine: DiagramEngine;
+
+  constructor(elem: Node | Model, engine: DiagramEngine) {
     super();
+    this._engine = engine;
     // configs
     this.deleteKeys = [46];
 
@@ -130,6 +135,17 @@ export class KevoreeDiagramModel extends ADiagramModel {
           const chanPortVM = binding.port.refInParent === 'inputs' ? chanVM.output : chanVM.input;
           vm = portVM.link(chanPortVM);
           vm.binding = binding;
+          const meta = binding.getMeta(KWE_BINDING_POINTS);
+          if (meta) {
+            const points = JSON.parse(meta.value!)
+              .map((pt: any) => {
+                const point = new DefaultPointModel(pt.x, pt.y);
+                point.fromJSON(pt, this._engine);
+                return point;
+            });
+            // tslint:disable-next-line
+            console.log('loaded points', points);
+          }
           // add link to model
           this.addLink(vm);
         }

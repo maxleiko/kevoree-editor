@@ -4,20 +4,22 @@ import * as Mousetrap from 'mousetrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { observer, inject } from 'mobx-react';
 
-import { KevoreeStore } from './stores';
+import { AppStore, KevoreeStore } from './stores';
 import { FileService } from './services';
 import { Topbar } from './components/topbar';
 import { Sidebar } from './components/sidebar';
 import { Diagram } from './components/diagram';
+import { ViewSelector, View } from './components/view-selector';
 
 import './App.css';
 
 interface AppProps {
+  appStore?: AppStore;
   kevoreeStore?: KevoreeStore;
   fileService?: FileService;
 }
 
-@inject('kevoreeStore', 'fileService')
+@inject('appStore', 'kevoreeStore', 'fileService')
 @observer
 export default class App extends React.Component<AppProps> {
 
@@ -83,12 +85,21 @@ export default class App extends React.Component<AppProps> {
   }
 
   render() {
+    const { currentView } = this.props.appStore!;
+
     return (
       <div className="App">
         <Topbar />
         <div className="App-content">
-          <Sidebar />
-          <Diagram onFileDrop={(data) => this.askBeforeLoad(data.name, data.data, data.toastId)} />
+          <ViewSelector views={['Diagram', 'KevScript']} currentView={currentView}>
+            <View name="diagram">
+              <Sidebar />
+              <Diagram onFileDrop={(data) => this.askBeforeLoad(data.name, data.data, data.toastId)} />
+            </View>
+            <View name="kevscript">
+              <div style={{ flexGrow: 1, color: '#fff' }}>TODO Kevscript Editor</div>
+            </View>
+          </ViewSelector>
         </div>
         <ToastContainer
           className="Toastify"

@@ -1,6 +1,7 @@
 import { FileService, RegistryService } from './services';
-import { SelectionPanelStore, RegistryStore, KevoreeStore } from './stores';
+import { SelectionPanelStore, RegistryStore, KevoreeStore, AppStore } from './stores';
 
+const appStore = new AppStore();
 const fileService = new FileService();
 const kevoreeStore = new KevoreeStore();
 const registryService = new RegistryService();
@@ -12,5 +13,5 @@ export const services = {
 };
 
 export const stores = {
-  selectionPanelStore, registryStore, kevoreeStore,
+  appStore, selectionPanelStore, registryStore, kevoreeStore,
 };

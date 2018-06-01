@@ -80,7 +80,7 @@ export class KevoreeStore {
         this._previousPath = this._currentPath;
         this._currentPath = path;
         const prevZoomLevel = this._engine.model.zoom;
-        const model = new KevoreeDiagramModel(elem);
+        const model = new KevoreeDiagramModel(elem, this._engine);
         model.zoom = prevZoomLevel;
         this._engine.model = model;
       } else {

@@ -1,12 +1,12 @@
-import { DefaultLinkModel } from '@leiko/react-diagrams';
-import { computed, IReactionDisposer, reaction, observable } from 'mobx';
+import { DefaultLinkModel, PointModel } from '@leiko/react-diagrams';
+import { computed, reaction, observable, observe, IObservableArray } from 'mobx';
 import { Binding, DefaultKevoreeFactory } from 'kevoree-ts-model';
-import { KWE_SELECTED } from '../../../utils/constants';
+import { KWE_SELECTED, KWE_BINDING_POINTS } from '../../../utils/constants';
 
 export class KevoreeLinkModel extends DefaultLinkModel {
 
   @observable private _binding: Binding | null = null;
-  private _reactionDisposers: IReactionDisposer[] = [];
+  private _reactionDisposers: Array<() => void> = [];
 
   constructor(color?: string, width?: number, curvyness?: number) {
     super(color, width, curvyness);
@@ -23,6 +23,16 @@ export class KevoreeLinkModel extends DefaultLinkModel {
         }
       })
     );
+
+    this.addReaction(
+      observe(this.points as IObservableArray, (change) => {
+        // tslint:disable-next-line
+        console.log('observe', change);
+        if (change.type === 'splice') {
+          this.updateKevoreePoint(change.object);
+        }
+      })
+    );
   }
 
   @computed
@@ -34,7 +44,18 @@ export class KevoreeLinkModel extends DefaultLinkModel {
     this._binding = binding;
   }
 
-  protected addReaction(disposer: IReactionDisposer) {
+  protected addReaction(disposer: () => void) {
     this._reactionDisposers.push(disposer);
+  }
+
+  private updateKevoreePoint(points: PointModel[]) {
+    if (this._binding) {
+      let meta = this._binding.getMeta(KWE_BINDING_POINTS);
+      if (!meta) {
+        meta = new DefaultKevoreeFactory().createValue<any>().withName(KWE_BINDING_POINTS);
+        this._binding.addMeta(meta);
+      }
+      meta.value = JSON.stringify(points.map((pt) => pt.toJSON()));
+    }
   }
 }
